@@ -1,114 +1,223 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+/**
+ * CartContext.jsx — Shopping cart state management
+ *
+ * Issue #14: Utilities cart, checkout, and GRID credit linking
+ *
+ * Features:
+ *  - Cart items persisted in localStorage (survive page navigation)
+ *  - addItem / removeItem / setQuantity / clearCart operations
+ *  - linkOrder: associate a completed order with a wallet address
+ *  - getLinkedOrders: retrieve orders for a connected wallet
+ *  - cartCount and cartTotal computed values for UI badges
+ */
 
-const CART_KEY = 'gridset-cart'
-const LINKED_KEY = 'gridset-linked-orders'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
+import { getProduct } from '../config/products';
+
+// ---------------------------------------------------------------------------
+// localStorage helpers
+// ---------------------------------------------------------------------------
+
+const CART_KEY   = 'gridset_cart_v1';
+const ORDERS_KEY = 'gridset_linked_orders_v1';
 
 function loadCart() {
   try {
-    const raw = localStorage.getItem(CART_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
+    const raw = localStorage.getItem(CART_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return []
+    return [];
   }
 }
 
 function saveCart(items) {
   try {
-    localStorage.setItem(CART_KEY, JSON.stringify(items))
-  } catch {}
-}
-
-function loadLinked() {
-  try {
-    const raw = localStorage.getItem(LINKED_KEY)
-    if (!raw) return {}
-    return JSON.parse(raw)
+    localStorage.setItem(CART_KEY, JSON.stringify(items));
   } catch {
-    return {}
+    // Quota exceeded or private-browsing restriction — silently ignore.
   }
 }
 
-function saveLinked(byAccount) {
+function loadLinkedOrders() {
   try {
-    localStorage.setItem(LINKED_KEY, JSON.stringify(byAccount))
+    const raw = localStorage.getItem(ORDERS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveLinkedOrders(orders) {
+  try {
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
   } catch {}
 }
 
-const CartContext = createContext()
+// ---------------------------------------------------------------------------
+// Context
+// ---------------------------------------------------------------------------
+
+const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState(loadCart)
-  const [linkedByAccount, setLinkedByAccount] = useState(loadLinked)
+  const [items, setItems]             = useState(loadCart);
+  const [linkedOrders, setLinkedOrders] = useState(loadLinkedOrders);
 
+  // Persist cart to localStorage on every change
   useEffect(() => {
-    saveCart(cart)
-  }, [cart])
+    saveCart(items);
+  }, [items]);
 
+  // Persist linked orders on every change
   useEffect(() => {
-    saveLinked(linkedByAccount)
-  }, [linkedByAccount])
+    saveLinkedOrders(linkedOrders);
+  }, [linkedOrders]);
 
+  // -------------------------------------------------------------------------
+  // Cart operations
+  // -------------------------------------------------------------------------
+
+  /** Add `quantity` of a product. If already in cart, increment quantity. */
   const addItem = useCallback((productId, quantity = 1) => {
-    setCart((prev) => {
-      const i = prev.findIndex((x) => x.productId === productId)
-      if (i >= 0) {
-        const next = [...prev]
-        next[i] = { ...next[i], quantity: next[i].quantity + quantity }
-        return next
+    setItems((prev) => {
+      const existing = prev.find((i) => i.productId === productId);
+      if (existing) {
+        return prev.map((i) =>
+          i.productId === productId
+            ? { ...i, quantity: i.quantity + quantity }
+            : i,
+        );
       }
-      return [...prev, { productId, quantity }]
-    })
-  }, [])
+      return [...prev, { productId, quantity }];
+    });
+  }, []);
 
+  /** Remove a product from the cart entirely. */
   const removeItem = useCallback((productId) => {
-    setCart((prev) => prev.filter((x) => x.productId !== productId))
-  }, [])
+    setItems((prev) => prev.filter((i) => i.productId !== productId));
+  }, []);
 
+  /** Set an explicit quantity. Removes the item if quantity <= 0. */
   const setQuantity = useCallback((productId, quantity) => {
-    if (quantity <= 0) removeItem(productId)
-    else setCart((prev) => prev.map((x) => (x.productId === productId ? { ...x, quantity } : x)))
-  }, [removeItem])
+    if (quantity <= 0) {
+      setItems((prev) => prev.filter((i) => i.productId !== productId));
+    } else {
+      setItems((prev) =>
+        prev.map((i) =>
+          i.productId === productId ? { ...i, quantity } : i,
+        ),
+      );
+    }
+  }, []);
 
-  const clearCart = useCallback(() => setCart([]), [])
+  /** Empty the entire cart. */
+  const clearCart = useCallback(() => {
+    setItems([]);
+  }, []);
 
+  // -------------------------------------------------------------------------
+  // Computed values
+  // -------------------------------------------------------------------------
+
+  /** Total number of individual units in the cart (for badge display). */
+  const cartCount = useMemo(
+    () => items.reduce((sum, i) => sum + i.quantity, 0),
+    [items],
+  );
+
+  /** Total price of all cart items. */
+  const cartTotal = useMemo(() => {
+    return items.reduce((sum, i) => {
+      const product = getProduct(i.productId);
+      return sum + (product?.price ?? 0) * i.quantity;
+    }, 0);
+  }, [items]);
+
+  // -------------------------------------------------------------------------
+  // Linked orders (GRID credit association)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Record a completed order against a wallet address.
+   * @param {string} account  - Ethereum address
+   * @param {string[]} productIds - Product IDs purchased
+   * @param {number} total        - Order total in USD
+   */
   const linkOrder = useCallback((account, productIds, total) => {
-    if (!account) return
-    const order = { orderId: Date.now(), productIds, total, timestamp: new Date().toISOString() }
-    setLinkedByAccount((prev) => ({
+    if (!account) return;
+    const key = account.toLowerCase();
+    const entry = {
+      productIds,
+      total,
+      linkedAt: Date.now(),
+    };
+    setLinkedOrders((prev) => ({
       ...prev,
-      [account.toLowerCase()]: [...(prev[account.toLowerCase()] || []), order],
-    }))
-  }, [])
+      [key]: [...(prev[key] ?? []), entry],
+    }));
+  }, []);
 
-  const getLinkedOrders = useCallback((account) => {
-    if (!account) return []
-    return linkedByAccount[account.toLowerCase()] || []
-  }, [linkedByAccount])
+  /**
+   * Returns all linked orders for a given wallet address.
+   * @param {string} account
+   * @returns {Array}
+   */
+  const getLinkedOrders = useCallback(
+    (account) => {
+      if (!account) return [];
+      return linkedOrders[account.toLowerCase()] ?? [];
+    },
+    [linkedOrders],
+  );
 
-  const cartCount = cart.reduce((n, i) => n + i.quantity, 0)
+  // -------------------------------------------------------------------------
+  // Context value
+  // -------------------------------------------------------------------------
 
-  return (
-    <CartContext.Provider
-      value={{
-        cart,
-        cartCount,
-        addItem,
-        removeItem,
-        setQuantity,
-        clearCart,
-        linkOrder,
-        getLinkedOrders,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
-  )
+  const value = useMemo(
+    () => ({
+      items,
+      cartCount,
+      cartTotal,
+      addItem,
+      removeItem,
+      setQuantity,
+      clearCart,
+      linkOrder,
+      getLinkedOrders,
+    }),
+    [
+      items,
+      cartCount,
+      cartTotal,
+      addItem,
+      removeItem,
+      setQuantity,
+      clearCart,
+      linkOrder,
+      getLinkedOrders,
+    ],
+  );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
+/** Hook to consume the CartContext. Must be used inside <CartProvider>. */
 export function useCart() {
-  const ctx = useContext(CartContext)
-  if (!ctx) throw new Error('useCart must be used within CartProvider')
-  return ctx
+  const ctx = useContext(CartContext);
+  if (!ctx) {
+    throw new Error('useCart must be used inside <CartProvider>');
+  }
+  return ctx;
 }

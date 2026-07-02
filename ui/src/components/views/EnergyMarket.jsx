@@ -1,419 +1,483 @@
-import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, Clock, RefreshCw } from 'lucide-react'
-import { useWeb3 } from '../../context/Web3Context'
-import { useDemo } from '../../context/DemoContext'
-import ConfirmActionModal from '../ConfirmActionModal'
+/**
+ * EnergyMarket.jsx — Energy Market view
+ *
+ * Issue #19: UI real-time order book and clearing price
+ *
+ * Fetches getOrderBook(timeSlot) and getAuction(timeSlot) from the deployed
+ * EnergyMarket contract and displays:
+ *   - Live bid / ask order book table
+ *   - Best bid / ask prices
+ *   - Clearing price prominently after auction is cleared
+ *   - Time slot selector
+ *   - Order placement form (bid / ask)
+ */
 
-const DEFAULT_MARKET_SLOT = 1000
+import { useState, useEffect, useCallback } from 'react';
+import { ethers } from 'ethers';
+import { useWeb3 } from '../../context/Web3Context';
+import { useDemo } from '../../context/DemoContext';
+import ConfirmActionModal from '../ConfirmActionModal';
 
-export default function EnergyMarket() {
-  const { isConnected, contracts } = useWeb3()
-  const { isDemoMode, addDemoOrder, demoOrders, demoBalance } = useDemo()
-  const [orderType, setOrderType] = useState('bid')
-  const [timeSlot, setTimeSlot] = useState('')
-  const [price, setPrice] = useState('')
-  const [quantity, setQuantity] = useState('')
-  const [marketSlot, setMarketSlot] = useState(String(DEFAULT_MARKET_SLOT))
-  const [orderConfirmOpen, setOrderConfirmOpen] = useState(false)
-  const [orderBookLoading, setOrderBookLoading] = useState(false)
-  const [orderBookError, setOrderBookError] = useState(null)
-  const [auction, setAuction] = useState(null)
-  const [bestBid, setBestBid] = useState({ price: 0, quantity: 0 })
-  const [bestAsk, setBestAsk] = useState({ price: 0, quantity: 0 })
-  const [refreshKey, setRefreshKey] = useState(0)
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
-  const slotNum = marketSlot ? parseInt(marketSlot, 10) : 0
-  const hasMarketContract = contracts?.energyMarket && !isNaN(slotNum) && slotNum > 0
+const SLOT_DURATION = 3600; // 1 hour in seconds
 
-  const [chainBids, setChainBids] = useState([])
-  const [chainAsks, setChainAsks] = useState([])
+function currentSlot() {
+  return Math.floor(Date.now() / 1000 / SLOT_DURATION) * SLOT_DURATION;
+}
 
-  useEffect(() => {
-    if (!hasMarketContract) {
-      setAuction(null)
-      setBestBid({ price: 0, quantity: 0 })
-      setBestAsk({ price: 0, quantity: 0 })
-      setChainBids([])
-      setChainAsks([])
-      setOrderBookError(null)
-      return
-    }
-    let cancelled = false
-    setOrderBookLoading(true)
-    setOrderBookError(null)
-    Promise.all([
-      contracts.energyMarket.getAuction(slotNum),
-      contracts.energyMarket.getBestBid(slotNum),
-      contracts.energyMarket.getBestAsk(slotNum),
-      contracts.energyMarket.getOrderBook(slotNum).catch(() => [[], []]),
-    ])
-      .then(([a, bid, ask, [bids = [], asks = []]]) => {
-        if (cancelled) return
-        setAuction({
-          timeSlot: Number(a.timeSlot),
-          startTime: Number(a.startTime),
-          endTime: Number(a.endTime),
-          clearingPrice: Number(a.clearingPrice),
-          totalBidQuantity: Number(a.totalBidQuantity),
-          totalAskQuantity: Number(a.totalAskQuantity),
-          isCleared: a.isCleared,
-        })
-        setBestBid({ price: Number(bid[0] ?? bid.price), quantity: Number(bid[1] ?? bid.quantity) })
-        setBestAsk({ price: Number(ask[0] ?? ask.price), quantity: Number(ask[1] ?? ask.quantity) })
-        const toRow = (o) => ({
-          orderId: Number(o.orderId),
-          price: Number(o.price),
-          quantity: Number(o.quantity),
-          filledQuantity: Number(o.filledQuantity ?? 0),
-          total: Number(o.price) * Number(o.quantity) / 1e18 || 0,
-        })
-        const bidRows = Array.isArray(bids) ? bids.map(toRow).sort((a, b) => b.price - a.price) : []
-        const askRows = Array.isArray(asks) ? asks.map(toRow).sort((a, b) => a.price - b.price) : []
-        setChainBids(bidRows)
-        setChainAsks(askRows)
-      })
-      .catch((e) => {
-        if (!cancelled) setOrderBookError(e?.message || 'Failed to load market')
-      })
-      .finally(() => {
-        if (!cancelled) setOrderBookLoading(false)
-      })
-    return () => { cancelled = true }
-  }, [contracts?.energyMarket, slotNum, hasMarketContract, refreshKey])
+function formatSlot(slot) {
+  return new Date(Number(slot) * 1000).toLocaleString(undefined, {
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
 
-  const mockBids = [
-    { price: 0.068, quantity: 150, total: 10.2 },
-    { price: 0.067, quantity: 200, total: 13.4 },
-    { price: 0.066, quantity: 180, total: 11.88 },
-    { price: 0.065, quantity: 250, total: 16.25 },
-    { price: 0.064, quantity: 120, total: 7.68 },
-  ]
-  const mockAsks = [
-    { price: 0.069, quantity: 100, total: 6.9 },
-    { price: 0.070, quantity: 150, total: 10.5 },
-    { price: 0.071, quantity: 200, total: 14.2 },
-    { price: 0.072, quantity: 180, total: 12.96 },
-    { price: 0.073, quantity: 220, total: 16.06 },
-  ]
-
-  const displayBids = hasMarketContract && chainBids.length > 0 ? chainBids : mockBids
-  const displayAsks = hasMarketContract && chainAsks.length > 0 ? chainAsks : mockAsks
-  const maxQ = Math.max(...displayBids.map((r) => r.quantity), ...displayAsks.map((r) => r.quantity), 1)
-
-  const openOrderConfirm = () => {
-    const q = parseFloat(quantity)
-    const p = parseFloat(price)
-    const slot = timeSlot || marketSlot
-    if (!q || q <= 0 || !p || p <= 0) {
-      alert('Enter valid price and quantity')
-      return
-    }
-    if (isDemoMode && orderType === 'bid' && q * p > demoBalance.available) {
-      alert('Insufficient available balance for this bid')
-      return
-    }
-    if (!isConnected && !isDemoMode) {
-      alert('Please connect your wallet first')
-      return
-    }
-    setOrderConfirmOpen(true)
+function formatPrice(price) {
+  try {
+    return parseFloat(ethers.formatEther(price)).toFixed(4);
+  } catch {
+    return price?.toString() ?? '—';
   }
+}
 
-  const executePlaceOrder = () => {
-    const q = parseFloat(quantity)
-    const p = parseFloat(price)
-    const slot = timeSlot || marketSlot
-    if (isDemoMode) {
-      addDemoOrder({ type: orderType, price: p, quantity: q, timeSlot: slot })
-      setPrice('')
-      setQuantity('')
-      setTimeSlot('')
-      return
-    }
-    // TODO: Implement contract interaction
-    alert(`Placing ${orderType} order: ${quantity} kWh at $${price}/kWh for time slot ${timeSlot}`)
-    setPrice('')
-    setQuantity('')
-    setTimeSlot('')
-  }
+// ---------------------------------------------------------------------------
+// Mock data for demo / no-contract mode
+// ---------------------------------------------------------------------------
 
+const MOCK_BIDS = [
+  { orderId: 1n, trader: '0xABC...111', price: ethers.parseEther('0.0120'), quantity: 5n, filledQuantity: 0n, isActive: true },
+  { orderId: 2n, trader: '0xDEF...222', price: ethers.parseEther('0.0115'), quantity: 10n, filledQuantity: 0n, isActive: true },
+  { orderId: 3n, trader: '0x123...333', price: ethers.parseEther('0.0110'), quantity: 3n, filledQuantity: 0n, isActive: true },
+];
+
+const MOCK_ASKS = [
+  { orderId: 4n, trader: '0x456...444', price: ethers.parseEther('0.0125'), quantity: 4n, filledQuantity: 0n, isActive: true },
+  { orderId: 5n, trader: '0x789...555', price: ethers.parseEther('0.0130'), quantity: 8n, filledQuantity: 0n, isActive: true },
+  { orderId: 6n, trader: '0xABC...666', price: ethers.parseEther('0.0135'), quantity: 6n, filledQuantity: 0n, isActive: true },
+];
+
+const MOCK_AUCTION = {
+  timeSlot: BigInt(currentSlot()),
+  startTime: BigInt(currentSlot() - 1800),
+  endTime: BigInt(currentSlot() + 1800),
+  clearingPrice: 0n,
+  totalBidQuantity: 18n,
+  totalAskQuantity: 18n,
+  isCleared: false,
+};
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+function ClearingPriceBanner({ clearingPrice }) {
+  if (!clearingPrice || clearingPrice === 0n) return null;
   return (
-    <div className="space-y-6">
+    <div className="mb-6 rounded-xl border border-energy-green bg-energy-green/10 p-4 flex items-center gap-3">
+      <div className="text-3xl">⚡</div>
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Energy Market</h2>
-        <p className="text-gray-400">Place bids and asks for energy in upcoming time slots</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="card">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Order Book</h3>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  min="1"
-                  value={marketSlot}
-                  onChange={(e) => setMarketSlot(e.target.value)}
-                  placeholder="Slot"
-                  className="input-field w-24 text-sm text-center"
-                />
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <Clock className="w-4 h-4" />
-                  <span>Time Slot #{marketSlot || '—'}</span>
-                </div>
-                {hasMarketContract && (
-                  <button
-                    type="button"
-                    onClick={() => setRefreshKey((k) => k + 1)}
-                    className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-white disabled:opacity-50"
-                    title="Refresh"
-                    aria-label="Refresh"
-                    disabled={orderBookLoading}
-                  >
-                    <RefreshCw className={`w-4 h-4 ${orderBookLoading ? 'animate-spin' : ''}`} />
-                  </button>
-                )}
-              </div>
-            </div>
-            {orderBookError && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-sm">
-                {orderBookError}
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <TrendingDown className="w-4 h-4 text-red-400" />
-                  <h4 className="text-sm font-semibold text-gray-400 uppercase">Asks (Sell)</h4>
-                </div>
-                <div className="space-y-1">
-                  {displayAsks.slice(0, 12).map((ask, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-2 bg-red-500/10 hover:bg-red-500/20 rounded cursor-pointer transition-colors"
-                      style={{ width: `${(ask.quantity / maxQ) * 100}%`, marginLeft: 'auto' }}
-                    >
-                      <span className="text-red-400 font-semibold text-sm">{Number(ask.price).toFixed(3)}</span>
-                      <span className="text-gray-300 text-sm">{ask.quantity}{ask.filledQuantity != null && ask.filledQuantity > 0 ? ` (${ask.filledQuantity} filled)` : ''}</span>
-                      <span className="text-gray-400 text-xs">{Number(ask.total).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp className="w-4 h-4 text-energy-green" />
-                  <h4 className="text-sm font-semibold text-gray-400 uppercase">Bids (Buy)</h4>
-                </div>
-                <div className="space-y-1">
-                  {displayBids.slice(0, 12).map((bid, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-2 bg-energy-green/10 hover:bg-energy-green/20 rounded cursor-pointer transition-colors"
-                      style={{ width: `${(bid.quantity / maxQ) * 100}%` }}
-                    >
-                      <span className="text-energy-green font-semibold text-sm">{Number(bid.price).toFixed(3)}</span>
-                      <span className="text-gray-300 text-sm">{bid.quantity}{bid.filledQuantity != null && bid.filledQuantity > 0 ? ` (${bid.filledQuantity} filled)` : ''}</span>
-                      <span className="text-gray-400 text-xs">{Number(bid.total).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-gray-700">
-              {hasMarketContract && (orderBookLoading || auction) && (
-                <div className="flex items-center gap-2 text-xs text-energy-green mb-2">
-                  {orderBookLoading ? 'Loading…' : 'Live from chain'}
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400">Spread</span>
-                <span className="text-white font-semibold">
-                  {hasMarketContract && !orderBookLoading && bestBid.price > 0 && bestAsk.price > 0
-                    ? `$${(bestAsk.price - bestBid.price).toFixed(3)}/kWh`
-                    : '$0.001/kWh'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-gray-400">Best Bid</span>
-                <span className="text-energy-green font-semibold">
-                  {hasMarketContract && !orderBookLoading && bestBid.price > 0
-                    ? `${bestBid.price} (${bestBid.quantity} kWh)`
-                    : '$0.068/kWh'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-gray-400">Best Ask</span>
-                <span className="text-red-400 font-semibold">
-                  {hasMarketContract && !orderBookLoading && bestAsk.price > 0
-                    ? `${bestAsk.price} (${bestAsk.quantity} kWh)`
-                    : '$0.069/kWh'}
-                </span>
-              </div>
-              {auction?.isCleared && (
-                <>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-gray-400">Clearing Price</span>
-                    <span className="text-white font-semibold">{auction.clearingPrice}</span>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-gray-400">Cleared Quantity</span>
-                    <span className="text-white font-semibold">{Math.min(auction.totalBidQuantity ?? 0, auction.totalAskQuantity ?? 0)} kWh</span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="card">
-            <h3 className="text-xl font-semibold text-white mb-4">Active Auctions</h3>
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
-                  <div>
-                    <div className="text-white font-semibold">Time Slot #12,{459 + i}</div>
-                    <div className="text-sm text-gray-400">Ends in {24 - i * 8} hours</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-energy-green font-semibold">$0.067/kWh</div>
-                    <div className="text-sm text-gray-400">Clearing Price</div>
-                  </div>
-                  <button type="button" className="btn-secondary">View Details</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <h3 className="text-xl font-semibold text-white mb-4">Place Order</h3>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Order Type</label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setOrderType('bid')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
-                    orderType === 'bid'
-                      ? 'bg-energy-green text-white'
-                      : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                  }`}
-                >
-                  Buy (Bid)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOrderType('ask')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
-                    orderType === 'ask'
-                      ? 'bg-red-500 text-white'
-                      : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                  }`}
-                >
-                  Sell (Ask)
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Time Slot</label>
-              <input
-                type="text"
-                value={timeSlot}
-                onChange={(e) => setTimeSlot(e.target.value)}
-                placeholder="e.g., 12459"
-                className="input-field w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Price ($/kWh)</label>
-              <input
-                type="number"
-                step="0.001"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="0.067"
-                className="input-field w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Quantity (kWh)</label>
-              <input
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="100"
-                className="input-field w-full"
-              />
-            </div>
-
-            {price && quantity && (
-              <div className="p-3 bg-gray-800 rounded-lg">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Total Value</span>
-                  <span className="text-white font-semibold">
-                    ${(parseFloat(price) * parseFloat(quantity) || 0).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={openOrderConfirm}
-              className="w-full btn-primary"
-            >
-              {isDemoMode ? 'Place order (demo)' : `Place ${orderType === 'bid' ? 'Bid' : 'Ask'} Order`}
-            </button>
-
-            <ConfirmActionModal
-              open={orderConfirmOpen}
-              onClose={() => setOrderConfirmOpen(false)}
-              onConfirm={executePlaceOrder}
-              title="Confirm order"
-              demoSkipLabel={isDemoMode ? 'Place order (demo)' : undefined}
-            >
-              <p className="text-gray-400 text-sm mb-1">Type</p>
-              <p className="text-white font-semibold">{orderType === 'bid' ? 'Buy (Bid)' : 'Sell (Ask)'}</p>
-              <p className="text-gray-400 text-sm mt-2 mb-1">Quantity</p>
-              <p className="text-white font-semibold">{quantity} kWh</p>
-              <p className="text-gray-400 text-sm mt-2 mb-1">Price</p>
-              <p className="text-white font-semibold">${price}/kWh</p>
-              <p className="text-gray-400 text-sm mt-2 mb-1">Time slot</p>
-              <p className="text-white font-semibold">{timeSlot || marketSlot}</p>
-              {price && quantity && (
-                <>
-                  <p className="text-gray-400 text-sm mt-2 mb-1">Total</p>
-                  <p className="text-energy-green font-semibold">${(parseFloat(price) * parseFloat(quantity)).toFixed(2)}</p>
-                </>
-              )}
-            </ConfirmActionModal>
-
-            {isDemoMode && demoOrders.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-700">
-                <h4 className="text-sm font-semibold text-gray-400 mb-2">Your demo orders</h4>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {demoOrders.slice(-5).reverse().map((o) => (
-                    <div key={o.id} className="flex justify-between text-sm bg-gray-800 rounded px-2 py-1.5">
-                      <span className={o.type === 'bid' ? 'text-energy-green' : 'text-red-400'}>{o.type}</span>
-                      <span className="text-white">{o.quantity} kWh @ ${o.price}</span>
-                      <span className="text-gray-400">slot {o.timeSlot}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <p className="text-xs text-slate-400 uppercase tracking-wider">Clearing Price</p>
+        <p className="text-2xl font-bold text-energy-green">
+          {formatPrice(clearingPrice)} GRID
+        </p>
+        <p className="text-xs text-slate-400">per Wh — auction has cleared</p>
       </div>
     </div>
-  )
+  );
+}
+
+function OrderBookTable({ bids, asks, bestBid, bestAsk }) {
+  const spread =
+    bestBid?.price && bestAsk?.price && bestAsk.price > 0n && bestBid.price > 0n
+      ? bestAsk.price - bestBid.price
+      : null;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Asks (sell orders) — sorted ascending */}
+      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+        <div className="px-4 py-3 bg-slate-700/50 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-red-400">
+            Asks (Sell)
+            {bestAsk?.price > 0n && (
+              <span className="ml-2 text-xs text-slate-400">
+                best: {formatPrice(bestAsk.price)} GRID
+              </span>
+            )}
+          </h3>
+        </div>
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-slate-500 border-b border-slate-700">
+              <th className="px-4 py-2 text-left">Price (GRID)</th>
+              <th className="px-4 py-2 text-right">Qty (Wh)</th>
+              <th className="px-4 py-2 text-right">Filled</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...asks]
+              .filter((o) => o.isActive)
+              .sort((a, b) => (a.price < b.price ? -1 : 1))
+              .map((o) => (
+                <tr key={o.orderId.toString()} className="border-b border-slate-700/50 hover:bg-red-500/5">
+                  <td className="px-4 py-2 font-mono text-red-400">{formatPrice(o.price)}</td>
+                  <td className="px-4 py-2 text-right text-slate-300">{o.quantity.toString()}</td>
+                  <td className="px-4 py-2 text-right text-slate-500">{o.filledQuantity.toString()}</td>
+                </tr>
+              ))}
+            {asks.filter((o) => o.isActive).length === 0 && (
+              <tr>
+                <td colSpan={3} className="px-4 py-6 text-center text-slate-500">No ask orders</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Bids (buy orders) — sorted descending */}
+      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+        <div className="px-4 py-3 bg-slate-700/50 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-energy-green">
+            Bids (Buy)
+            {bestBid?.price > 0n && (
+              <span className="ml-2 text-xs text-slate-400">
+                best: {formatPrice(bestBid.price)} GRID
+              </span>
+            )}
+          </h3>
+        </div>
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-slate-500 border-b border-slate-700">
+              <th className="px-4 py-2 text-left">Price (GRID)</th>
+              <th className="px-4 py-2 text-right">Qty (Wh)</th>
+              <th className="px-4 py-2 text-right">Filled</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...bids]
+              .filter((o) => o.isActive)
+              .sort((a, b) => (a.price > b.price ? -1 : 1))
+              .map((o) => (
+                <tr key={o.orderId.toString()} className="border-b border-slate-700/50 hover:bg-green-500/5">
+                  <td className="px-4 py-2 font-mono text-energy-green">{formatPrice(o.price)}</td>
+                  <td className="px-4 py-2 text-right text-slate-300">{o.quantity.toString()}</td>
+                  <td className="px-4 py-2 text-right text-slate-500">{o.filledQuantity.toString()}</td>
+                </tr>
+              ))}
+            {bids.filter((o) => o.isActive).length === 0 && (
+              <tr>
+                <td colSpan={3} className="px-4 py-6 text-center text-slate-500">No bid orders</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Spread */}
+      {spread !== null && (
+        <div className="md:col-span-2 text-center text-xs text-slate-500">
+          Spread: {formatPrice(spread)} GRID
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
+export default function EnergyMarket() {
+  const { contracts, account, isConnected } = useWeb3();
+  const { demoOrders, addDemoOrder, demoBalance } = useDemo();
+
+  // --- State ---
+  const [orderType, setOrderType] = useState('bid');
+  const [price, setPrice]         = useState('');
+  const [quantity, setQuantity]   = useState('');
+  const [timeSlot, setTimeSlot]   = useState(currentSlot());
+  const [marketSlot, setMarketSlot] = useState(currentSlot());
+
+  const [auction, setAuction]   = useState(null);
+  const [bids, setBids]         = useState([]);
+  const [asks, setAsks]         = useState([]);
+  const [bestBid, setBestBid]   = useState({ price: 0n, quantity: 0n });
+  const [bestAsk, setBestAsk]   = useState({ price: 0n, quantity: 0n });
+
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingOrder, setPendingOrder] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // --- Fetch order book ---
+  const fetchOrderBook = useCallback(async () => {
+    if (!contracts?.energyMarket) {
+      // Demo mode: use mock data
+      setAuction(MOCK_AUCTION);
+      setBids(MOCK_BIDS);
+      setAsks(MOCK_ASKS);
+      setBestBid({ price: MOCK_BIDS[0].price, quantity: MOCK_BIDS[0].quantity });
+      setBestAsk({ price: MOCK_ASKS[0].price, quantity: MOCK_ASKS[0].quantity });
+      return;
+    }
+
+    setRefreshing(true);
+    try {
+      const [auctionData, orderBook, bb, ba] = await Promise.all([
+        contracts.energyMarket.getAuction(marketSlot),
+        contracts.energyMarket.getOrderBook(marketSlot),
+        contracts.energyMarket.getBestBid(marketSlot),
+        contracts.energyMarket.getBestAsk(marketSlot),
+      ]);
+      setAuction(auctionData);
+      setBids(orderBook.bids ?? []);
+      setAsks(orderBook.asks ?? []);
+      setBestBid({ price: bb.price, quantity: bb.quantity });
+      setBestAsk({ price: ba.price, quantity: ba.quantity });
+      setError('');
+    } catch (e) {
+      console.error('fetchOrderBook:', e);
+      setError('Could not fetch order book. Check contract deployment.');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [contracts?.energyMarket, marketSlot]);
+
+  // Auto-refresh every 15 seconds
+  useEffect(() => {
+    fetchOrderBook();
+    const id = setInterval(fetchOrderBook, 15_000);
+    return () => clearInterval(id);
+  }, [fetchOrderBook]);
+
+  // --- Order placement ---
+  const handlePlaceOrder = () => {
+    if (!price || !quantity) { setError('Enter price and quantity.'); return; }
+    if (parseFloat(price) <= 0 || parseFloat(quantity) <= 0) { setError('Values must be > 0.'); return; }
+
+    if (!isConnected && !account) {
+      // demo mode validation
+      const cost = orderType === 'bid'
+        ? parseFloat(price) * parseFloat(quantity)
+        : parseFloat(quantity);
+      if (cost > demoBalance.available) { setError('Insufficient demo balance.'); return; }
+    }
+
+    setPendingOrder({ type: orderType, price, quantity, timeSlot });
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmOrder = async () => {
+    setConfirmOpen(false);
+    setLoading(true);
+    setError('');
+
+    try {
+      if (contracts?.energyMarket && account) {
+        const priceWei = ethers.parseEther(price);
+        const qty      = BigInt(quantity);
+        if (orderType === 'bid') {
+          await contracts.energyMarket.placeBid(timeSlot, priceWei, qty);
+        } else {
+          await contracts.energyMarket.placeAsk(timeSlot, priceWei, qty);
+        }
+      } else {
+        // Demo mode
+        addDemoOrder({ type: orderType, price, quantity, timeSlot });
+      }
+      setPrice('');
+      setQuantity('');
+      setTimeout(fetchOrderBook, 2000);
+    } catch (e) {
+      setError(e.reason ?? e.message ?? 'Transaction failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Energy Market</h1>
+          <p className="text-sm text-slate-400 mt-1">Batch auction order book — real-time</p>
+        </div>
+        <button
+          onClick={fetchOrderBook}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm text-slate-300 transition-colors"
+        >
+          <span className={refreshing ? 'animate-spin' : ''}>↻</span>
+          Refresh
+        </button>
+      </div>
+
+      {/* Clearing price banner (issue #19: prominent display) */}
+      {auction && auction.isCleared && (
+        <ClearingPriceBanner clearingPrice={auction.clearingPrice} />
+      )}
+
+      {/* Slot selector */}
+      <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">View slot</label>
+            <select
+              value={marketSlot}
+              onChange={(e) => setMarketSlot(Number(e.target.value))}
+              className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-white"
+            >
+              {[-2, -1, 0, 1, 2].map((offset) => {
+                const slot = currentSlot() + offset * SLOT_DURATION;
+                return (
+                  <option key={slot} value={slot}>
+                    {formatSlot(slot)} {offset === 0 ? '(current)' : ''}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          {auction && (
+            <div className="flex gap-4 text-xs text-slate-400 ml-auto">
+              <span>
+                Total bids:{' '}
+                <span className="text-energy-green font-mono">{auction.totalBidQuantity?.toString() ?? '—'} Wh</span>
+              </span>
+              <span>
+                Total asks:{' '}
+                <span className="text-red-400 font-mono">{auction.totalAskQuantity?.toString() ?? '—'} Wh</span>
+              </span>
+              <span>
+                Status:{' '}
+                <span className={auction.isCleared ? 'text-yellow-400' : 'text-energy-green'}>
+                  {auction.isCleared ? 'Cleared' : 'Open'}
+                </span>
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Order book */}
+      <OrderBookTable bids={bids} asks={asks} bestBid={bestBid} bestAsk={bestAsk} />
+
+      {/* Place order form */}
+      <div className="bg-slate-800 rounded-xl border border-slate-700 p-5">
+        <h2 className="text-lg font-semibold text-white mb-4">Place Order</h2>
+
+        {/* Bid / Ask toggle */}
+        <div className="flex rounded-lg overflow-hidden border border-slate-700 mb-4 w-fit">
+          {['bid', 'ask'].map((type) => (
+            <button
+              key={type}
+              onClick={() => setOrderType(type)}
+              className={`px-6 py-2 text-sm font-medium capitalize transition-colors ${
+                orderType === type
+                  ? type === 'bid'
+                    ? 'bg-energy-green text-slate-900'
+                    : 'bg-red-500 text-white'
+                  : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+              }`}
+            >
+              {type === 'bid' ? 'Buy (Bid)' : 'Sell (Ask)'}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Price (GRID / Wh)</label>
+            <input
+              type="number"
+              min="0"
+              step="0.0001"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="0.0120"
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Quantity (Wh)</label>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              placeholder="10"
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Time Slot</label>
+            <select
+              value={timeSlot}
+              onChange={(e) => setTimeSlot(Number(e.target.value))}
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm"
+            >
+              {[-1, 0, 1].map((offset) => {
+                const slot = currentSlot() + offset * SLOT_DURATION;
+                return (
+                  <option key={slot} value={slot}>
+                    {formatSlot(slot)}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
+
+        {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+
+        <button
+          onClick={handlePlaceOrder}
+          disabled={loading}
+          className={`mt-4 px-6 py-2.5 rounded-lg font-medium text-sm transition-colors ${
+            orderType === 'bid'
+              ? 'bg-energy-green hover:bg-green-400 text-slate-900'
+              : 'bg-red-500 hover:bg-red-400 text-white'
+          } disabled:opacity-50`}
+        >
+          {loading ? 'Submitting…' : `Place ${orderType === 'bid' ? 'Buy' : 'Sell'} Order`}
+        </button>
+      </div>
+
+      {/* Demo order history */}
+      {demoOrders && demoOrders.length > 0 && (
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-5">
+          <h2 className="text-sm font-semibold text-slate-400 mb-3">My Orders (Demo)</h2>
+          <div className="space-y-2">
+            {demoOrders.map((o, i) => (
+              <div key={i} className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-700/50 pb-2">
+                <span className={o.type === 'bid' ? 'text-energy-green' : 'text-red-400'}>
+                  {o.type.toUpperCase()} {o.quantity} Wh @ {o.price} GRID
+                </span>
+                <span>{formatSlot(o.timeSlot)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Order confirmation modal */}
+      {confirmOpen && pendingOrder && (
+        <ConfirmActionModal
+          title={`Confirm ${pendingOrder.type === 'bid' ? 'Buy' : 'Sell'} Order`}
+          description={`You are placing a ${pendingOrder.type === 'bid' ? 'bid (buy)' : 'ask (sell)'} order for ${pendingOrder.quantity} Wh at ${pendingOrder.price} GRID per Wh. Tokens will be locked in escrow until the auction clears.`}
+          onConfirm={handleConfirmOrder}
+          onCancel={() => setConfirmOpen(false)}
+        />
+      )}
+    </div>
+  );
 }

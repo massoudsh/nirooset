@@ -1,250 +1,388 @@
-import { useState, useMemo } from 'react'
+/**
+ * Utilities.jsx — Green-energy utilities store
+ *
+ * Issue #26: Utilities product detail page and filters
+ * Issue #14: Utilities cart, checkout, and GRID credit linking
+ *
+ * Features:
+ *  - Category, brand, price-range, and capacity-range filters
+ *  - Sort by price / rating / newest
+ *  - Product card grid with Add-to-Cart and detail buttons
+ *  - ProductDetailModal on click
+ *  - "My linked purchases" section when wallet is connected
+ *  - Cart state persisted in CartContext (localStorage)
+ */
+
+import { useState, useMemo } from 'react';
+import { useWeb3 } from '../../context/Web3Context';
+import { useCart } from '../../context/CartContext';
 import {
-  BatteryCharging,
-  ExternalLink,
-  ShoppingCart,
-  Star,
-  Link2,
-} from 'lucide-react'
-import { useWeb3 } from '../../context/Web3Context'
-import { useCart } from '../../context/CartContext'
-import ProductDetailModal from '../ProductDetailModal'
-import { PRODUCTS, CATEGORIES, BRANDS, getProduct, formatPrice, parseCapacity, SORT_OPTIONS } from '../../config/products'
+  PRODUCTS,
+  CATEGORIES,
+  BRANDS,
+  SORT_OPTIONS,
+  getProduct,
+  formatPrice,
+  parseCapacity,
+} from '../../config/products';
+import ProductDetailModal from '../ProductDetailModal';
 
+// ---------------------------------------------------------------------------
+// Star rating helper
+// ---------------------------------------------------------------------------
+function Stars({ rating }) {
+  return (
+    <span className="text-yellow-400 text-xs">
+      {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Filter sidebar
+// ---------------------------------------------------------------------------
+function FilterPanel({ filters, setFilters, onReset }) {
+  return (
+    <aside className="space-y-6">
+      {/* Category */}
+      <div>
+        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Category</h3>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilters((f) => ({ ...f, category: cat }))}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                filters.category === cat
+                  ? 'bg-energy-green text-slate-900'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Brand */}
+      <div>
+        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Brand</h3>
+        <select
+          value={filters.brand}
+          onChange={(e) => setFilters((f) => ({ ...f, brand: e.target.value }))}
+          className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white"
+        >
+          <option value="All">All Brands</option>
+          {BRANDS.map((b) => (
+            <option key={b} value={b}>{b}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Price range */}
+      <div>
+        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          Price Range (USD)
+        </h3>
+        <div className="flex gap-2 items-center">
+          <input
+            type="number"
+            min="0"
+            placeholder="Min"
+            value={filters.priceMin ?? ''}
+            onChange={(e) => setFilters((f) => ({ ...f, priceMin: e.target.value === '' ? null : Number(e.target.value) }))}
+            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-white"
+          />
+          <span className="text-slate-500 text-sm">–</span>
+          <input
+            type="number"
+            min="0"
+            placeholder="Max"
+            value={filters.priceMax ?? ''}
+            onChange={(e) => setFilters((f) => ({ ...f, priceMax: e.target.value === '' ? null : Number(e.target.value) }))}
+            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-white"
+          />
+        </div>
+      </div>
+
+      {/* Capacity range */}
+      <div>
+        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          Capacity
+        </h3>
+        <div className="flex gap-2 items-center">
+          <input
+            type="number"
+            min="0"
+            placeholder="Min Wh"
+            value={filters.capacityMin ?? ''}
+            onChange={(e) => setFilters((f) => ({ ...f, capacityMin: e.target.value === '' ? null : Number(e.target.value) }))}
+            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-white"
+          />
+          <span className="text-slate-500 text-sm">–</span>
+          <input
+            type="number"
+            min="0"
+            placeholder="Max Wh"
+            value={filters.capacityMax ?? ''}
+            onChange={(e) => setFilters((f) => ({ ...f, capacityMax: e.target.value === '' ? null : Number(e.target.value) }))}
+            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-white"
+          />
+        </div>
+      </div>
+
+      <button
+        onClick={onReset}
+        className="w-full py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm text-slate-400 transition-colors"
+      >
+        Reset Filters
+      </button>
+    </aside>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Default filter state
+// ---------------------------------------------------------------------------
+const DEFAULT_FILTERS = {
+  category: 'All',
+  brand: 'All',
+  priceMin: null,
+  priceMax: null,
+  capacityMin: null,
+  capacityMax: null,
+  sort: SORT_OPTIONS[0].value,
+};
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 export default function Utilities() {
-  const { isConnected, account } = useWeb3()
-  const { addItem, getLinkedOrders } = useCart()
-  const [categoryFilter, setCategoryFilter] = useState('all')
-  const [detailProductId, setDetailProductId] = useState(null)
-  const [priceMin, setPriceMin] = useState('')
-  const [priceMax, setPriceMax] = useState('')
-  const [capacityMin, setCapacityMin] = useState('')
-  const [capacityMax, setCapacityMax] = useState('')
-  const [brandFilter, setBrandFilter] = useState('all')
-  const [sortBy, setSortBy] = useState('price-asc')
+  const { account, isConnected } = useWeb3();
+  const { addItem, getLinkedOrders } = useCart();
 
-  const linkedOrders = isConnected && account ? getLinkedOrders(account) : []
+  const [filters, setFilters]       = useState(DEFAULT_FILTERS);
+  const [detailId, setDetailId]     = useState(null);
+  const [addedId, setAddedId]       = useState(null);
 
+  // --- Filtered + sorted product list ---
   const filtered = useMemo(() => {
-    let list = categoryFilter === 'all' ? [...PRODUCTS] : PRODUCTS.filter((p) => p.category === categoryFilter)
-    if (brandFilter !== 'all') list = list.filter((p) => p.brand === brandFilter)
-    const pMin = priceMin === '' ? -Infinity : parseFloat(priceMin)
-    const pMax = priceMax === '' ? Infinity : parseFloat(priceMax)
-    if (!Number.isNaN(pMin)) list = list.filter((p) => p.price >= pMin)
-    if (!Number.isNaN(pMax)) list = list.filter((p) => p.price <= pMax)
-    const cMin = capacityMin === '' ? -Infinity : parseFloat(capacityMin)
-    const cMax = capacityMax === '' ? Infinity : parseFloat(capacityMax)
-    if (!Number.isNaN(cMin)) list = list.filter((p) => parseCapacity(p.capacity) >= cMin)
-    if (!Number.isNaN(cMax)) list = list.filter((p) => parseCapacity(p.capacity) <= cMax)
-    if (sortBy === 'price-asc') list.sort((a, b) => a.price - b.price)
-    else if (sortBy === 'price-desc') list.sort((a, b) => b.price - a.price)
-    else if (sortBy === 'rating') list.sort((a, b) => b.rating - a.rating)
-    else if (sortBy === 'newest') list.sort((a, b) => PRODUCTS.indexOf(b) - PRODUCTS.indexOf(a))
-    return list
-  }, [categoryFilter, brandFilter, priceMin, priceMax, capacityMin, capacityMax, sortBy])
+    let list = [...PRODUCTS];
+
+    // Category
+    if (filters.category !== 'All') {
+      list = list.filter((p) => p.category === filters.category);
+    }
+
+    // Brand
+    if (filters.brand !== 'All') {
+      list = list.filter((p) => p.brand === filters.brand);
+    }
+
+    // Price range
+    if (filters.priceMin != null) {
+      list = list.filter((p) => p.price >= filters.priceMin);
+    }
+    if (filters.priceMax != null) {
+      list = list.filter((p) => p.price <= filters.priceMax);
+    }
+
+    // Capacity range (parse capacity string to numeric Wh)
+    if (filters.capacityMin != null) {
+      list = list.filter((p) => parseCapacity(p.capacity) >= filters.capacityMin);
+    }
+    if (filters.capacityMax != null) {
+      list = list.filter((p) => parseCapacity(p.capacity) <= filters.capacityMax);
+    }
+
+    // Sort
+    const opt = SORT_OPTIONS.find((s) => s.value === filters.sort);
+    if (opt?.compareFn) {
+      list = list.sort(opt.compareFn);
+    }
+
+    return list;
+  }, [filters]);
+
+  // --- Add to cart with brief confirmation flash ---
+  const handleAddToCart = (productId) => {
+    addItem(productId, 1);
+    setAddedId(productId);
+    setTimeout(() => setAddedId(null), 1200);
+  };
+
+  // --- Linked purchases for connected wallet ---
+  const linkedOrders = account ? getLinkedOrders(account) : [];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Green Energy Utilities</h2>
-        <p className="text-gray-400">
-          Real products for storage and off-grid power — power banks, batteries, power stations, and accessories
-        </p>
-      </div>
-
-      {!isConnected && (
-        <div className="card bg-energy-blue/10 border-energy-blue/50">
-          <p className="text-energy-blue text-sm">
-            Connect your wallet to link purchases to your GRIDSET profile and earn energy credits on compatible items
-          </p>
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            type="button"
-            onClick={() => setCategoryFilter(cat.id)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              categoryFilter === cat.id
-                ? 'bg-energy-green text-white'
-                : 'bg-slate-800 text-gray-300 hover:bg-slate-700'
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-slate-800/50 rounded-lg border border-gray-700">
-        <span className="text-gray-400 text-sm font-medium">Filters & sort</span>
-        <select
-          value={brandFilter}
-          onChange={(e) => setBrandFilter(e.target.value)}
-          className="input-field w-36 text-sm py-1.5"
-        >
-          <option value="all">All brands</option>
-          {BRANDS.map((b) => (
-            <option key={b.id} value={b.id}>{b.label}</option>
-          ))}
-        </select>
-        <input
-          type="number"
-          min="0"
-          step="1"
-          placeholder="Min price"
-          value={priceMin}
-          onChange={(e) => setPriceMin(e.target.value)}
-          className="input-field w-24 text-sm py-1.5"
-        />
-        <input
-          type="number"
-          min="0"
-          step="1"
-          placeholder="Max price"
-          value={priceMax}
-          onChange={(e) => setPriceMax(e.target.value)}
-          className="input-field w-24 text-sm py-1.5"
-        />
-        <input
-          type="number"
-          min="0"
-          placeholder="Min capacity"
-          value={capacityMin}
-          onChange={(e) => setCapacityMin(e.target.value)}
-          className="input-field w-28 text-sm py-1.5"
-        />
-        <input
-          type="number"
-          min="0"
-          placeholder="Max capacity"
-          value={capacityMax}
-          onChange={(e) => setCapacityMax(e.target.value)}
-          className="input-field w-28 text-sm py-1.5"
-        />
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="input-field w-44 text-sm py-1.5"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.id} value={o.id}>{o.label}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filtered.map((product) => (
-          <div
-            key={product.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => setDetailProductId(product.id)}
-            onKeyDown={(e) => e.key === 'Enter' && setDetailProductId(product.id)}
-            className="card overflow-hidden hover:border-energy-green transition-all duration-200 group cursor-pointer"
-          >
-            <div className="relative aspect-[4/3] bg-slate-800 rounded-lg overflow-hidden mb-4">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              {!product.inStock && (
-                <div className="absolute inset-0 bg-slate-900/70 flex items-center justify-center">
-                  <span className="text-white font-semibold">Out of stock</span>
-                </div>
-              )}
-              <div className="absolute top-2 right-2 flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded text-sm text-energy-yellow">
-                <Star className="w-4 h-4 fill-current" />
-                {product.rating}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <p className="text-energy-green/90 text-xs font-medium uppercase tracking-wide">
-                {product.brand}
-              </p>
-              <h3 className="text-lg font-semibold text-white line-clamp-2">{product.name}</h3>
-              <p className="text-sm text-gray-400">{product.capacity}</p>
-              <ul className="text-xs text-gray-500 space-y-0.5">
-                {product.specs.slice(0, 2).map((s, i) => (
-                  <li key={i}>• {s}</li>
-                ))}
-              </ul>
-              <div className="flex items-center justify-between pt-2 border-t border-gray-700">
-                <span className="text-xl font-bold text-white">
-                  {formatPrice(product.price, product.currency)}
-                </span>
-                <span className="text-xs text-gray-500">{product.reviews} reviews</span>
-              </div>
-              <div className="flex gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  onClick={() => addItem(product.id)}
-                  className="flex-1 btn-primary flex items-center justify-center gap-2 py-2 text-sm"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  Add to cart
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDetailProductId(product.id)}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-gray-300"
-                  title="View details"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {isConnected && account && linkedOrders.length > 0 && (
-        <div className="card">
-          <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Link2 className="w-5 h-5 text-energy-green" />
-            My linked purchases
-          </h3>
-          <p className="text-gray-400 text-sm mb-4">Purchases linked to your wallet for future energy-credit eligibility.</p>
-          <ul className="space-y-3">
-            {linkedOrders.slice().reverse().map((order) => (
-              <li key={order.orderId} className="p-3 bg-gray-800 rounded-lg">
-                <div className="flex justify-between text-sm text-gray-400 mb-1">
-                  <span>Order #{String(order.orderId).slice(-6)}</span>
-                  <span>{new Date(order.timestamp).toLocaleDateString()}</span>
-                </div>
-                <div className="text-white font-medium">
-                  {order.productIds.map((id) => getProduct(id)?.name).filter(Boolean).join(', ')}
-                </div>
-                <div className="text-energy-green text-sm">{formatPrice(order.total)}</div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="card flex items-start gap-4">
-        <div className="p-3 rounded-lg bg-energy-green/20">
-          <BatteryCharging className="w-8 h-8 text-energy-green" />
-        </div>
+      <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-semibold text-white mb-2">Why green energy utilities?</h3>
-          <p className="text-gray-400 text-sm">
-            Store and use energy from your panels or the grid with batteries and power banks. Large power stations
-            and cells help you go off-grid, reduce peak demand, and pair with GRIDSET settlement for a full
-            green energy loop. Cart persists across the app; checkout supports “Link to GRIDSET” to associate purchases with your wallet for future energy-credit eligibility. Linked orders appear under “My linked purchases” when connected.
+          <h1 className="text-2xl font-bold text-white">Utilities Store</h1>
+          <p className="text-sm text-slate-400 mt-1">
+            {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
           </p>
+        </div>
+
+        {/* Sort selector */}
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-slate-400 whitespace-nowrap">Sort by</label>
+          <select
+            value={filters.sort}
+            onChange={(e) => setFilters((f) => ({ ...f, sort: e.target.value }))}
+            className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-white"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {detailProductId && (
+      {/* Wallet CTA */}
+      {!isConnected && !account && (
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 flex items-center gap-3">
+          <span className="text-2xl">🔗</span>
+          <div>
+            <p className="text-sm font-medium text-white">Connect your wallet</p>
+            <p className="text-xs text-slate-400">
+              Link purchases to your GRIDSET account and earn energy credits.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-6">
+        {/* Filter sidebar */}
+        <div className="w-56 flex-shrink-0">
+          <FilterPanel
+            filters={filters}
+            setFilters={setFilters}
+            onReset={() => setFilters(DEFAULT_FILTERS)}
+          />
+        </div>
+
+        {/* Product grid */}
+        <div className="flex-1">
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+              <span className="text-4xl mb-3">🔍</span>
+              <p className="text-sm">No products match your filters.</p>
+              <button
+                onClick={() => setFilters(DEFAULT_FILTERS)}
+                className="mt-3 text-energy-green text-sm hover:underline"
+              >
+                Reset filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filtered.map((product) => (
+                <div
+                  key={product.id}
+                  className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden flex flex-col hover:border-slate-500 transition-colors"
+                >
+                  {/* Product image */}
+                  <button
+                    onClick={() => setDetailId(product.id)}
+                    className="relative aspect-video bg-slate-700 overflow-hidden block w-full"
+                    title="View details"
+                  >
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                    {!product.inStock && (
+                      <div className="absolute inset-0 bg-slate-900/70 flex items-center justify-center">
+                        <span className="text-xs font-semibold text-slate-300 bg-slate-800 px-2 py-1 rounded">
+                          Out of Stock
+                        </span>
+                      </div>
+                    )}
+                  </button>
+
+                  <div className="p-3 flex flex-col flex-1">
+                    <p className="text-xs text-energy-green font-medium">{product.brand}</p>
+                    <button
+                      onClick={() => setDetailId(product.id)}
+                      className="text-sm font-medium text-white text-left hover:text-energy-green transition-colors line-clamp-2 mt-0.5"
+                    >
+                      {product.name}
+                    </button>
+                    <p className="text-xs text-slate-500 mt-0.5">{product.capacity}</p>
+
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <Stars rating={product.rating} />
+                      <span className="text-xs text-slate-500">({product.reviews})</span>
+                    </div>
+
+                    <div className="mt-auto pt-3 flex items-center justify-between">
+                      <span className="text-base font-bold text-white">
+                        {formatPrice(product.price)}
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setDetailId(product.id)}
+                          className="px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-xs text-slate-300 transition-colors"
+                        >
+                          Details
+                        </button>
+                        <button
+                          onClick={() => handleAddToCart(product.id)}
+                          disabled={!product.inStock}
+                          className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                            addedId === product.id
+                              ? 'bg-energy-green text-slate-900'
+                              : 'bg-slate-600 hover:bg-energy-green hover:text-slate-900 text-slate-300'
+                          } disabled:opacity-40 disabled:cursor-not-allowed`}
+                        >
+                          {addedId === product.id ? '✓ Added' : '+ Cart'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Linked purchases */}
+      {(isConnected || account) && linkedOrders.length > 0 && (
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-5">
+          <h2 className="text-sm font-semibold text-white mb-3">
+            My Linked Purchases
+            <span className="ml-2 text-xs text-slate-400">wallet: {account?.slice(0, 6)}…{account?.slice(-4)}</span>
+          </h2>
+          <div className="space-y-2">
+            {linkedOrders.map((order, i) => (
+              <div key={i} className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-700/50 pb-2">
+                <div className="flex gap-2">
+                  {(order.productIds ?? []).map((pid) => {
+                    const p = getProduct(pid);
+                    return p ? (
+                      <span key={pid} className="bg-slate-700 rounded px-2 py-0.5">{p.name}</span>
+                    ) : null;
+                  })}
+                </div>
+                <span className="text-energy-green">{formatPrice(order.total)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Product detail modal */}
+      {detailId && (
         <ProductDetailModal
-          productId={detailProductId}
-          onClose={() => setDetailProductId(null)}
-          onAddToCart={addItem}
+          productId={detailId}
+          onClose={() => setDetailId(null)}
+          onAddToCart={(id) => { handleAddToCart(id); setDetailId(null); }}
         />
       )}
     </div>
-  )
+  );
 }

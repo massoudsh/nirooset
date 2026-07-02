@@ -1,39 +1,68 @@
-# GRIDSET SDK
+# @gridset/sdk
 
-Minimal JS client for GRIDSET protocol contracts (ethers v6).
+JavaScript/TypeScript client library for the GRIDSET Protocol.
 
 ## Install
 
-From repo root (or npm link):
-
 ```bash
-cd sdk && npm install ethers
+npm install @gridset/sdk ethers
 ```
 
-Or in your app: `npm install ethers` and copy or link this package.
+## Quick start
 
-## Usage
+```ts
+import { createSDKFromBrowser } from '@gridset/sdk';
 
-```js
-import { getContracts } from 'gridset-sdk'
-import { BrowserProvider } from 'ethers'
-
-const provider = new BrowserProvider(window.ethereum)
-const signer = await provider.getSigner()
-const addresses = {
-  energyToken: '0x...',
+const sdk = await createSDKFromBrowser(window.ethereum, {
+  energyToken:  '0x...',
   energyMarket: '0x...',
-  stakingVault: '0x...',
-}
-const contracts = getContracts(signer, addresses)
+  panelNFT:     '0x...',
+  panelRegistry:'0x...',
+  energyOracle: '0x...',
+});
 
-const supply = await contracts.energyToken.totalSupply()
-const auction = await contracts.energyMarket.getAuction(1000)
+// Get the live order book
+const book = await sdk.getOrderBook(GridsetSDK.currentTimeSlot());
+console.log('Bids:', book.bids);
+console.log('Asks:', book.asks);
+
+// Place a bid (requires signer)
+await sdk.placeBid(GridsetSDK.currentTimeSlot(), ethers.parseEther('0.012'), 10n);
+
+// Mint energy tokens (owner only)
+await sdk.mint('0xYourAddress', ethers.parseEther('1000'));
+```
+
+## Read-only (no wallet)
+
+```ts
+import { createSDKFromRPC } from '@gridset/sdk';
+
+const sdk = createSDKFromRPC('https://sepolia.infura.io/v3/YOUR_KEY', addresses);
+const auction = await sdk.getAuction(GridsetSDK.currentTimeSlot());
 ```
 
 ## API
 
-- **getContracts(providerOrSigner, addresses)** – returns `{ energyToken, energyMarket, stakingVault }` (Contract instances or null).
-- **energyTokenAbi / energyMarketAbi / stakingVaultAbi** – minimal ABIs for custom use.
-
-Event subscriptions: use `contracts.energyMarket.on('AuctionCleared', (slot, price, qty) => ...)` (ethers v6).
+| Method | Description |
+|---|---|
+| `getOrderBook(slot)` | Fetch bids & asks for a time slot |
+| `getAuction(slot)` | Fetch auction state (clearing price, status) |
+| `getBestBid(slot)` | Highest bid price & quantity |
+| `getBestAsk(slot)` | Lowest ask price & quantity |
+| `placeBid(slot, price, qty)` | Submit a buy order |
+| `placeAsk(slot, price, qty)` | Submit a sell order |
+| `cancelOrder(orderId)` | Cancel an active order |
+| `clearAuction(slot)` | Clear auction (owner only) |
+| `mint(to, amount)` | Mint energy tokens (owner only) |
+| `getBalance(account)` | Available token balance |
+| `getLockedBalance(account)` | Locked token balance |
+| `registerPanel(tokenId, owner, capacity)` | Register a panel |
+| `getPanelRecord(tokenId)` | Panel registry record |
+| `getRegisteredPanels()` | All registered panel IDs |
+| `mintPanel(to, tokenId, capacity)` | Mint a PanelNFT |
+| `getPanelOwner(tokenId)` | Owner of a panel NFT |
+| `getTimeSlotData(slot)` | Oracle time slot data |
+| `getTotalProduction(slot)` | Total Wh produced in a slot |
+| `GridsetSDK.currentTimeSlot()` | Current hourly slot (static) |
+| `GridsetSDK.timeSlotFor(date)` | Slot for a specific Date (static) |

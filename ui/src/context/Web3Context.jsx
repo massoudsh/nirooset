@@ -1,159 +1,237 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react'
-import { ethers } from 'ethers'
-import { contractAddresses, abis, hasAnyAddress } from '../config/contracts'
-import { SUPPORTED_CHAIN_IDS, CHAIN_PARAMS, getChain } from '../config/chains'
+/**
+ * Web3Context.jsx — Wallet connectivity and contract instances
+ *
+ * Issue #12: Multi-chain Support
+ *
+ * Uses getAddresses(chainId) so each network has its own set of
+ * contract addresses loaded from environment variables.
+ * Supports: Ethereum, Sepolia, OP Sepolia, Optimism, Arbitrum, Polygon.
+ */
 
-const Web3Context = createContext()
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
+import { ethers } from 'ethers';
+import {
+  getAddresses,
+  hasAddressesForChain,
+  ENERGY_TOKEN_ABI,
+  ENERGY_MARKET_ABI,
+  PANEL_REGISTRY_ABI,
+  STAKING_VAULT_ABI,
+  SETTLEMENT_ENGINE_ABI,
+  GOVERNANCE_DAO_ABI,
+  ENERGY_ORACLE_ABI,
+  PANEL_NFT_ABI,
+} from '../config/contracts';
+import {
+  isSupportedChain,
+  getChainParams,
+  SUPPORTED_CHAIN_IDS,
+  getChain,
+} from '../config/chains';
+
+// ---------------------------------------------------------------------------
+// Context
+// ---------------------------------------------------------------------------
+
+const Web3Context = createContext(null);
 
 export function Web3Provider({ children }) {
-  const [account, setAccount] = useState(null)
-  const [provider, setProvider] = useState(null)
-  const [signer, setSigner] = useState(null)
-  const [isConnected, setIsConnected] = useState(false)
-  const [chainId, setChainId] = useState(null)
+  const [account,   setAccount]   = useState(null);
+  const [provider,  setProvider]  = useState(null);
+  const [signer,    setSigner]    = useState(null);
+  const [chainId,   setChainId]   = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  // -------------------------------------------------------------------------
+  // Contract instances — re-created whenever signer or chainId changes
+  // -------------------------------------------------------------------------
 
   const contracts = useMemo(() => {
-    const out = {
-      energyToken: null,
-      energyMarket: null,
-      stakingVault: null,
-      panelRegistry: null,
-      settlementEngine: null,
-      governanceDAO: null,
-      energyOracle: null,
-    }
-    if (!provider) return out
-    const tokenAddr = contractAddresses.energyToken
-    if (tokenAddr && tokenAddr.startsWith('0x') && tokenAddr.length >= 40 && abis.energyToken?.length) {
-      out.energyToken = new ethers.Contract(tokenAddr, abis.energyToken, signer || provider)
-    }
-    const marketAddr = contractAddresses.energyMarket
-    if (marketAddr && marketAddr.startsWith('0x') && marketAddr.length >= 40 && abis.energyMarket?.length) {
-      out.energyMarket = new ethers.Contract(marketAddr, abis.energyMarket, provider)
-    }
-    const vaultAddr = contractAddresses.stakingVault
-    if (vaultAddr && vaultAddr.startsWith('0x') && vaultAddr.length >= 40 && abis.stakingVault?.length) {
-      out.stakingVault = new ethers.Contract(vaultAddr, abis.stakingVault, provider)
-    }
-    const registryAddr = contractAddresses.panelRegistry
-    if (registryAddr && registryAddr.startsWith('0x') && registryAddr.length >= 40 && abis.panelRegistry?.length) {
-      out.panelRegistry = new ethers.Contract(registryAddr, abis.panelRegistry, provider)
-    }
-    const engineAddr = contractAddresses.settlementEngine
-    if (engineAddr && engineAddr.startsWith('0x') && engineAddr.length >= 40 && abis.settlementEngine?.length) {
-      out.settlementEngine = new ethers.Contract(engineAddr, abis.settlementEngine, provider)
-    }
-    const daoAddr = contractAddresses.governanceDAO
-    if (daoAddr && daoAddr.startsWith('0x') && daoAddr.length >= 40 && abis.governanceDAO?.length) {
-      out.governanceDAO = new ethers.Contract(daoAddr, abis.governanceDAO, provider)
-    }
-    const oracleAddr = contractAddresses.energyOracle
-    if (oracleAddr && oracleAddr.startsWith('0x') && oracleAddr.length >= 40 && abis.energyOracle?.length) {
-      out.energyOracle = new ethers.Contract(oracleAddr, abis.energyOracle, provider)
-    }
-    return out
-  }, [provider, signer])
+    const runner = signer ?? provider;
+    if (!runner || !chainId) return null;
 
-  const connectWallet = async () => {
-    if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
+    const addrs = getAddresses(chainId);
+
+    function makeContract(address, abi) {
+      if (!address || address.length < 20) return null;
       try {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts'
-        })
-        const provider = new ethers.BrowserProvider(window.ethereum)
-        const signer = await provider.getSigner()
-        const network = await provider.getNetwork()
-
-        setAccount(accounts[0])
-        setProvider(provider)
-        setSigner(signer)
-        setIsConnected(true)
-        setChainId(Number(network.chainId))
-      } catch (error) {
-        console.error('Error connecting wallet:', error)
-        alert('Error connecting wallet: ' + error.message)
+        return new ethers.Contract(address, abi, runner);
+      } catch {
+        return null;
       }
-    } else {
-      alert('Please install MetaMask or another Web3 wallet')
     }
-  }
 
-  const disconnectWallet = () => {
-    setAccount(null)
-    setProvider(null)
-    setSigner(null)
-    setIsConnected(false)
-    setChainId(null)
-  }
+    return {
+      energyToken:      makeContract(addrs.energyToken,      ENERGY_TOKEN_ABI),
+      energyMarket:     makeContract(addrs.energyMarket,     ENERGY_MARKET_ABI),
+      panelNFT:         makeContract(addrs.panelNFT,         PANEL_NFT_ABI),
+      panelRegistry:    makeContract(addrs.panelRegistry,    PANEL_REGISTRY_ABI),
+      stakingVault:     makeContract(addrs.stakingVault,     STAKING_VAULT_ABI),
+      energyOracle:     makeContract(addrs.energyOracle,     ENERGY_ORACLE_ABI),
+      settlementEngine: makeContract(addrs.settlementEngine, SETTLEMENT_ENGINE_ABI),
+      governanceDAO:    makeContract(addrs.governanceDAO,    GOVERNANCE_DAO_ABI),
+    };
+  }, [signer, provider, chainId]);
 
-  const switchChain = async (targetChainId) => {
-    if (typeof window === 'undefined' || !window.ethereum) return
-    const hexChainId = '0x' + Number(targetChainId).toString(16)
+  // -------------------------------------------------------------------------
+  // Connect wallet
+  // -------------------------------------------------------------------------
+
+  const connectWallet = useCallback(async () => {
+    const eth = window.ethereum;
+    if (!eth) {
+      alert('No Web3 wallet detected. Please install MetaMask or a compatible wallet.');
+      return;
+    }
+
     try {
-      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexChainId }] })
+      const accounts = await eth.request({ method: 'eth_requestAccounts' });
+      const _provider = new ethers.BrowserProvider(eth);
+      const _signer   = await _provider.getSigner();
+      const network   = await _provider.getNetwork();
+      const _chainId  = Number(network.chainId);
+
+      setAccount(accounts[0]);
+      setProvider(_provider);
+      setSigner(_signer);
+      setChainId(_chainId);
+      setIsConnected(true);
     } catch (e) {
-      if (e.code === 4902 && CHAIN_PARAMS[targetChainId]) {
-        await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [CHAIN_PARAMS[targetChainId]] })
+      console.error('connectWallet:', e);
+    }
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // Disconnect wallet
+  // -------------------------------------------------------------------------
+
+  const disconnectWallet = useCallback(() => {
+    setAccount(null);
+    setProvider(null);
+    setSigner(null);
+    setChainId(null);
+    setIsConnected(false);
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // Switch chain
+  // -------------------------------------------------------------------------
+
+  const switchChain = useCallback(async (targetChainId) => {
+    const eth = window.ethereum;
+    if (!eth) return;
+
+    try {
+      await eth.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+      });
+    } catch (switchError) {
+      // Chain not added to wallet — try adding it
+      if (switchError.code === 4902) {
+        const params = getChainParams(targetChainId);
+        if (params) {
+          try {
+            await eth.request({ method: 'wallet_addEthereumChain', params: [params] });
+          } catch (addError) {
+            console.error('Failed to add chain:', addError);
+          }
+        }
       } else {
-        alert('Could not switch network: ' + (e.message || e))
+        console.error('Failed to switch chain:', switchError);
       }
     }
-  }
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // Listen for wallet events
+  // -------------------------------------------------------------------------
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
-      const handleAccountsChanged = (accounts) => {
-        if (accounts.length === 0) {
-          disconnectWallet()
-        } else {
-          connectWallet()
+    const eth = window.ethereum;
+    if (!eth) return;
+
+    const handleAccountsChanged = async (accounts) => {
+      if (accounts.length === 0) {
+        disconnectWallet();
+      } else if (isConnected) {
+        setAccount(accounts[0]);
+        if (provider) {
+          const _signer = await provider.getSigner();
+          setSigner(_signer);
         }
       }
+    };
 
-      const handleChainChanged = () => {
-        window.location.reload()
-      }
+    const handleChainChanged = () => {
+      // Reload is recommended by MetaMask to avoid stale state
+      window.location.reload();
+    };
 
-      window.ethereum.on('accountsChanged', handleAccountsChanged)
-      window.ethereum.on('chainChanged', handleChainChanged)
+    eth.on('accountsChanged', handleAccountsChanged);
+    eth.on('chainChanged', handleChainChanged);
 
-      return () => {
-        if (window.ethereum.removeListener) {
-          window.ethereum.removeListener('accountsChanged', handleAccountsChanged)
-          window.ethereum.removeListener('chainChanged', handleChainChanged)
-        }
-      }
-    }
-  }, [])
+    return () => {
+      eth.removeListener('accountsChanged', handleAccountsChanged);
+      eth.removeListener('chainChanged', handleChainChanged);
+    };
+  }, [isConnected, provider, disconnectWallet]);
 
-  return (
-    <Web3Context.Provider
-      value={{
-        account,
-        provider,
-        signer,
-        isConnected,
-        chainId,
-        connectWallet,
-        disconnectWallet,
-        switchChain,
-        supportedChainIds: SUPPORTED_CHAIN_IDS,
-        isSupportedChain: (id) => id != null && SUPPORTED_CHAIN_IDS.includes(Number(id)),
-        getChain,
-        contracts,
-        contractAddresses,
-        hasContractAddresses: hasAnyAddress(),
-      }}
-    >
-      {children}
-    </Web3Context.Provider>
-  )
+  // -------------------------------------------------------------------------
+  // Computed helpers
+  // -------------------------------------------------------------------------
+
+  const currentChain     = chainId ? getChain(chainId) : null;
+  const isChainSupported = chainId ? isSupportedChain(chainId) : false;
+  const hasContracts     = chainId ? hasAddressesForChain(chainId) : false;
+
+  // -------------------------------------------------------------------------
+  // Context value
+  // -------------------------------------------------------------------------
+
+  const value = useMemo(() => ({
+    account,
+    provider,
+    signer,
+    chainId,
+    isConnected,
+    contracts,
+    currentChain,
+    isChainSupported,
+    hasContracts,
+    supportedChainIds: SUPPORTED_CHAIN_IDS,
+    connectWallet,
+    disconnectWallet,
+    switchChain,
+  }), [
+    account,
+    provider,
+    signer,
+    chainId,
+    isConnected,
+    contracts,
+    currentChain,
+    isChainSupported,
+    hasContracts,
+    connectWallet,
+    disconnectWallet,
+    switchChain,
+  ]);
+
+  return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>;
 }
 
 export function useWeb3() {
-  const context = useContext(Web3Context)
-  if (!context) {
-    throw new Error('useWeb3 must be used within Web3Provider')
+  const ctx = useContext(Web3Context);
+  if (!ctx) {
+    throw new Error('useWeb3 must be used inside <Web3Provider>');
   }
-  return context
+  return ctx;
 }
