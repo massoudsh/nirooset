@@ -56,7 +56,7 @@
 ## ساختار پروژه
 
 ```
-niroset-protocol/
+nirooset-protocol/
 ├── src/
 │   ├── interfaces/          # اینترفیس‌های قرارداد
 │   │   ├── IEnergyToken.sol

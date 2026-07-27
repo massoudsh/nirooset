@@ -25,7 +25,7 @@ const mockPriceData = [
 
 const DEFAULT_SLOT_FOR_PRICE = 1000
 
-const ONBOARDING_DISMISSED_KEY = 'niroset-onboarding-dismissed'
+const ONBOARDING_DISMISSED_KEY = 'nirooset-onboarding-dismissed'
 
 export default function Overview({ setActiveView }) {
   const { account, contracts } = useWeb3()

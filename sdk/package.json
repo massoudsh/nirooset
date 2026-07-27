@@ -1,5 +1,5 @@
 {
-  "name": "@niroset/sdk",
+  "name": "@nirooset/sdk",
   "version": "0.1.0",
   "description": "JavaScript/TypeScript client library for the نیروست Protocol smart contracts",
   "main": "dist/index.js",
@@ -15,7 +15,7 @@
     "lint": "eslint src"
   },
   "keywords": [
-    "niroset",
+    "nirooset",
     "energy",
     "blockchain",
     "ethereum",

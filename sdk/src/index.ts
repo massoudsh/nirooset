@@ -1,12 +1,12 @@
 /**
- * @niroset/sdk — JavaScript/TypeScript client library for نیروست Protocol
+ * @nirooset/sdk — JavaScript/TypeScript client library for نیروست Protocol
  *
  * Issue #23: SDK or client library (JS/TS)
  *
  * Usage:
- *   import { NirosetSDK } from '@niroset/sdk';
+ *   import { NiroosetSDK } from '@nirooset/sdk';
  *
- *   const sdk = new NirosetSDK(provider, {
+ *   const sdk = new NiroosetSDK(provider, {
  *     energyToken:  '0x...',
  *     energyMarket: '0x...',
  *     panelNFT:     '0x...',
@@ -99,7 +99,7 @@ const GOVERNANCE_DAO_ABI = [
 // Types
 // ---------------------------------------------------------------------------
 
-export interface NirosetAddresses {
+export interface NiroosetAddresses {
   energyToken?: string;
   energyMarket?: string;
   panelNFT?: string;
@@ -296,9 +296,9 @@ const SLOT_SECONDS = 3600n; // 1 hour, matches EnergyOracle.SLOT_DURATION
 // Main SDK class
 // ---------------------------------------------------------------------------
 
-export class NirosetSDK {
+export class NiroosetSDK {
   private runner: ContractRunner;
-  private addresses: NirosetAddresses;
+  private addresses: NiroosetAddresses;
 
   // Contract instances (lazy-initialised)
   private _energyToken?: Contract;
@@ -310,7 +310,7 @@ export class NirosetSDK {
   private _settlementEngine?: Contract;
   private _governanceDAO?: Contract;
 
-  constructor(runner: ContractRunner, addresses: NirosetAddresses) {
+  constructor(runner: ContractRunner, addresses: NiroosetAddresses) {
     this.runner    = runner;
     this.addresses = addresses;
   }
@@ -689,10 +689,10 @@ export class NirosetSDK {
     return slots;
   }
 
-  private _assertAddress(key: keyof NirosetAddresses): void {
+  private _assertAddress(key: keyof NiroosetAddresses): void {
     const addr = this.addresses[key];
     if (!addr || addr.length < 20) {
-      throw new Error(`[NirosetSDK] Missing contract address for "${key}". Pass it in the constructor.`);
+      throw new Error(`[NiroosetSDK] Missing contract address for "${key}". Pass it in the constructor.`);
     }
   }
 
@@ -732,27 +732,27 @@ export {
 // ---------------------------------------------------------------------------
 
 /**
- * Create a NirosetSDK instance from a browser wallet (ethers v6 BrowserProvider).
+ * Create a NiroosetSDK instance from a browser wallet (ethers v6 BrowserProvider).
  *
  * @example
  * const sdk = await createSDKFromBrowser(window.ethereum, addresses);
  */
 export async function createSDKFromBrowser(
   ethereum: unknown,
-  addresses: NirosetAddresses,
-): Promise<NirosetSDK> {
+  addresses: NiroosetAddresses,
+): Promise<NiroosetSDK> {
   const provider = new ethers.BrowserProvider(ethereum as Parameters<typeof ethers.BrowserProvider>[0]);
   const signer   = await provider.getSigner();
-  return new NirosetSDK(signer, addresses);
+  return new NiroosetSDK(signer, addresses);
 }
 
 /**
- * Create a read-only NirosetSDK instance from an RPC URL (no signer).
+ * Create a read-only NiroosetSDK instance from an RPC URL (no signer).
  *
  * @example
  * const sdk = createSDKFromRPC('https://sepolia.infura.io/v3/...', addresses);
  */
-export function createSDKFromRPC(rpcUrl: string, addresses: NirosetAddresses): NirosetSDK {
+export function createSDKFromRPC(rpcUrl: string, addresses: NiroosetAddresses): NiroosetSDK {
   const provider = new ethers.JsonRpcProvider(rpcUrl);
-  return new NirosetSDK(provider, addresses);
+  return new NiroosetSDK(provider, addresses);
 }

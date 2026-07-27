@@ -136,7 +136,7 @@
 
 - **NEW-8 مرحلهٔ تأییدِ EnergyOracle:** نقش تأییدکنندهٔ اختیاری: وقتی تنظیم شود، finalizeTimeSlot نیازمند فراخوانی اولیهٔ confirmTimeSlot(timeSlot) است (توسط تأییدکننده یا مالک). وقتی تأییدکننده تنظیم نشده باشد تک‌اوراکلی؛ وقتی تنظیم شده باشد دومرحله‌ای (گزارش → تأیید → نهایی‌سازی). به [ORACLE_TRUST_MODEL.md](ORACLE_TRUST_MODEL.md) نگاه کنید. *تصویر کلی:* نقش دوم می‌تواند برای ممیزی یا تأیید نهایی پیش از نهایی‌سازی بازه استفاده شود.
 
-- **NEW-10 SDK:** پکیج حداقلیِ `sdk/` (niroset-sdk): getContracts(provider, addresses) نمونه‌های Contract برای energyToken، energyMarket، stakingVault برمی‌گرداند؛ ABIهای حداقلی برای خواندن/نوشتن و رویدادها. به `sdk/README.md` نگاه کنید.
+- **NEW-10 SDK:** پکیج حداقلیِ `sdk/` (nirooset-sdk): getContracts(provider, addresses) نمونه‌های Contract برای energyToken، energyMarket، stakingVault برمی‌گرداند؛ ABIهای حداقلی برای خواندن/نوشتن و رویدادها. به `sdk/README.md` نگاه کنید.
 
 - **NEW-11 E2E:** تست‌های Playwright در `ui/e2e/`: بارگذاری داشبورد و ناوبری سایدبار، بازار انرژی (دفتر سفارش، ثبت سفارش)، یوتیلیتی‌ها و سبد خرید (افزودن به سبد، باز کردن کشوی سبد). CI آن‌ها را با `npm run preview` اجرا می‌کند؛ برای اجرای محلی، `npm run dev` و سپس `npm run test:e2e` را در ui اجرا کنید.
 

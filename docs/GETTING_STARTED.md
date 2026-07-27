@@ -11,8 +11,8 @@
 ## ۱. کلون و بیلد
 
 ```bash
-git clone https://github.com/massoudsh/niroset-protocol.git
-cd niroset-protocol
+git clone https://github.com/massoudsh/nirooset-protocol.git
+cd nirooset-protocol
 forge build
 ```
 
