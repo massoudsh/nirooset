@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  forge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          cache: true
+
+      - name: Build
+        run: forge build
+
+      - name: Test
+        run: forge test -vvv
+
+      - name: Coverage
+        run: forge coverage --report summary
+        continue-on-error: true
+
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          cache: true
+
+      - name: Build
+        run: forge build
+
+      - name: Install Slither
+        run: pip install slither-analyzer
+
+      - name: Run Slither
+        run: slither . --compile-force-framework foundry --filter-paths "lib|test"
+        continue-on-error: true
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install UI dependencies
+        run: cd ui && npm install
+
+      - name: Build UI
+        run: cd ui && npm run build
+
+      - name: Install Playwright browsers
+        run: cd ui && npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: cd ui && npm run test:e2e
+        env:
+          CI: true
+        continue-on-error: true

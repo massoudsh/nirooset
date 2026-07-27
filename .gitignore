@@ -16,12 +16,21 @@ dist/
 __pycache__/
 *.pyc
 
+# Foundry
+cache/
+lib/
+broadcast/
+!broadcast/.gitkeep
+
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+
 .DS_Store
+Thumbs.db
+*~
 
 # Environment
 .env
@@ -30,14 +39,24 @@ __pycache__/
 .venv/
 venv/
 
+# UI (Node.js)
+ui/node_modules/
+ui/dist/
+ui/dist-ssr/
+ui/*.local
+ui/.vite/
+ui/playwright-report/
+ui/test-results/
+
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # Cache
 .cache/
 .turbo/
 tsconfig.tsbuildinfo
-
-# OS
-Thumbs.db
