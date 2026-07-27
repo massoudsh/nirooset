@@ -1,12 +1,12 @@
-# GRIDSET Protocol
+# پروتکل GRIDSET
 
-GRIDSET is a market-based energy and compute settlement system that enables financial settlement of energy obligations through blockchain infrastructure. The protocol operates on discrete time slots, uses batch auctions for price discovery, relies on oracle-reported production data, and implements stake-backed penalty mechanisms to ensure system integrity and participant compliance.
+GRIDSET یک سیستم تسویه‌حساب انرژی و محاسبات مبتنی بر بازار است که تسویهٔ مالی تعهدات انرژی را از طریق زیرساخت بلاک‌چین امکان‌پذیر می‌کند. این پروتکل بر پایهٔ بازه‌های زمانی گسسته کار می‌کند، از حراج دسته‌ای (batch auction) برای کشف قیمت استفاده می‌کند، به داده‌های تولید گزارش‌شده توسط اوراکل متکی است و برای اطمینان از یکپارچگی سیستم و پایبندی شرکت‌کنندگان، سازوکارهای جریمهٔ مبتنی بر استیک (stake-backed penalty) را پیاده‌سازی می‌کند.
 
-## System Architecture
+## معماری سیستم
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        GRIDSET Protocol                         │
+│                        پروتکل GRIDSET                            │
 └─────────────────────────────────────────────────────────────────┘
                               │
         ┌─────────────────────┼─────────────────────┐
@@ -14,7 +14,7 @@ GRIDSET is a market-based energy and compute settlement system that enables fina
         ▼                     ▼                     ▼
 ┌───────────────┐    ┌───────────────┐    ┌───────────────┐
 │  PanelNFT     │    │ EnergyToken   │    │ StakingVault  │
-│  (Assets)     │    │ (Settlement)  │    │ (Security)    │
+│  (دارایی‌ها)   │    │ (تسویه)       │    │ (امنیت)       │
 └───────┬───────┘    └───────┬───────┘    └───────┬───────┘
         │                     │                     │
         └─────────────────────┼─────────────────────┘
@@ -24,41 +24,41 @@ GRIDSET is a market-based energy and compute settlement system that enables fina
         ▼                     ▼                     ▼
 ┌───────────────┐    ┌───────────────┐    ┌───────────────┐
 │PanelRegistry  │    │ EnergyOracle  │    │ EnergyMarket  │
-│(Tracking)     │    │ (Data)        │    │ (Pricing)     │
+│(ردیابی)       │    │ (داده)        │    │ (قیمت‌گذاری)  │
 └───────┬───────┘    └───────┬───────┘    └───────┬───────┘
         │                     │                     │
         └─────────────────────┼─────────────────────┘
                               │
         ┌─────────────────────┼─────────────────────┐
         │                     │                     │
-        ▼                     ▼                     ▼
+        ▼                     ▼
 ┌───────────────┐    ┌───────────────┐
 │SettlementEngine│    │ GovernanceDAO │
-│(Execution)     │    │ (Control)     │
+│(اجرا)          │    │ (کنترل)       │
 └────────────────┘    └───────────────┘
 ```
 
-## Key Components
+## اجزای کلیدی
 
-- **EnergyToken**: Fungible energy credits for settlement
-- **PanelNFT**: Non-fungible tokens representing energy production assets
-- **PanelRegistry**: Registry tracking panel ownership and production
-- **StakingVault**: Economic security through staking mechanisms
-- **EnergyOracle**: Authoritative production data reporting
-- **EnergyMarket**: Batch auction price discovery
-- **SettlementEngine**: Financial settlement execution
-- **GovernanceDAO**: Decentralized protocol governance
+- **EnergyToken**: توکن‌های قابل‌تعویض (fungible) انرژی برای تسویه‌حساب
+- **PanelNFT**: توکن‌های غیرقابل‌تعویض (NFT) که دارایی‌های تولید انرژی را نمایندگی می‌کنند
+- **PanelRegistry**: رجیستری برای ردیابی مالکیت و تولید پنل‌ها
+- **StakingVault**: امنیت اقتصادی از طریق سازوکارهای استیکینگ
+- **EnergyOracle**: گزارش‌دهی معتبر داده‌های تولید
+- **EnergyMarket**: کشف قیمت از طریق حراج دسته‌ای
+- **SettlementEngine**: اجرای تسویهٔ مالی
+- **GovernanceDAO**: حاکمیت غیرمتمرکز پروتکل
 
-## Important Notice
+## توجه مهم
 
-**This protocol settles financial obligations, not physical energy delivery.** GRIDSET operates as a financial settlement layer that tracks energy production and consumption as financial claims, executes payments based on net energy positions, and does not guarantee physical energy delivery. The protocol is designed to work on top of existing physical energy infrastructure.
+**این پروتکل تعهدات مالی را تسویه می‌کند، نه تحویل فیزیکی انرژی را.** GRIDSET به‌عنوان یک لایهٔ تسویهٔ مالی عمل می‌کند که تولید و مصرف انرژی را به‌صورت مطالبات مالی ردیابی می‌کند، پرداخت‌ها را بر اساس موقعیت خالص انرژی اجرا می‌کند و تحویل فیزیکی انرژی را تضمین نمی‌کند. این پروتکل برای کار روی زیرساخت فیزیکی موجود انرژی طراحی شده است.
 
-## Project Structure
+## ساختار پروژه
 
 ```
 gridset-protocol/
 ├── src/
-│   ├── interfaces/          # Contract interfaces
+│   ├── interfaces/          # اینترفیس‌های قرارداد
 │   │   ├── IEnergyToken.sol
 │   │   ├── IPanelNFT.sol
 │   │   ├── IPanelRegistry.sol
@@ -67,7 +67,7 @@ gridset-protocol/
 │   │   ├── IEnergyMarket.sol
 │   │   ├── ISettlementEngine.sol
 │   │   └── IGovernanceDAO.sol
-│   ├── EnergyToken.sol      # Placeholder implementations
+│   ├── EnergyToken.sol      # پیاده‌سازی‌های اصلی
 │   ├── PanelNFT.sol
 │   ├── PanelRegistry.sol
 │   ├── StakingVault.sol
@@ -75,44 +75,44 @@ gridset-protocol/
 │   ├── EnergyMarket.sol
 │   ├── SettlementEngine.sol
 │   └── GovernanceDAO.sol
-├── test/                    # Forge tests (130 tests, >95% line coverage)
+├── test/                    # تست‌های Forge (۱۳۰ تست، پوشش خطی بیش از ۹۵٪)
 ├── script/
-│   └── Deploy.s.sol         # Deploy full suite (Anvil/testnet/mainnet)
+│   └── Deploy.s.sol         # استقرار کامل مجموعه (Anvil/تست‌نت/مین‌نت)
 ├── docs/
-│   ├── architecture.md      # System architecture
-│   ├── GETTING_STARTED.md   # Clone → build → test → deploy → UI
-│   ├── DEPLOYMENT.md        # Deployment order, env vars, post-deploy
-│   └── NEW_ISSUES.md        # Backlog
-├── ui/                      # React + Vite web UI
+│   ├── architecture.md      # معماری سیستم
+│   ├── GETTING_STARTED.md   # کلون → بیلد → تست → استقرار → رابط کاربری
+│   ├── DEPLOYMENT.md        # ترتیب استقرار، متغیرهای محیطی، مراحل پس از استقرار
+│   └── NEW_ISSUES.md        # بک‌لاگ
+├── ui/                      # رابط کاربری وب با React + Vite
 │   └── src/
-│       ├── components/      # Views (Dashboard, Energy Wallet, Market, etc.)
-│       ├── context/         # Web3Context (contracts, addresses)
-│       └── config/          # Contract addresses & ABIs from env
-└── foundry.toml             # Foundry configuration
+│       ├── components/      # نماها (داشبورد، کیف پول انرژی، بازار و...)
+│       ├── context/         # Web3Context (قراردادها، آدرس‌ها)
+│       └── config/          # آدرس قراردادها و ABI از env
+└── foundry.toml             # تنظیمات Foundry
 ```
 
-## Development
+## توسعه
 
-### Prerequisites
+### پیش‌نیازها
 
 - Foundry (forge, cast, anvil)
 - Solidity ^0.8.20
 
-### Build
+### بیلد
 
 ```bash
 forge build
 ```
 
-### Test
+### تست
 
 ```bash
 forge test
 ```
 
-### Run UI
+### اجرای رابط کاربری
 
-The project includes a modern web UI for interacting with the protocol:
+این پروژه شامل یک رابط کاربری وب مدرن برای تعامل با پروتکل است:
 
 ```bash
 cd ui
@@ -120,59 +120,59 @@ npm install
 npm run dev
 ```
 
-The UI will open at `http://localhost:5173` (or the URL Vite prints) and includes:
-- Energy dashboard with real-time metrics
-- Energy market with order book visualization
-- Panel registry management
-- Energy wallet and token transfers
-- Settlement engine monitoring
-- Staking vault management
-- Governance DAO participation
+رابط کاربری روی آدرس `http://localhost:5173` (یا آدرسی که Vite چاپ می‌کند) باز می‌شود و شامل موارد زیر است:
+- داشبورد انرژی با متریک‌های بلادرنگ
+- بازار انرژی با نمایش دفتر سفارش
+- مدیریت رجیستری پنل‌ها
+- کیف پول انرژی و انتقال توکن
+- نظارت بر موتور تسویه
+- مدیریت خزانهٔ استیکینگ
+- مشارکت در حاکمیت DAO
 
-See `ui/README.md` for more details.
+برای جزئیات بیشتر `ui/README.md` را ببینید.
 
-### Release path
+### مسیر انتشار
 
-See **[docs/RELEASE_READINESS.md](docs/RELEASE_READINESS.md)** for the shortest path to testnet and mainnet release.
+برای کوتاه‌ترین مسیر تا انتشار روی تست‌نت و مین‌نت، **[docs/RELEASE_READINESS.md](docs/RELEASE_READINESS.md)** را ببینید.
 
-### Testnet live (after you deploy)
+### فعال بودن روی تست‌نت (پس از استقرار)
 
-Once the deployer has Sepolia ETH, run:
+پس از اینکه استقرار‌دهنده ETH تست‌نت Sepolia داشت، اجرا کنید:
 
 ```bash
 export PRIVATE_KEY=0x...
 ./script/deploy-sepolia.sh
-# or: forge script script/Deploy.s.sol --rpc-url https://ethereum-sepolia-rpc.publicnode.com --broadcast
+# یا: forge script script/Deploy.s.sol --rpc-url https://ethereum-sepolia-rpc.publicnode.com --broadcast
 ```
 
-Then restart the UI (`cd ui && npm run dev`). **Share** with testers:
+سپس رابط کاربری را دوباره اجرا کنید (`cd ui && npm run dev`). این اطلاعات را با آزمایش‌کنندگان **به اشتراک بگذارید**:
 
-- **App URL:** your hosted URL (e.g. Vercel) or `http://localhost:5173` for local
-- **Network:** Sepolia (Chain ID 11155111)
-- **Get test ETH:** [sepoliafaucet.com](https://sepoliafaucet.com/)
+- **آدرس اپلیکیشن:** آدرس میزبانی‌شدهٔ شما (مثلاً Vercel) یا `http://localhost:5173` برای اجرای محلی
+- **شبکه:** Sepolia (شناسهٔ شبکه ۱۱۱۵۵۱۱۱)
+- **دریافت ETH تستی:** [sepoliafaucet.com](https://sepoliafaucet.com/)
 
-Copy-paste for announcements: *"GRIDSET testnet is live on Sepolia. Switch your wallet to Sepolia (11155111), get test ETH at [sepoliafaucet.com](https://sepoliafaucet.com/), then open the app. Set contract addresses in Settings if needed."*
+متن آماده برای اطلاع‌رسانی: *«تست‌نت GRIDSET روی Sepolia فعال است. کیف پول خود را به Sepolia (۱۱۱۵۵۱۱۱) تغییر دهید، از [sepoliafaucet.com](https://sepoliafaucet.com/) ETH تستی بگیرید، سپس اپلیکیشن را باز کنید. در صورت نیاز آدرس قراردادها را در تنظیمات وارد کنید.»*
 
-### Deploy locally
+### استقرار محلی
 
-See **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** for the full flow. Quick version:
+برای جریان کامل کار، **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** را ببینید. نسخهٔ سریع:
 
 ```bash
 anvil
-# In another terminal:
+# در ترمینال دیگر:
 forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
-# Copy logged addresses into ui/.env (see ui/.env.example), then:
+# آدرس‌های ثبت‌شده را در ui/.env کپی کنید (به ui/.env.example نگاه کنید)، سپس:
 cd ui && npm install && npm run dev
 ```
 
-### Current Status
+### وضعیت فعلی
 
-- ✅ **Contracts**: EnergyToken, PanelNFT, PanelRegistry, StakingVault, EnergyOracle, EnergyMarket, SettlementEngine, GovernanceDAO (full implementations)
-- ✅ **Tests**: 130 Forge tests, >95% line coverage; fuzz test for EnergyToken
-- ✅ **UI**: Dashboard, Energy Wallet (balance/transfer), Energy Market (live order book), Panel Registry, Staking, Governance, Settlement, Utilities; contract wiring via env
-- ✅ **Deployment**: `script/Deploy.s.sol` for local/testnet/mainnet; [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
-- ✅ **Docs**: [GETTING_STARTED](docs/GETTING_STARTED.md), [DEPLOYMENT](docs/DEPLOYMENT.md), [TESTNET](docs/TESTNET.md), [MAINNET_CHECKLIST](docs/MAINNET_CHECKLIST.md), [ROADMAP](ROADMAP.md), [SECURITY](SECURITY.md)
+- ✅ **قراردادها**: EnergyToken، PanelNFT، PanelRegistry، StakingVault، EnergyOracle، EnergyMarket، SettlementEngine، GovernanceDAO (پیاده‌سازی کامل)
+- ✅ **تست‌ها**: ۱۳۰ تست Forge، پوشش خطی بیش از ۹۵٪؛ تست فازی برای EnergyToken
+- ✅ **رابط کاربری**: داشبورد، کیف پول انرژی (موجودی/انتقال)، بازار انرژی (دفتر سفارش زنده)، رجیستری پنل، استیکینگ، حاکمیت، تسویه، ابزارهای کاربردی؛ اتصال قرارداد از طریق env
+- ✅ **استقرار**: `script/Deploy.s.sol` برای محلی/تست‌نت/مین‌نت؛ [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+- ✅ **مستندات**: [GETTING_STARTED](docs/GETTING_STARTED.md)، [DEPLOYMENT](docs/DEPLOYMENT.md)، [TESTNET](docs/TESTNET.md)، [MAINNET_CHECKLIST](docs/MAINNET_CHECKLIST.md)، [ROADMAP](ROADMAP.md)، [SECURITY](SECURITY.md)
 
-## License
+## مجوز
 
 MIT

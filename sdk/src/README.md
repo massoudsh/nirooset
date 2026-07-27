@@ -1,14 +1,14 @@
 # @gridset/sdk
 
-JavaScript/TypeScript client library for the GRIDSET Protocol.
+کتابخانهٔ کلاینت جاوااسکریپت/تایپ‌اسکریپت برای پروتکل GRIDSET.
 
-## Install
+## نصب
 
 ```bash
 npm install @gridset/sdk ethers
 ```
 
-## Quick start
+## شروع سریع
 
 ```ts
 import { createSDKFromBrowser } from '@gridset/sdk';
@@ -21,19 +21,19 @@ const sdk = await createSDKFromBrowser(window.ethereum, {
   energyOracle: '0x...',
 });
 
-// Get the live order book
+// دریافت دفتر سفارش زنده
 const book = await sdk.getOrderBook(GridsetSDK.currentTimeSlot());
 console.log('Bids:', book.bids);
 console.log('Asks:', book.asks);
 
-// Place a bid (requires signer)
+// ثبت یک پیشنهاد خرید (نیاز به signer)
 await sdk.placeBid(GridsetSDK.currentTimeSlot(), ethers.parseEther('0.012'), 10n);
 
-// Mint energy tokens (owner only)
+// ضرب توکن انرژی (فقط مالک)
 await sdk.mint('0xYourAddress', ethers.parseEther('1000'));
 ```
 
-## Read-only (no wallet)
+## فقط‌خواندنی (بدون کیف پول)
 
 ```ts
 import { createSDKFromRPC } from '@gridset/sdk';
@@ -42,41 +42,40 @@ const sdk = createSDKFromRPC('https://sepolia.infura.io/v3/YOUR_KEY', addresses)
 const auction = await sdk.getAuction(GridsetSDK.currentTimeSlot());
 ```
 
-## API
+## رابط برنامه‌نویسی (API)
 
-| Method | Description |
+| متد | توضیح |
 |---|---|
-| `getOrderBook(slot)` | Fetch bids & asks for a time slot |
-| `getAuction(slot)` | Fetch auction state (clearing price, status) |
-| `getBestBid(slot)` | Highest bid price & quantity |
-| `getBestAsk(slot)` | Lowest ask price & quantity |
-| `placeBid(slot, price, qty)` | Submit a buy order |
-| `placeAsk(slot, price, qty)` | Submit a sell order |
-| `cancelOrder(orderId)` | Cancel an active order |
-| `clearAuction(slot)` | Clear auction (owner only) |
-| `mint(to, amount)` | Mint energy tokens (owner only) |
-| `getBalance(account)` | Available token balance |
-| `getLockedBalance(account)` | Locked token balance |
-| `registerPanel(tokenId, owner, capacity)` | Register a panel |
-| `getPanelRecord(tokenId)` | Panel registry record |
-| `getRegisteredPanels()` | All registered panel IDs |
-| `mintPanel(to, tokenId, capacity)` | Mint a PanelNFT |
-| `getPanelOwner(tokenId)` | Owner of a panel NFT |
-| `getTimeSlotData(slot)` | Oracle time slot data |
-| `getTotalProduction(slot)` | Total Wh produced in a slot |
-| `getProductionReport(panelId, timestamp)` | Single panel production report |
-| `forecastSupplyDemand(slot, lookback?)` | Predicted next-slot supply/demand + confidence |
-| `suggestFairPrice(slot, lookback?)` | Recency-weighted fair price suggestion |
-| `detectProductionAnomalies(panelId, timestamps, zThreshold?)` | Flag outlier production reports |
-| `GridsetSDK.currentTimeSlot()` | Current hourly slot (static) |
-| `GridsetSDK.timeSlotFor(date)` | Slot for a specific Date (static) |
+| `getOrderBook(slot)` | دریافت پیشنهادهای خرید و فروش برای یک بازهٔ زمانی |
+| `getAuction(slot)` | دریافت وضعیت حراج (قیمت تسویه، وضعیت) |
+| `getBestBid(slot)` | بالاترین قیمت و مقدار پیشنهاد خرید |
+| `getBestAsk(slot)` | پایین‌ترین قیمت و مقدار پیشنهاد فروش |
+| `placeBid(slot, price, qty)` | ثبت سفارش خرید |
+| `placeAsk(slot, price, qty)` | ثبت سفارش فروش |
+| `cancelOrder(orderId)` | لغو یک سفارش فعال |
+| `clearAuction(slot)` | تسویهٔ حراج (فقط مالک) |
+| `mint(to, amount)` | ضرب توکن انرژی (فقط مالک) |
+| `getBalance(account)` | موجودی قابل‌استفادهٔ توکن |
+| `getLockedBalance(account)` | موجودی قفل‌شدهٔ توکن |
+| `registerPanel(tokenId, owner, capacity)` | ثبت یک پنل |
+| `getPanelRecord(tokenId)` | رکورد رجیستری پنل |
+| `getRegisteredPanels()` | همهٔ شناسه‌های پنل‌های ثبت‌شده |
+| `mintPanel(to, tokenId, capacity)` | ضرب یک PanelNFT |
+| `getPanelOwner(tokenId)` | مالک یک NFT پنل |
+| `getTimeSlotData(slot)` | داده‌های اوراکل برای یک بازهٔ زمانی |
+| `getTotalProduction(slot)` | مجموع وات-ساعت تولیدشده در یک بازهٔ زمانی |
+| `getProductionReport(panelId, timestamp)` | گزارش تولید یک پنل مشخص |
+| `forecastSupplyDemand(slot, lookback?)` | پیش‌بینی عرضه/تقاضای بازهٔ بعدی به‌همراه میزان اطمینان |
+| `suggestFairPrice(slot, lookback?)` | پیشنهاد قیمت منصفانه با وزن‌دهی بر اساس تازگی |
+| `detectProductionAnomalies(panelId, timestamps, zThreshold?)` | علامت‌گذاری گزارش‌های تولید پرت (ناهنجار) |
+| `GridsetSDK.currentTimeSlot()` | بازهٔ زمانی ساعتی فعلی (استاتیک) |
+| `GridsetSDK.timeSlotFor(date)` | بازهٔ زمانی برای یک تاریخ مشخص (استاتیک) |
 
-## Market Intelligence (beta)
+## هوش بازار (نسخهٔ بتا)
 
-Off-chain, read-only analytics layered on top of the existing oracle and
-market data — no contract changes required. See
+تحلیل‌های آف‌چین و فقط‌خواندنی که روی داده‌های موجود اوراکل و بازار قرار می‌گیرند — بدون نیاز به تغییر در قراردادها. برای منطق و طراحی الگوریتم، سند
 [`docs/MARKET_INTELLIGENCE_DESIGN.md`](../../docs/MARKET_INTELLIGENCE_DESIGN.md)
-for the rationale and algorithm design.
+را ببینید.
 
 ```ts
 const forecast = await sdk.forecastSupplyDemand(GridsetSDK.currentTimeSlot());
@@ -89,6 +88,6 @@ const anomalies = await sdk.detectProductionAnomalies(panelId, recentTimestamps)
 anomalies.forEach((a) => console.log(a.severity, a.message));
 ```
 
-The underlying pure functions (`computeForecast`, `computeAnomalies`,
-`computeWeightedPrice`) are also exported directly for use outside the SDK
-class (e.g. in a backend job or notebook working from CSV-exported data).
+توابع خالص زیربنایی (`computeForecast`، `computeAnomalies`،
+`computeWeightedPrice`) نیز مستقیماً برای استفاده خارج از کلاس SDK export
+شده‌اند (مثلاً در یک job بک‌اند یا نوت‌بوکی که با داده‌های استخراج‌شده از CSV کار می‌کند).
