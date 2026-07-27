@@ -207,6 +207,8 @@ export function Web3Provider({ children }) {
     isChainSupported,
     hasContracts,
     supportedChainIds: SUPPORTED_CHAIN_IDS,
+    getChain,
+    isSupportedChain,
     connectWallet,
     disconnectWallet,
     switchChain,
