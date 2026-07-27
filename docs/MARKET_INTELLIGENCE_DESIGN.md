@@ -1,107 +1,107 @@
-# Market Intelligence — Design
+# هوش بازار — طراحی
 
-**Feature:** Energy Exchange & Settlement Infrastructure — AI/analytics layer
-**Status:** v1 (heuristic) implemented in `sdk/src/index.ts` + `ui/src/components/views/MarketIntelligence.jsx`
+**قابلیت:** زیرساخت مبادله و تسویهٔ انرژی — لایهٔ هوش مصنوعی/تحلیلی
+**وضعیت:** نسخهٔ ۱ (اکتشافی/heuristic) پیاده‌سازی‌شده در `sdk/src/index.ts` + `ui/src/components/views/MarketIntelligence.jsx`
 
 ---
 
-## Motivation
+## انگیزه
 
-GRIDSET Protocol already provides the settlement "wedge" described in the
-product brief: multi-oracle production reporting (`EnergyOracle`), NFT-backed
-panel ownership (`PanelRegistry` / `PanelNFT`), and a batch-auction order book
-with token escrow (`EnergyMarket`). This is the auditable transaction and
-settlement layer for a decentralised renewable-energy market.
+پروتکل GRIDSET از قبل «گوهِ تسویه» (settlement wedge) توصیف‌شده در بریف
+محصول را فراهم می‌کند: گزارش‌دهی چند‌اوراکلیِ تولید (`EnergyOracle`)،
+مالکیت پنل مبتنی بر NFT (`PanelRegistry` / `PanelNFT`)، و یک دفتر سفارشِ
+حراج دسته‌ای با وثیقهٔ توکن (`EnergyMarket`). این لایهٔ تراکنش و تسویهٔ
+قابل‌ممیزی برای یک بازار انرژی تجدیدپذیرِ غیرمتمرکز است.
 
-The next stage of value — explicitly called out as the product's growth
-path — is turning that transaction history into **decision support**:
-predicting supply/demand, catching bad data early, and helping counterparties
-converge on fair prices. This document covers the first slice of that layer.
+مرحلهٔ بعدیِ ارزش‌آفرینی — که به‌صراحت به‌عنوان مسیر رشد محصول عنوان
+شده — تبدیل آن تاریخچهٔ تراکنش به **پشتیبانی تصمیم** است: پیش‌بینی
+عرضه/تقاضا، شناسایی زودهنگام داده‌های نادرست، و کمک به طرفین برای
+رسیدن به قیمت‌های منصفانه. این سند برش اول این لایه را پوشش می‌دهد.
 
-## Problem
+## مسئله
 
-As the number of independent producers grows, participants have no
-standardized way to answer:
+با رشد تعداد تولیدکنندگان مستقل، شرکت‌کنندگان راه استانداردی برای پاسخ به موارد زیر ندارند:
 
-1. How much supply/demand should we expect in the next time slot?
-2. Is a given production report plausible, or does it look like a faulty
-   meter / bad actor?
-3. What's a reasonable price to bid/ask right now, given recent history?
+۱. در بازهٔ زمانی بعدی چه میزان عرضه/تقاضا باید انتظار داشته باشیم؟
+۲. آیا یک گزارش تولید مشخص باورپذیر است، یا شبیه یک کنتور خراب/عامل بد به نظر می‌رسد؟
+۳. با توجه به تاریخچهٔ اخیر، چه قیمتی برای پیشنهاد خرید/فروش در حال حاضر معقول است؟
 
-Today this requires manually reading the order book and oracle data.
+امروز این کار مستلزم خواندن دستیِ دفتر سفارش و داده‌های اوراکل است.
 
-## Design goals
+## اهداف طراحی
 
-1. **No contract changes.** Everything is computed off-chain from existing
-   `EnergyOracle` / `EnergyMarket` view functions — zero gas cost, zero
-   deployment risk.
-2. **Explainable v1.** Use transparent statistical heuristics (moving
-   averages, z-scores, recency-weighted means) rather than an opaque model,
-   so every number has a plain-language justification (`basis` / `message`
-   fields).
-3. **Swappable internals.** The public API (`forecastSupplyDemand`,
-   `suggestFairPrice`, `detectProductionAnomalies`) is stable; the
-   implementation of `computeForecast` / `computeAnomalies` can be replaced
-   with a trained model later without breaking callers.
-4. **Precision-safe.** Price/quantity math (wei/Wh scale) stays in `bigint`
-   arithmetic end-to-end; only anomaly z-scores (which operate on
-   moderate-magnitude Wh readings, not wei) use floating point.
+۱. **بدون تغییر در قرارداد.** همه‌چیز آف‌چین و از توابع view موجود
+   `EnergyOracle` / `EnergyMarket` محاسبه می‌شود — بدون هزینهٔ گس،
+   بدون ریسک استقرار.
+۲. **نسخهٔ ۱ قابل‌توضیح.** به‌جای یک مدل مبهم، از هیوریستیک‌های آماریِ
+   شفاف (میانگین متحرک، z-score، میانگین‌های وزن‌دهی‌شده بر اساس تازگی)
+   استفاده می‌شود تا هر عدد یک توجیه به زبان ساده داشته باشد (فیلدهای
+   `basis` / `message`).
+۳. **درونی‌های قابل‌جایگزینی.** API عمومی (`forecastSupplyDemand`،
+   `suggestFairPrice`، `detectProductionAnomalies`) پایدار است؛ پیاده‌سازی
+   `computeForecast` / `computeAnomalies` بعداً می‌تواند بدون شکستن
+   فراخوانی‌کنندگان با یک مدل آموزش‌دیده جایگزین شود.
+۴. **ایمن از نظر دقت.** محاسبات قیمت/مقدار (در مقیاس wei/Wh) از ابتدا
+   تا انتها با حساب `bigint` انجام می‌شود؛ فقط z-scoreهای ناهنجاری
+   (که روی مقادیر Wh با اندازهٔ متوسط کار می‌کنند، نه wei) از اعشاری
+   (floating point) استفاده می‌کنند.
 
-## v1: heuristic implementation
+## نسخهٔ ۱: پیاده‌سازی هیوریستیک
 
-Implemented as pure, unit-tested functions in `sdk/src/index.ts`
-(`sdk/src/marketIntelligence.test.ts`):
+به‌صورت توابع خالص و تست‌شده در `sdk/src/index.ts`
+(`sdk/src/marketIntelligence.test.ts`) پیاده‌سازی شده است:
 
-| Function | Approach |
+| تابع | رویکرد |
 |---|---|
-| `computeForecast(history)` | Split series into first-half / second-half averages, extrapolate the trend one step forward. Confidence = fraction of consecutive steps that moved in the trend's direction. |
-| `computeAnomalies(values, zThreshold=2)` | Standard z-score outlier detection; flags points where `\|z\| > zThreshold`. Needs ≥3 points. |
-| `computeWeightedPrice(prices)` | Linearly recency-weighted average (`weight = index + 1`), pure `bigint` math — no float rounding on price values. |
+| `computeForecast(history)` | سری را به میانگین نیمهٔ اول/دوم تقسیم می‌کند، روند را یک گام به جلو برون‌یابی می‌کند. اطمینان = نسبت گام‌های متوالی که در جهت روند حرکت کرده‌اند. |
+| `computeAnomalies(values, zThreshold=2)` | تشخیص پرت با z-score استاندارد؛ نقاطی که `\|z\| > zThreshold` را علامت می‌زند. نیاز به ≥۳ نقطه دارد. |
+| `computeWeightedPrice(prices)` | میانگین وزن‌دهی‌شدهٔ خطی بر اساس تازگی (`weight = index + 1`)، حساب خالص `bigint` — بدون گرد کردن اعشاری روی مقادیر قیمت. |
 
-SDK-level wrappers fetch the last `lookback` hourly slots (default 24) via
-`EnergyOracle.getTotalProductionInSlot` / `EnergyMarket.getAuction` and feed
-them into the helpers:
+wrapperهای سطح SDK آخرین `lookback` بازهٔ ساعتی (پیش‌فرض ۲۴) را از طریق
+`EnergyOracle.getTotalProductionInSlot` / `EnergyMarket.getAuction` می‌گیرند
+و به توابع کمکی می‌دهند:
 
-- `forecastSupplyDemand(currentSlot, lookback?)` → next-slot predicted
-  supply (from production history) and demand (from `totalBidQuantity`
-  history), plus a combined confidence score.
-- `suggestFairPrice(currentSlot, lookback?)` → recency-weighted average of
-  recent **cleared** auction clearing prices.
-- `detectProductionAnomalies(panelId, timestamps, zThreshold?)` → per-panel
-  outlier reports via `EnergyOracle.getProductionReport`, classified into
-  `low` / `medium` / `high` severity by z-score magnitude.
+- `forecastSupplyDemand(currentSlot, lookback?)` → عرضهٔ پیش‌بینی‌شدهٔ
+  بازهٔ بعدی (از تاریخچهٔ تولید) و تقاضا (از تاریخچهٔ `totalBidQuantity`)،
+  به‌همراه یک امتیاز اطمینان ترکیبی.
+- `suggestFairPrice(currentSlot, lookback?)` → میانگین وزن‌دهی‌شده بر
+  اساس تازگی از قیمت‌های تسویهٔ **تسویه‌شدهٔ** اخیر.
+- `detectProductionAnomalies(panelId, timestamps, zThreshold?)` →
+  گزارش‌های پرتِ هر پنل از طریق `EnergyOracle.getProductionReport`،
+  طبقه‌بندی‌شده به شدت `low` / `medium` / `high` بر اساس اندازهٔ z-score.
 
-## v2 roadmap (not built yet)
+## نقشهٔ راه نسخهٔ ۲ (هنوز ساخته نشده)
 
-- Replace `computeForecast` with a trained time-series model (e.g.
-  weather-aware solar output prediction) behind the same interface.
-- Cross-panel/cross-region anomaly correlation (distinguish a single faulty
-  meter from a real grid-wide event).
-- Buyer/seller matching suggestions and risk-adjusted price bands, feeding
-  back into `EnergyMarket` order placement as optional UI hints (never
-  auto-submitted — the trader always confirms).
+- جایگزینی `computeForecast` با یک مدل سری‌زمانیِ آموزش‌دیده (مثلاً
+  پیش‌بینی خروجی خورشیدی آگاه از آب‌وهوا) پشت همان اینترفیس.
+- همبستگی ناهنجاری بین پنل‌ها/مناطق (تشخیص یک کنتور خراب منفرد از یک
+  رویدادِ واقعیِ سراسر شبکه).
+- پیشنهادهای تطبیق خریدار/فروشنده و بازه‌های قیمتِ تعدیل‌شده با ریسک،
+  که به‌عنوان راهنمایی‌های اختیاریِ رابط کاربری به ثبت سفارش در
+  `EnergyMarket` بازمی‌گردند (هرگز به‌طور خودکار ثبت نمی‌شوند — معامله‌گر
+  همیشه تأیید می‌کند).
 
-## UI
+## رابط کاربری
 
-`ui/src/components/views/MarketIntelligence.jsx` renders:
+`ui/src/components/views/MarketIntelligence.jsx` موارد زیر را نمایش می‌دهد:
 
-- A forecast card (predicted supply/demand for the next slot + confidence).
-- A suggested fair-price banner with its `basis` explanation.
-- An anomaly alert list with severity badges.
+- یک کارت پیش‌بینی (عرضه/تقاضای پیش‌بینی‌شده برای بازهٔ بعدی + اطمینان).
+- یک بنر قیمتِ منصفانهٔ پیشنهادی به‌همراه توضیح `basis` آن.
+- فهرست هشدار ناهنجاری با نشان‌های شدت.
 
-It follows the same pattern as `EnergyMarket.jsx`: live contract calls when
-`contracts.energyOracle` / `contracts.energyMarket` are available, falling
-back to representative mock data in demo mode.
+از همان الگوی `EnergyMarket.jsx` پیروی می‌کند: فراخوانی زندهٔ قرارداد
+وقتی `contracts.energyOracle` / `contracts.energyMarket` در دسترس باشند،
+و در حالت دمو به داده‌های ساختگیِ نماینده بازمی‌گردد.
 
-## Testing
+## تست
 
-See `sdk/src/marketIntelligence.test.ts` (`npm run test` inside `sdk/`,
-**run on the deployment server, not in this container** — see
-`.noqte/context/build.md`) for coverage of:
+برای پوشش موارد زیر `sdk/src/marketIntelligence.test.ts` را ببینید
+(`npm run test` داخل `sdk/`، **روی سرور استقرار اجرا شود، نه داخل این
+کانتینر** — به `.noqte/context/build.md` نگاه کنید):
 
-- Empty / single-point series edge cases.
-- Upward and downward trend extrapolation (never predicts negative supply).
-- Outlier detection on a clean series with one injected spike.
-- Custom z-score thresholds.
-- Recency-sensitivity of the weighted price (a recent spike weighs more than
-  an old one).
+- حالت‌های مرزیِ سری خالی / تک‌نقطه‌ای.
+- برون‌یابی روند صعودی و نزولی (هرگز عرضهٔ منفی پیش‌بینی نمی‌کند).
+- تشخیص پرت روی یک سریِ تمیز با یک جهش تزریق‌شده.
+- آستانه‌های z-score سفارشی.
+- حساسیت به تازگی در قیمت وزن‌دهی‌شده (یک جهش اخیر وزن بیشتری نسبت به
+  یک جهش قدیمی دارد).

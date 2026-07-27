@@ -1,50 +1,50 @@
-# Release Readiness
+# آمادگی انتشار
 
-Short checklist to get to **testnet release** and then **mainnet** as fast as possible.
+چک‌لیست کوتاه برای رسیدن سریع به **انتشار تست‌نت** و سپس **مین‌نت**.
 
 ---
 
-## Testnet release (goal: “we’re live on testnet”)
+## انتشار تست‌نت (هدف: «روی تست‌نت فعال هستیم»)
 
-Do these in order. When all are done, you have a testnet release.
+این موارد را به ترتیب انجام دهید. وقتی همه انجام شد، یک انتشار تست‌نت دارید.
 
-| Step | Task | Status / Notes |
+| مرحله | کار | وضعیت / یادداشت |
 |------|------|----------------|
-| 1 | Get testnet ETH (e.g. [Sepolia faucet](https://sepoliafaucet.com/)) for deployer | Manual |
-| 2 | Deploy: `forge script script/Deploy.s.sol --rpc-url <SEPOLIA_RPC> --broadcast` | [DEPLOYMENT.md](DEPLOYMENT.md) |
-| 3 | (Optional) Verify contracts: add `--verify --etherscan-api-key $ETHERSCAN_API_KEY` | Speeds up explorer UX |
-| 4 | Copy logged addresses into `ui/.env` (see `ui/.env.example`) | UI will use them on next start |
-| 5 | Build & host UI (e.g. Vercel/Netlify) or run `npm run dev` and share URL | Set env in hosting dashboard if needed |
-| 6 | Pin testnet announcement: chain (Sepolia), chain ID (11155111), app URL, “Get test ETH” link | Issue or README section |
+| ۱ | دریافت ETH تست‌نت (مثلاً [فاست Sepolia](https://sepoliafaucet.com/)) برای استقرار‌دهنده | دستی |
+| ۲ | استقرار: `forge script script/Deploy.s.sol --rpc-url <SEPOLIA_RPC> --broadcast` | [DEPLOYMENT.md](DEPLOYMENT.md) |
+| ۳ | (اختیاری) تأیید قراردادها: افزودن `--verify --etherscan-api-key $ETHERSCAN_API_KEY` | تجربهٔ کاربری explorer را سریع‌تر می‌کند |
+| ۴ | کپی آدرس‌های ثبت‌شده در `ui/.env` (نگاه کنید به `ui/.env.example`) | رابط کاربری در اجرای بعدی از آن‌ها استفاده می‌کند |
+| ۵ | بیلد و میزبانی رابط کاربری (مثلاً Vercel/Netlify) یا اجرای `npm run dev` و اشتراک‌گذاری آدرس | در صورت نیاز env را در داشبورد میزبانی تنظیم کنید |
+| ۶ | پین کردن اطلاعیهٔ تست‌نت: شبکه (Sepolia)، شناسهٔ زنجیره (۱۱۱۵۵۱۱۱)، آدرس اپلیکیشن، لینک «دریافت ETH تستی» | ایشو یا بخشی از README |
 
-**Rough time:** 1–2 hours (once you have RPC + key + faucet).
+**زمان تقریبی:** ۱ تا ۲ ساعت (وقتی RPC + کلید + فاست را دارید).
 
-**Optional but useful:** Document how testers get test GRID (e.g. “Deployer can mint; DM us your address” or a simple faucet contract later).
+**اختیاری ولی مفید:** مستند کنید آزمایش‌کنندگان چگونه GRID تستی دریافت می‌کنند (مثلاً «استقرار‌دهنده می‌تواند ضرب کند؛ آدرس خود را برای ما بفرستید» یا بعداً یک قرارداد فاست ساده).
 
 ---
 
-## Mainnet release (goal: “we’re live on mainnet”)
+## انتشار مین‌نت (هدف: «روی مین‌نت فعال هستیم»)
 
-Do **not** go to mainnet until testnet has been used and the checklist below is satisfied.
+تا زمانی که تست‌نت استفاده نشده و چک‌لیست زیر برآورده نشده، به مین‌نت **نروید**.
 
-| Step | Task | Status / Notes |
+| مرحله | کار | وضعیت / یادداشت |
 |------|------|----------------|
-| 1 | Testnet release done and running for at least 2–4 weeks | Use it; fix bugs |
-| 2 | External security review completed; critical/high findings fixed or accepted | [SECURITY.md](../SECURITY.md), [MAINNET_CHECKLIST.md](MAINNET_CHECKLIST.md) |
-| 3 | Mainnet deploy (same script, mainnet RPC + key) | [DEPLOYMENT.md](DEPLOYMENT.md) |
-| 4 | Verify contracts on block explorer | |
-| 5 | Set production UI env (mainnet addresses, correct chain ID) and deploy UI | |
-| 6 | Monitoring and runbook (RPC, events, who to contact) | [MAINNET_CHECKLIST.md](MAINNET_CHECKLIST.md) |
-| 7 | Public announcement: network, app URL, “use at your own risk,” support channel | |
+| ۱ | انتشار تست‌نت انجام شده و حداقل ۲ تا ۴ هفته در حال اجراست | از آن استفاده کنید؛ باگ‌ها را رفع کنید |
+| ۲ | بازبینی امنیتی خارجی کامل شده؛ یافته‌های حیاتی/جدی رفع یا پذیرفته شده‌اند | [SECURITY.md](../SECURITY.md)، [MAINNET_CHECKLIST.md](MAINNET_CHECKLIST.md) |
+| ۳ | استقرار مین‌نت (همان اسکریپت، RPC + کلید مین‌نت) | [DEPLOYMENT.md](DEPLOYMENT.md) |
+| ۴ | تأیید قراردادها روی block explorer | |
+| ۵ | تنظیم env تولیدیِ رابط کاربری (آدرس‌های مین‌نت، شناسهٔ زنجیرهٔ درست) و استقرار رابط کاربری | |
+| ۶ | پایش و رانبوک (RPC، رویدادها، مخاطب تماس) | [MAINNET_CHECKLIST.md](MAINNET_CHECKLIST.md) |
+| ۷ | اطلاعیهٔ عمومی: شبکه، آدرس اپلیکیشن، «استفاده با ریسک خودتان»، کانال پشتیبانی | |
 
-**Rough time:** Dominated by audit and testnet period; deploy + verification + docs is ~1–2 days.
+**زمان تقریبی:** بیشتر زمان صرف ممیزی و دورهٔ تست‌نت می‌شود؛ استقرار + تأیید + مستندات حدود ۱ تا ۲ روز است.
 
 ---
 
-## Path to release sooner
+## مسیر انتشار سریع‌تر
 
-- **This week:** Do the testnet release steps above. One deploy, one env paste, one place (README or issue) that says “Testnet live on Sepolia at [URL]. Get Sepolia ETH: [link].”
-- **Next 2–4 weeks:** Use testnet; fix bugs; start audit (scope: settlement, market, access control, token economics).
-- **After audit + testnet sign-off:** Run mainnet deploy and launch per [MAINNET_CHECKLIST.md](MAINNET_CHECKLIST.md).
+- **این هفته:** مراحل انتشار تست‌نت بالا را انجام دهید. یک استقرار، یک paste در env، و یک جا (README یا ایشو) که بگوید «تست‌نت روی Sepolia در [آدرس] فعال است. ETH Sepolia بگیرید: [لینک].»
+- **۲ تا ۴ هفتهٔ آینده:** از تست‌نت استفاده کنید؛ باگ‌ها را رفع کنید؛ ممیزی را شروع کنید (محدوده: تسویه، بازار، کنترل دسترسی، اقتصاد توکن).
+- **پس از تأیید ممیزی + تست‌نت:** طبق [MAINNET_CHECKLIST.md](MAINNET_CHECKLIST.md) استقرار و راه‌اندازی مین‌نت را اجرا کنید.
 
-Defer post-launch items (cart, escrow, notifications, etc.) until after mainnet so they don’t block release.
+مواردی که پس از راه‌اندازی می‌آیند (سبد خرید، وثیقه، اعلان‌ها و...) را تا بعد از مین‌نت به تعویق بیندازید تا مانع انتشار نشوند.

@@ -1,26 +1,26 @@
-# Multi-Chain Support
+# پشتیبانی چندزنجیره‌ای (Multi-Chain)
 
-GRIDSET UI supports multiple networks. Contract addresses in `ui/.env` are for a single deployment (e.g. Sepolia); the app lets users switch to a supported chain.
+رابط کاربری GRIDSET از چند شبکه پشتیبانی می‌کند. آدرس‌های قرارداد در `ui/.env` مربوط به یک استقرار مشخص هستند (مثلاً Sepolia)؛ اپلیکیشن به کاربران اجازه می‌دهد به یک زنجیرهٔ پشتیبانی‌شدهٔ دیگر تغییر دهند.
 
-## Supported networks
+## شبکه‌های پشتیبانی‌شده
 
-| Chain ID | Name       | Type    | Notes                    |
+| شناسهٔ شبکه | نام        | نوع     | یادداشت‌ها                    |
 |----------|------------|---------|--------------------------|
-| 1        | Ethereum   | Mainnet | When GRIDSET is deployed |
-| 11155111 | Sepolia    | Testnet | Faucet: sepoliafaucet.com |
-| 11155420 | OP Sepolia | Testnet | Faucet: app.optimism.io/faucet |
+| 1        | Ethereum   | مین‌نت | زمانی که GRIDSET مستقر شود |
+| 11155111 | Sepolia    | تست‌نت | فاست: sepoliafaucet.com |
+| 11155420 | OP Sepolia | تست‌نت | فاست: app.optimism.io/faucet |
 
-## In the app
+## در اپلیکیشن
 
-- **Header (when connected):** A chain selector shows the current network. Click it to switch to another supported chain. The wallet will prompt to add the network if needed.
-- **Unsupported chain:** If the wallet is on a chain that isn’t in the list, the selector is highlighted and “Switch to a supported network” is shown. Use the dropdown to pick e.g. Sepolia.
-- **Testnet banner:** On Sepolia or OP Sepolia, a banner shows testnet name and a link to get test ETH.
+- **هدر (هنگام اتصال):** یک انتخاب‌گر زنجیره، شبکهٔ فعلی را نشان می‌دهد. برای تغییر به یک زنجیرهٔ پشتیبانی‌شدهٔ دیگر روی آن کلیک کنید. در صورت نیاز، کیف پول برای افزودن شبکه پیام می‌دهد.
+- **زنجیرهٔ پشتیبانی‌نشده:** اگر کیف پول روی زنجیره‌ای باشد که در فهرست نیست، انتخاب‌گر هایلایت می‌شود و پیام «تغییر به یک شبکهٔ پشتیبانی‌شده» نمایش داده می‌شود. از منوی کشویی برای انتخاب مثلاً Sepolia استفاده کنید.
+- **بنر تست‌نت:** روی Sepolia یا OP Sepolia، بنری نام تست‌نت و لینکی برای دریافت ETH تستی نمایش می‌دهد.
 
-## Configuration
+## پیکربندی
 
-- Supported chains and EIP-3085 params (for `wallet_addEthereumChain`) are in `ui/src/config/chains.js`.
-- Contract addresses in `ui/.env` apply to the chain you deployed to (e.g. Sepolia). For true multi-chain deployments, the app would need address-by-chainId (future enhancement).
+- زنجیره‌های پشتیبانی‌شده و پارامترهای EIP-3085 (برای `wallet_addEthereumChain`) در `ui/src/config/chains.js` قرار دارند.
+- آدرس‌های قرارداد در `ui/.env` مربوط به زنجیره‌ای است که روی آن استقرار داده‌اید (مثلاً Sepolia). برای استقرارهای واقعی چندزنجیره‌ای، اپلیکیشن باید آدرس‌ها را بر اساس شناسهٔ زنجیره نگه دارد (بهبود آینده).
 
-## Big picture (issue #12)
+## تصویر کلی (ایشو #12)
 
-Multi-chain support lets panel owners, market participants, and infra investors use the same app on testnets (Sepolia, OP Sepolia) and, when ready, on mainnet. Switching networks is one click from the header.
+پشتیبانی چندزنجیره‌ای به مالکان پنل، شرکت‌کنندگان بازار و سرمایه‌گذاران زیرساخت اجازه می‌دهد از همان اپلیکیشن روی تست‌نت‌ها (Sepolia، OP Sepolia) و در آینده روی مین‌نت استفاده کنند. تغییر شبکه فقط یک کلیک از هدر فاصله دارد.

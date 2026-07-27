@@ -1,153 +1,153 @@
-# GRIDSET Protocol Architecture
+# معماری پروتکل GRIDSET
 
-## Overview
+## نمای کلی
 
-GRIDSET is a market-based energy and compute settlement system that operates on blockchain infrastructure. The protocol enables financial settlement of energy obligations through time-slot based accounting, batch auction price discovery, oracle-reported production data, and stake-backed penalty mechanisms.
+GRIDSET یک سیستم تسویه‌حساب انرژی و محاسبات مبتنی بر بازار است که روی زیرساخت بلاک‌چین کار می‌کند. این پروتکل تسویهٔ مالی تعهدات انرژی را از طریق حسابداری مبتنی بر بازهٔ زمانی، کشف قیمت با حراج دسته‌ای، داده‌های تولید گزارش‌شده توسط اوراکل و سازوکارهای جریمهٔ مبتنی بر استیک امکان‌پذیر می‌کند.
 
-## System Components
+## اجزای سیستم
 
-### 1. EnergyToken (IEnergyToken)
+### ۱. EnergyToken (IEnergyToken)
 
-The EnergyToken represents fungible energy credits within the system. It provides:
-- Standard token operations (transfer, approve, mint, burn)
-- Lock/unlock mechanisms for escrow and settlement
-- Balance tracking with separation of locked and available amounts
+EnergyToken اعتبارهای انرژیِ قابل‌تعویض (fungible) را در سیستم نمایندگی می‌کند. این قرارداد موارد زیر را فراهم می‌کند:
+- عملیات استاندارد توکن (انتقال، approve، ضرب، سوزاندن)
+- سازوکارهای قفل/باز کردن قفل برای وثیقه و تسویه
+- ردیابی موجودی با تفکیک مبالغ قفل‌شده و در دسترس
 
-### 2. PanelNFT (IPanelNFT)
+### ۲. PanelNFT (IPanelNFT)
 
-PanelNFT represents non-fungible tokens for solar panels or energy production assets. Each NFT:
-- Contains metadata about panel capacity and installation details
-- Can be transferred between owners
-- Supports retirement mechanisms
-- Links to production data in the registry
+PanelNFT توکن‌های غیرقابل‌تعویض (NFT) را برای پنل‌های خورشیدی یا دارایی‌های تولید انرژی نمایندگی می‌کند. هر NFT:
+- شامل متادیتای ظرفیت پنل و جزئیات نصب است
+- می‌تواند بین مالکان منتقل شود
+- از سازوکارهای بازنشستگی (retirement) پشتیبانی می‌کند
+- به داده‌های تولید در رجیستری متصل است
 
-### 3. PanelRegistry (IPanelRegistry)
+### ۳. PanelRegistry (IPanelRegistry)
 
-The PanelRegistry maintains a registry of all registered energy production panels:
-- Tracks panel ownership and capacity
-- Records production data per time slot
-- Provides historical production queries
-- Manages panel registration and deregistration
+PanelRegistry رجیستری همهٔ پنل‌های تولید انرژیِ ثبت‌شده را نگه می‌دارد:
+- مالکیت و ظرفیت پنل را ردیابی می‌کند
+- داده‌های تولید را به ازای هر بازهٔ زمانی ثبت می‌کند
+- امکان جست‌وجوی تاریخچهٔ تولید را فراهم می‌کند
+- ثبت‌نام و لغو ثبتِ پنل را مدیریت می‌کند
 
-### 4. StakingVault (IStakingVault)
+### ۴. StakingVault (IStakingVault)
 
-The StakingVault manages economic security through staking:
-- Participants deposit stake to participate in the system
-- Stake can be locked for specific durations
-- Penalties and slashing mechanisms for misbehavior
-- Stake-backed guarantees for settlement obligations
+StakingVault امنیت اقتصادی را از طریق استیکینگ مدیریت می‌کند:
+- شرکت‌کنندگان برای مشارکت در سیستم استیک واریز می‌کنند
+- استیک می‌تواند برای مدت‌های معین قفل شود
+- سازوکارهای جریمه و slashing برای تخلف
+- ضمانت‌های مبتنی بر استیک برای تعهدات تسویه
 
-### 5. EnergyOracle (IEnergyOracle)
+### ۵. EnergyOracle (IEnergyOracle)
 
-The EnergyOracle provides authoritative production data:
-- Reports energy production from panels
-- Finalizes time slot data after verification
-- Maintains historical production records
-- Supports oracle operator updates
+EnergyOracle داده‌های معتبر تولید را فراهم می‌کند:
+- تولید انرژی پنل‌ها را گزارش می‌دهد
+- داده‌های بازهٔ زمانی را پس از تأیید نهایی می‌کند
+- سوابق تاریخیِ تولید را نگه می‌دارد
+- از به‌روزرسانی اپراتور اوراکل پشتیبانی می‌کند
 
-### 6. EnergyMarket (IEnergyMarket)
+### ۶. EnergyMarket (IEnergyMarket)
 
-The EnergyMarket facilitates price discovery through batch auctions:
-- Order book management for bids and asks
-- Time-slot based auction periods
-- Clearing price determination
-- Order matching and execution
+EnergyMarket کشف قیمت را از طریق حراج دسته‌ای تسهیل می‌کند:
+- مدیریت دفتر سفارش برای پیشنهادهای خرید و فروش
+- دوره‌های حراج مبتنی بر بازهٔ زمانی
+- تعیین قیمت تسویه
+- تطبیق و اجرای سفارش
 
-### 7. SettlementEngine (ISettlementEngine)
+### ۷. SettlementEngine (ISettlementEngine)
 
-The SettlementEngine executes financial settlements:
-- Processes settlements for completed time slots
-- Calculates net energy positions per participant
-- Applies penalties for non-performance
-- Handles dispute resolution
-- Finalizes time slot settlements
+SettlementEngine تسویه‌های مالی را اجرا می‌کند:
+- تسویهٔ بازه‌های زمانیِ تکمیل‌شده را پردازش می‌کند
+- موقعیت‌های خالص انرژی هر شرکت‌کننده را محاسبه می‌کند
+- جریمه‌ها را برای عدم انجام تعهد اعمال می‌کند
+- حل‌وفصل اختلاف را مدیریت می‌کند
+- تسویهٔ بازه‌های زمانی را نهایی می‌کند
 
-### 8. GovernanceDAO (IGovernanceDAO)
+### ۸. GovernanceDAO (IGovernanceDAO)
 
-The GovernanceDAO enables decentralized governance:
-- Proposal creation and voting
-- Voting power based on stake or token holdings
-- Proposal execution after successful votes
-- Cancellation mechanisms for invalid proposals
+GovernanceDAO حاکمیت غیرمتمرکز را ممکن می‌سازد:
+- ایجاد پیشنهاد و رأی‌گیری
+- قدرت رأی مبتنی بر استیک یا دارایی توکن
+- اجرای پیشنهاد پس از رأی‌گیری موفق
+- سازوکارهای لغو برای پیشنهادهای نامعتبر
 
-## Time-Slot Based Energy Accounting
+## حسابداری انرژی مبتنی بر بازهٔ زمانی
 
-The protocol operates on discrete time slots (e.g., hourly or 15-minute intervals). Each time slot:
-- Has a defined start and end time
-- Accumulates production reports from all panels
-- Requires finalization before settlement
-- Maintains immutable historical records
+پروتکل روی بازه‌های زمانی گسسته کار می‌کند (مثلاً هر ساعت یا هر ۱۵ دقیقه). هر بازهٔ زمانی:
+- زمان شروع و پایان مشخصی دارد
+- گزارش‌های تولید همهٔ پنل‌ها را جمع‌آوری می‌کند
+- پیش از تسویه نیاز به نهایی‌سازی دارد
+- سوابق تاریخیِ تغییرناپذیر نگه می‌دارد
 
-Time slots enable:
-- Clear temporal boundaries for accounting
-- Batch processing of settlements
-- Historical audit trails
-- Predictable settlement schedules
+بازه‌های زمانی موارد زیر را ممکن می‌سازند:
+- مرزهای زمانی روشن برای حسابداری
+- پردازش دسته‌ایِ تسویه‌ها
+- ردهای ممیزی تاریخی
+- برنامهٔ تسویهٔ قابل‌پیش‌بینی
 
-## Batch Auction Price Discovery
+## کشف قیمت با حراج دسته‌ای
 
-The EnergyMarket uses batch auctions for price discovery:
-- Orders are collected during an auction period
-- All orders for a time slot are cleared at once
-- Clearing price is determined by matching supply and demand
-- Uniform clearing price for all matched orders
+EnergyMarket از حراج دسته‌ای برای کشف قیمت استفاده می‌کند:
+- سفارش‌ها در طول یک دورهٔ حراج جمع‌آوری می‌شوند
+- همهٔ سفارش‌های یک بازهٔ زمانی یک‌جا تسویه می‌شوند
+- قیمت تسویه با تطبیق عرضه و تقاضا تعیین می‌شود
+- قیمت تسویهٔ یکنواخت برای همهٔ سفارش‌های تطبیق‌یافته
 
-This mechanism:
-- Reduces front-running opportunities
-- Provides fair price discovery
-- Enables efficient batch settlement
-- Supports predictable pricing
+این سازوکار:
+- فرصت‌های front-running را کاهش می‌دهد
+- کشف قیمت منصفانه ارائه می‌دهد
+- تسویهٔ دسته‌ایِ کارآمد را ممکن می‌سازد
+- از قیمت‌گذاری قابل‌پیش‌بینی پشتیبانی می‌کند
 
-## Oracle-Reported Production
+## تولید گزارش‌شده توسط اوراکل
 
-Energy production is reported by oracles:
-- Oracles submit production data for panels
-- Data is verified before acceptance
-- Time slots are finalized after verification period
-- Historical data is immutable once finalized
+تولید انرژی توسط اوراکل‌ها گزارش می‌شود:
+- اوراکل‌ها داده‌های تولید پنل‌ها را ارسال می‌کنند
+- داده‌ها پیش از پذیرش تأیید می‌شوند
+- بازه‌های زمانی پس از دورهٔ تأیید نهایی می‌شوند
+- داده‌های تاریخی پس از نهایی‌شدن تغییرناپذیرند
 
-Oracle design considerations:
-- Multiple oracle support for redundancy
-- Verification mechanisms for data integrity
-- Economic incentives for accurate reporting
-- Penalties for misreporting
+ملاحظات طراحی اوراکل:
+- پشتیبانی از چند اوراکل برای افزونگی (redundancy)
+- سازوکارهای تأیید برای یکپارچگی داده
+- انگیزه‌های اقتصادی برای گزارش‌دهی دقیق
+- جریمه برای گزارش نادرست
 
-## Stake-Backed Penalties
+## جریمه‌های مبتنی بر استیک
 
-The system uses stake-backed penalties to ensure compliance:
-- Participants must stake tokens to participate
-- Penalties are assessed for non-performance or misbehavior
-- Slashing can occur for severe violations
-- Stake provides economic security for the system
+سیستم از جریمه‌های مبتنی بر استیک برای اطمینان از پایبندی استفاده می‌کند:
+- شرکت‌کنندگان باید برای مشارکت توکن استیک کنند
+- جریمه برای عدم انجام تعهد یا تخلف اعمال می‌شود
+- slashing می‌تواند برای تخلف‌های شدید رخ دهد
+- استیک امنیت اقتصادی سیستم را فراهم می‌کند
 
-Penalty mechanisms:
-- Automatic penalties for missed obligations
-- Governance-controlled slashing for major violations
-- Dispute resolution for contested penalties
-- Stake lock periods for critical operations
+سازوکارهای جریمه:
+- جریمهٔ خودکار برای تعهدات ازدست‌رفته
+- slashing تحت کنترل حاکمیت برای تخلف‌های عمده
+- حل‌وفصل اختلاف برای جریمه‌های مورد مناقشه
+- دوره‌های قفل استیک برای عملیات حیاتی
 
-## Financial Settlement vs Physical Delivery
+## تسویهٔ مالی در برابر تحویل فیزیکی
 
-**IMPORTANT**: GRIDSET settles financial obligations, not physical energy delivery. The protocol:
-- Tracks energy production and consumption as financial claims
-- Settles payments based on net energy positions
-- Does not guarantee physical energy delivery
-- Operates as a financial settlement layer on top of physical infrastructure
+**مهم**: GRIDSET تعهدات مالی را تسویه می‌کند، نه تحویل فیزیکی انرژی. این پروتکل:
+- تولید و مصرف انرژی را به‌صورت مطالبات مالی ردیابی می‌کند
+- پرداخت‌ها را بر اساس موقعیت‌های خالص انرژی تسویه می‌کند
+- تحویل فیزیکی انرژی را تضمین نمی‌کند
+- به‌عنوان یک لایهٔ تسویهٔ مالی روی زیرساخت فیزیکی عمل می‌کند
 
-## System Flow
+## جریان سیستم
 
-1. **Registration**: Panels are registered as NFTs and added to the registry
-2. **Production Reporting**: Oracles report production data for each time slot
-3. **Auction**: Market participants place bids and asks for energy in upcoming time slots
-4. **Clearing**: Auctions are cleared, determining prices and matched orders
-5. **Settlement**: Settlement engine calculates net positions and executes payments
-6. **Penalties**: Non-performance results in stake penalties
-7. **Governance**: DAO manages protocol parameters and upgrades
+۱. **ثبت‌نام**: پنل‌ها به‌صورت NFT ثبت می‌شوند و به رجیستری اضافه می‌شوند
+۲. **گزارش تولید**: اوراکل‌ها داده‌های تولید هر بازهٔ زمانی را گزارش می‌دهند
+۳. **حراج**: شرکت‌کنندگان بازار برای انرژی در بازه‌های زمانی آینده پیشنهاد خرید و فروش ثبت می‌کنند
+۴. **تسویه (Clearing)**: حراج‌ها تسویه می‌شوند و قیمت‌ها و سفارش‌های تطبیق‌یافته تعیین می‌شوند
+۵. **تسویه‌حساب (Settlement)**: موتور تسویه موقعیت‌های خالص را محاسبه و پرداخت‌ها را اجرا می‌کند
+۶. **جریمه‌ها**: عدم انجام تعهد منجر به جریمهٔ استیک می‌شود
+۷. **حاکمیت**: DAO پارامترها و ارتقاهای پروتکل را مدیریت می‌کند
 
-## Security Considerations
+## ملاحظات امنیتی
 
-- All contracts use Solidity ^0.8.20 for safety features
-- Stake-backed security model for economic guarantees
-- Oracle verification for production data integrity
-- Time-locked operations for critical functions
-- Dispute mechanisms for contested settlements
+- همهٔ قراردادها از Solidity ^0.8.20 برای ویژگی‌های ایمنی استفاده می‌کنند
+- مدل امنیتیِ مبتنی بر استیک برای ضمانت‌های اقتصادی
+- تأیید اوراکل برای یکپارچگی داده‌های تولید
+- عملیات با قفل زمانی برای توابع حیاتی
+- سازوکارهای حل‌وفصل اختلاف برای تسویه‌های مورد مناقشه

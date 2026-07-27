@@ -1,39 +1,39 @@
-# EnergyOracle Multi-Oracle Consensus Design
+# طراحی اجماع چند‌اوراکلیِ EnergyOracle
 
-**Issue:** NEW-8 (#21)
-**Status:** Implemented in `src/EnergyOracle.sol`
-
----
-
-## Problem
-
-The original `EnergyOracle` relied on a single trusted address (`oracle`) to report production data. This creates a single point of failure and trust centralisation:
-
-- If the oracle key is compromised, false production data can be submitted.
-- There is no mechanism for independent verification before a time slot is finalised.
+**ایشو:** NEW-8 (#21)
+**وضعیت:** پیاده‌سازی‌شده در `src/EnergyOracle.sol`
 
 ---
 
-## Design Goals
+## مسئله
 
-1. **Decentralisation of trust** — Multiple independent entities can report production data.
-2. **Threshold consensus** — A configurable number of oracle confirmations is required before a slot is considered reliable enough to finalise.
-3. **Gas efficiency** — Avoid on-chain aggregation of raw values; use a *presence* model (did enough oracles report for this slot?).
-4. **Backwards compatibility** — The single-oracle and legacy `confirmer` paths remain functional.
+`EnergyOracle` اولیه برای گزارش داده‌های تولید به یک آدرس معتمد واحد (`oracle`) متکی بود. این کار یک نقطهٔ شکست واحد و تمرکز اعتماد ایجاد می‌کند:
+
+- اگر کلید اوراکل به‌خطر بیفتد، داده‌های تولید نادرست می‌توانند ارسال شوند.
+- هیچ سازوکاری برای تأیید مستقل پیش از نهایی‌سازی یک بازهٔ زمانی وجود ندارد.
 
 ---
 
-## Chosen Approach: N-of-M Oracle Threshold
+## اهداف طراحی
 
-### Oracle Set
+۱. **عدم‌تمرکز اعتماد** — چند نهاد مستقل می‌توانند داده‌های تولید را گزارش دهند.
+۲. **اجماع آستانه‌ای** — تعداد قابل‌تنظیمی از تأییدهای اوراکل لازم است تا یک بازه به‌اندازهٔ کافی قابل‌اعتماد برای نهایی‌سازی تلقی شود.
+۳. **کارایی گس** — از تجمیعِ روی‌زنجیرهٔ مقادیر خام پرهیز می‌شود؛ از یک مدل *حضور* استفاده می‌شود (آیا اوراکل‌های کافی برای این بازه گزارش داده‌اند؟).
+۴. **سازگاری با نسخه‌های قبلی** — مسیرهای تک‌اوراکلی و `confirmer` قدیمی همچنان کار می‌کنند.
 
-- The owner maintains a set of registered oracle addresses via `registerOracle(addr)` / `removeOracle(addr)`.
-- `oracleCount` tracks the current set size.
-- `requiredConsensus` (1 ≤ N ≤ M) is the number of distinct oracles that must call `reportProduction` for the same time slot before the slot is **auto-confirmed**.
+---
 
-### Auto-Confirmation
+## رویکرد انتخاب‌شده: آستانهٔ N-از-M اوراکل
 
-When oracle #N calls `reportProduction` for slot S:
+### مجموعهٔ اوراکل‌ها
+
+- مالک مجموعه‌ای از آدرس‌های اوراکلِ ثبت‌شده را از طریق `registerOracle(addr)` / `removeOracle(addr)` نگه می‌دارد.
+- `oracleCount` اندازهٔ فعلی مجموعه را دنبال می‌کند.
+- `requiredConsensus` (با ۱ ≤ N ≤ M) تعداد اوراکل‌های متمایزی است که باید برای همان بازهٔ زمانی `reportProduction` را فراخوانی کنند تا بازه به‌طور **خودکار تأیید** شود.
+
+### تأیید خودکار
+
+وقتی اوراکل شمارهٔ N برای بازهٔ S، `reportProduction` را فراخوانی کند:
 
 ```
 _slotReportCount[S] >= requiredConsensus
@@ -41,66 +41,66 @@ _slotReportCount[S] >= requiredConsensus
   → emit TimeSlotConfirmed(S)
 ```
 
-This confirmation unlocks `finalizeTimeSlot(S)` (unless a manual confirmer is also set, in which case the manual path is still required).
+این تأیید، `finalizeTimeSlot(S)` را باز می‌کند (مگر اینکه یک تأییدکنندهٔ دستی هم تنظیم شده باشد، که در این صورت مسیر دستی همچنان لازم است).
 
-### Legacy Confirmer
+### تأییدکنندهٔ قدیمی
 
-The existing `confirmer` / `confirmTimeSlot` flow is still supported. If `confirmer != address(0)` the slot must be confirmed (either by the confirmer or via consensus) before finalisation. This lets existing deployments upgrade gradually.
+جریان کار قدیمیِ `confirmer` / `confirmTimeSlot` همچنان پشتیبانی می‌شود. اگر `confirmer != address(0)` باشد، بازه باید پیش از نهایی‌سازی تأیید شود (چه توسط تأییدکننده، چه از طریق اجماع). این به استقرارهای موجود اجازه می‌دهد به‌تدریج ارتقا یابند.
 
 ---
 
-## Gas Cost Analysis
+## تحلیل هزینهٔ گس
 
-| Operation | Extra storage writes | Approx extra gas |
+| عملیات | نوشتن‌های اضافیِ storage | گس اضافیِ تقریبی |
 |---|---|---|
-| `registerOracle` | 1 mapping write + uint256 incr | ~22,000 |
-| `reportProduction` (first oracle in slot) | 2 mapping writes | ~45,000 |
-| `reportProduction` (Nth oracle, triggers auto-confirm) | 2 mapping writes + 1 bool | ~50,000 |
-| `finalizeTimeSlot` | No change | — |
+| `registerOracle` | ۱ نوشتنِ mapping + افزایش uint256 | ~۲۲٬۰۰۰ |
+| `reportProduction` (اولین اوراکل در بازه) | ۲ نوشتنِ mapping | ~۴۵٬۰۰۰ |
+| `reportProduction` (اوراکل Nام، فعال‌سازی تأیید خودکار) | ۲ نوشتنِ mapping + ۱ bool | ~۵۰٬۰۰۰ |
+| `finalizeTimeSlot` | بدون تغییر | — |
 
-The overhead per `reportProduction` call is approximately **+23,000 gas** compared to the single-oracle version (two extra mapping writes: `_oracleReportedSlot` and `_panelSlotOracleReported`).
+سربار به‌ازای هر فراخوانی `reportProduction` حدود **+۲۳٬۰۰۰ گس** در مقایسه با نسخهٔ تک‌اوراکلی است (دو نوشتنِ mapping اضافی: `_oracleReportedSlot` و `_panelSlotOracleReported`).
 
 ---
 
-## Configuration Recommendations
+## توصیه‌های پیکربندی
 
-| Scenario | `oracleCount` | `requiredConsensus` |
+| سناریو | `oracleCount` | `requiredConsensus` |
 |---|---|---|
-| Development / testnet | 1 | 1 |
-| Production (high trust) | 3 | 2 |
-| Production (max security) | 5 | 3 |
+| توسعه / تست‌نت | ۱ | ۱ |
+| تولید (اعتماد بالا) | ۳ | ۲ |
+| تولید (حداکثر امنیت) | ۵ | ۳ |
 
 ---
 
-## Rate Limiting (Issue #30)
+## محدودسازی نرخ (ایشو #30)
 
-Each oracle is allowed to report a given `(panelId, slotId)` pair **at most once**. This prevents:
+هر اوراکل مجاز است یک جفت `(panelId, slotId)` مشخص را **حداکثر یک‌بار** گزارش دهد. این کار جلوی موارد زیر را می‌گیرد:
 
-- Accidental duplicate submissions (e.g. retries after a network hiccup).
-- Malicious inflation of `_slotTotalEnergy` by a single oracle submitting multiple values.
+- ارسال‌های تکراری تصادفی (مثلاً تلاش مجدد پس از یک اختلال شبکه).
+- تورم مخرب `_slotTotalEnergy` توسط یک اوراکل که چند مقدار ارسال می‌کند.
 
-The check uses: `_panelSlotOracleReported[panelId][slotId][msg.sender]`.
+بررسی از طریق `_panelSlotOracleReported[panelId][slotId][msg.sender]` انجام می‌شود.
 
-Note that different oracles *can* report for the same `(panelId, slotId)`, which is intentional — their energy values are summed. In a real deployment, oracle off-chain software should validate that each oracle reads from a separate metering device or data source to avoid double-counting.
-
----
-
-## Circuit Breaker (Issue #30)
-
-`setPaused(true)` halts all `reportProduction` and `finalizeTimeSlot` calls. The owner can use this to:
-
-- Pause oracle operations during a security incident.
-- Coordinate a protocol upgrade that requires a clean state.
+توجه کنید که اوراکل‌های مختلف *می‌توانند* برای همان `(panelId, slotId)` گزارش دهند، که عمدی است — مقادیر انرژی آن‌ها جمع می‌شود. در یک استقرار واقعی، نرم‌افزار آف‌چین اوراکل باید تأیید کند که هر اوراکل از یک دستگاه اندازه‌گیری یا منبع دادهٔ جداگانه می‌خواند تا از شمارش مضاعف جلوگیری شود.
 
 ---
 
-## Testing
+## قطع‌کنندهٔ مدار (ایشو #30)
 
-See `test/EnergyOracleConsensus.t.sol` for full coverage of:
+`setPaused(true)` همهٔ فراخوانی‌های `reportProduction` و `finalizeTimeSlot` را متوقف می‌کند. مالک می‌تواند از این برای موارد زیر استفاده کند:
 
-- Single oracle default (1-of-1)
-- Two-of-two auto-confirmation
-- Two-of-three threshold
-- Rate limiting (duplicate report reverts)
-- Circuit breaker (pause / resume)
-- Legacy confirmer path compatibility
+- توقف عملیات اوراکل در طول یک رخداد امنیتی.
+- هماهنگیِ یک ارتقای پروتکل که نیاز به وضعیت پاک دارد.
+
+---
+
+## تست
+
+برای پوشش کامل موارد زیر `test/EnergyOracleConsensus.t.sol` را ببینید:
+
+- حالت پیش‌فرض تک‌اوراکلی (۱-از-۱)
+- تأیید خودکار دو-از-دو
+- آستانهٔ دو-از-سه
+- محدودسازی نرخ (گزارش تکراری revert می‌شود)
+- قطع‌کنندهٔ مدار (توقف / ازسرگیری)
+- سازگاری مسیر تأییدکنندهٔ قدیمی

@@ -1,14 +1,14 @@
-# Getting Started
+# شروع کار
 
-This guide gets you from clone to a running UI with contracts deployed on a local chain.
+این راهنما شما را از کلون کردن پروژه تا اجرای رابط کاربری با قراردادهای مستقرشده روی یک زنجیرهٔ محلی می‌برد.
 
-## Prerequisites
+## پیش‌نیازها
 
-- **Foundry**: [Install Foundry](https://book.getfoundry.sh/getting-started/installation) (`forge`, `cast`, `anvil`)
-- **Node.js** 18+ (for the web UI)
-- **Solidity** ^0.8.20 (via Foundry)
+- **Foundry**: [نصب Foundry](https://book.getfoundry.sh/getting-started/installation) (`forge`، `cast`، `anvil`)
+- **Node.js** نسخهٔ ۱۸ به بالا (برای رابط کاربری وب)
+- **Solidity** ^0.8.20 (از طریق Foundry)
 
-## 1. Clone and build
+## ۱. کلون و بیلد
 
 ```bash
 git clone https://github.com/massoudsh/gridset-protocol.git
@@ -16,35 +16,35 @@ cd gridset-protocol
 forge build
 ```
 
-## 2. Run tests
+## ۲. اجرای تست‌ها
 
 ```bash
 forge test
 ```
 
-Optional: run with coverage (≥95% line coverage expected):
+اختیاری: اجرا با پوشش (پوشش خطیِ ≥۹۵٪ انتظار می‌رود):
 
 ```bash
 forge coverage --report summary
 ```
 
-## 3. Start a local chain and deploy
+## ۳. راه‌اندازی یک زنجیرهٔ محلی و استقرار
 
-In one terminal, start Anvil:
+در یک ترمینال، Anvil را اجرا کنید:
 
 ```bash
 anvil
 ```
 
-In another terminal, deploy the full contract suite:
+در ترمینال دیگر، کل مجموعهٔ قرارداد را مستقر کنید:
 
 ```bash
 forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
 ```
 
-The script logs deployed addresses. Copy them into `ui/.env` (see [Deployment](DEPLOYMENT.md)).
+اسکریپت آدرس‌های مستقرشده را چاپ می‌کند. آن‌ها را در `ui/.env` کپی کنید (به [استقرار](DEPLOYMENT.md) نگاه کنید).
 
-Create `ui/.env` with the addresses printed by the script (keys from `ui/.env.example`). Example for a **fresh** Anvil + first deploy:
+`ui/.env` را با آدرس‌های چاپ‌شده توسط اسکریپت بسازید (کلیدها از `ui/.env.example`). نمونه برای یک Anvil **تازه** و استقرار اول:
 
 ```
 VITE_ENERGY_TOKEN_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
@@ -57,9 +57,9 @@ VITE_SETTLEMENT_ENGINE_ADDRESS=0x0165878A594ca255338adfa4d48449f69242Eb8F
 VITE_GOVERNANCE_DAO_ADDRESS=0xa513E6E4b8f2a923D98304ec87F64353C4D5C853
 ```
 
-Addresses change if you redeploy or use a different deployer; always use the addresses from your own script output.
+اگر دوباره استقرار دهید یا از استقرار‌دهندهٔ متفاوتی استفاده کنید، آدرس‌ها تغییر می‌کنند؛ همیشه از آدرس‌های خروجی اسکریپت خودتان استفاده کنید.
 
-## 4. Run the web UI
+## ۴. اجرای رابط کاربری وب
 
 ```bash
 cd ui
@@ -67,20 +67,20 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 (or the URL Vite prints). Connect MetaMask (or another wallet) to the Anvil network (e.g. http://127.0.0.1:8545, chain ID 31337) and use the first Anvil account. You can mint tokens and use the Energy Wallet and Energy Market views against the deployed contracts.
+آدرس http://localhost:5173 (یا آدرسی که Vite چاپ می‌کند) را باز کنید. MetaMask (یا کیف پول دیگری) را به شبکهٔ Anvil وصل کنید (مثلاً http://127.0.0.1:8545، شناسهٔ زنجیرهٔ ۳۱۳۳۷) و از اولین حساب Anvil استفاده کنید. می‌توانید توکن ضرب کنید و از نماهای کیف پول انرژی و بازار انرژی روی قراردادهای مستقرشده استفاده کنید.
 
-## 5. Mint tokens (optional)
+## ۵. ضرب توکن (اختیاری)
 
-The deployer is set as minter. Using `cast` (with Anvil default key):
+استقرار‌دهنده به‌عنوان minter تنظیم شده است. با استفاده از `cast` (با کلید پیش‌فرض Anvil):
 
 ```bash
 cast send <ENERGY_TOKEN_ADDRESS> "mint(address,uint256)" <YOUR_ADDRESS> 1000000000000000000000 --rpc-url http://127.0.0.1:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
 
-Then in the UI, open **Energy Wallet** to see balance and **Energy Market** to see live order book (after starting an auction and placing orders; see [DEPLOYMENT](DEPLOYMENT.md)).
+سپس در رابط کاربری، **کیف پول انرژی** را برای دیدن موجودی و **بازار انرژی** را برای دیدن دفتر سفارش زنده (پس از شروع یک حراج و ثبت سفارش‌ها؛ به [استقرار](DEPLOYMENT.md) نگاه کنید) باز کنید.
 
-## Next steps
+## گام‌های بعدی
 
-- [Deployment](DEPLOYMENT.md) – Testnet, env vars, and deployment details
-- [Architecture](architecture.md) – System design and contracts
-- [ROADMAP](../ROADMAP.md) – Phases and issues
+- [استقرار](DEPLOYMENT.md) – جزئیات تست‌نت، متغیرهای محیطی و استقرار
+- [معماری](architecture.md) – طراحی سیستم و قراردادها
+- [ROADMAP](../ROADMAP.md) – فازها و ایشوها

@@ -1,37 +1,37 @@
-# Rate Limiting and Pause (Market / Oracle)
+# محدودسازی نرخ (Rate Limiting) و توقف (Pause) در بازار/اوراکل
 
-Design and operational notes for pausing or rate-limiting the Energy Market and Energy Oracle.
+یادداشت‌های طراحی و عملیاتی برای توقف یا محدودسازی نرخ Energy Market و Energy Oracle.
 
-## Pause (EnergyMarket)
+## توقف (EnergyMarket)
 
-The EnergyMarket contract supports an owner-controlled **pause** flag:
+قرارداد EnergyMarket از یک پرچم **توقف (pause)** تحت کنترل مالک پشتیبانی می‌کند:
 
-- **setPaused(bool)** – only owner. When `paused` is true:
-  - **placeBid** and **placeAsk** revert with `MarketPaused`.
-  - **startAuction** reverts with `MarketPaused`.
-- **clearAuction**, **cancelOrder**, and read-only functions are unchanged (so existing orders can be cleared or cancelled; no new orders or auctions).
+- **setPaused(bool)** – فقط مالک. وقتی `paused` برابر true باشد:
+  - **placeBid** و **placeAsk** با خطای `MarketPaused` برمی‌گردند (revert).
+  - **startAuction** با خطای `MarketPaused` برمی‌گردد.
+- **clearAuction**، **cancelOrder** و توابع فقط‌خواندنی بدون تغییر باقی می‌مانند (بنابراین سفارش‌های موجود همچنان قابل تسویه یا لغو هستند؛ فقط سفارش یا حراج جدیدی ثبت نمی‌شود).
 
-**When to pause:** Suspected bug, emergency (e.g. oracle compromise), or planned maintenance. Document in runbook who can pause and how to unpause.
+**چه زمانی توقف کنیم:** باگ مشکوک، وضعیت اضطراری (مثلاً به‌خطر افتادن اوراکل)، یا نگهداری برنامه‌ریزی‌شده. در رانبوک مشخص کنید چه کسی می‌تواند توقف کند و چگونه لغو شود.
 
-**Runbook (example):**
-1. Owner calls `setPaused(true)`.
-2. Investigate; fix or deploy fix if needed.
-3. Owner calls `setPaused(false)` to resume.
+**رانبوک (نمونه):**
+۱. مالک `setPaused(true)` را فراخوانی می‌کند.
+۲. بررسی می‌شود؛ در صورت نیاز اصلاح می‌شود یا رفع‌اشکال مستقر می‌شود.
+۳. مالک `setPaused(false)` را برای ازسرگیری فراخوانی می‌کند.
 
-## Rate limiting (design only)
+## محدودسازی نرخ (فقط طراحی)
 
-No rate limit is enforced on-chain in the current implementation. Optional future options:
+در پیاده‌سازی فعلی هیچ محدودیت نرخی روی زنجیره اعمال نمی‌شود. گزینه‌های اختیاری آینده:
 
-- **Per-user, per-slot order cap:** e.g. max N orders per (user, timeSlot) in EnergyMarket. Would require storage and checks in placeBid/placeAsk.
-- **Oracle report throttling:** max reports per (panelId, timestamp) or per slot in EnergyOracle. Could mitigate spam; adds complexity.
+- **سقف سفارش به ازای هر کاربر و هر بازه:** مثلاً حداکثر N سفارش برای هر (کاربر، بازهٔ زمانی) در EnergyMarket. نیازمند storage و بررسی‌های اضافی در placeBid/placeAsk است.
+- **محدودسازی گزارش اوراکل:** حداکثر تعداد گزارش برای هر (panelId, timestamp) یا هر بازه در EnergyOracle. می‌تواند اسپم را کاهش دهد؛ پیچیدگی اضافه می‌کند.
 
-Gas and UX trade-offs should be evaluated before adding rate limits.
+پیش از افزودن محدودیت نرخ، باید موازنهٔ گس و تجربهٔ کاربری ارزیابی شود.
 
 ## EnergyOracle
 
-The Energy Oracle does not have a pause flag. To stop new reports or finalization:
+اوراکل انرژی پرچم توقف ندارد. برای متوقف کردن گزارش‌های جدید یا نهایی‌سازی:
 
-- **updateOracle(address(0))** is not recommended (could break integrations).
-- Prefer: use a dedicated “pause” oracle address that reverts or no-ops, or add an optional **paused** flag and **setPaused** to the oracle contract in a future change.
+- استفاده از **updateOracle(address(0))** توصیه نمی‌شود (ممکن است یکپارچگی‌ها را بشکند).
+- ترجیحاً: از یک آدرس اوراکل اختصاصیِ «توقف» استفاده شود که revert می‌کند یا کاری انجام نمی‌دهد، یا یک پرچم اختیاری **paused** و **setPaused** در یک تغییر آینده به قرارداد اوراکل افزوده شود.
 
-For now, operational control is via the oracle key (revoke or rotate) and the confirmer (two-step finalization when confirmer is set).
+فعلاً کنترل عملیاتی از طریق کلید اوراکل (لغو یا چرخش) و تأییدکننده (نهایی‌سازی دومرحله‌ای وقتی تأییدکننده تنظیم شده) انجام می‌شود.

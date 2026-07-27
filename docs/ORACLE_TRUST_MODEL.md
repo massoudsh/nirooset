@@ -1,35 +1,35 @@
-# EnergyOracle Trust Model
+# مدل اعتماد EnergyOracle
 
-## Roles
+## نقش‌ها
 
-- **Owner:** Can update the oracle address and set the confirmer. Cannot report or finalize unless also set as oracle/confirmer.
-- **Oracle:** Can call `reportProduction` and `finalizeTimeSlot`. When a confirmer is set, finalization requires the slot to be confirmed first.
-- **Confirmer (optional):** Can call `confirmTimeSlot(timeSlot)`. When set, the oracle cannot finalize a slot until the confirmer has confirmed it.
+- **مالک (Owner):** می‌تواند آدرس اوراکل را به‌روزرسانی و تأییدکننده (confirmer) را تنظیم کند. مگر اینکه خودش به‌عنوان اوراکل/تأییدکننده هم تنظیم شده باشد، نمی‌تواند گزارش دهد یا نهایی کند.
+- **اوراکل (Oracle):** می‌تواند `reportProduction` و `finalizeTimeSlot` را فراخوانی کند. وقتی تأییدکننده تنظیم شده باشد، نهایی‌سازی مستلزم تأیید شدن بازه پیش از آن است.
+- **تأییدکننده (Confirmer) - اختیاری:** می‌تواند `confirmTimeSlot(timeSlot)` را فراخوانی کند. وقتی تنظیم شده باشد، اوراکل نمی‌تواند بازه‌ای را نهایی کند تا تأییدکننده آن را تأیید کرده باشد.
 
-## Single-oracle (default)
+## حالت تک‌اوراکلی (پیش‌فرض)
 
-If no confirmer is set (`confirmer == address(0)`):
+اگر تأییدکننده‌ای تنظیم نشده باشد (`confirmer == address(0)`):
 
-- The oracle (or owner) reports production and finalizes time slots in one step.
-- Trust: a single oracle key is trusted to report and finalize. Suitable for testnets or when the oracle is operated by a known party.
+- اوراکل (یا مالک) در یک مرحله تولید را گزارش می‌دهد و بازه‌های زمانی را نهایی می‌کند.
+- اعتماد: به یک کلید اوراکلِ واحد برای گزارش و نهایی‌سازی اعتماد می‌شود. برای تست‌نت‌ها یا زمانی که اوراکل توسط یک نهاد شناخته‌شده اداره می‌شود مناسب است.
 
-## Two-step finalization (confirmer set)
+## نهایی‌سازی دومرحله‌ای (با تأییدکنندهٔ تنظیم‌شده)
 
-When `setConfirmer(addr)` has been called:
+پس از فراخوانی `setConfirmer(addr)`:
 
-1. **Report:** Oracle (or owner) calls `reportProduction(panelId, timestamp, energyWh)` as usual.
-2. **Confirm:** Confirmer (or owner) calls `confirmTimeSlot(timeSlot)`. This signals that the slot data has been audited or agreed.
-3. **Finalize:** Oracle (or owner) calls `finalizeTimeSlot(timeSlot)`. This reverts with `SlotNotConfirmed` if the slot was not confirmed.
+۱. **گزارش:** اوراکل (یا مالک) طبق روال `reportProduction(panelId, timestamp, energyWh)` را فراخوانی می‌کند.
+۲. **تأیید:** تأییدکننده (یا مالک) `confirmTimeSlot(timeSlot)` را فراخوانی می‌کند. این نشان می‌دهد که داده‌های بازه ممیزی یا تأیید شده‌اند.
+۳. **نهایی‌سازی:** اوراکل (یا مالک) `finalizeTimeSlot(timeSlot)` را فراخوانی می‌کند. اگر بازه تأیید نشده باشد، با خطای `SlotNotConfirmed` برمی‌گردد.
 
-Trust: two roles (oracle + confirmer) must cooperate to finalize. The confirmer acts as an auditor or second signer. Gas: one extra transaction per slot (`confirmTimeSlot`).
+اعتماد: دو نقش (اوراکل + تأییدکننده) باید برای نهایی‌سازی همکاری کنند. تأییدکننده نقش ممیز یا امضاکنندهٔ دوم را دارد. گس: یک تراکنش اضافه به ازای هر بازه (`confirmTimeSlot`).
 
-## Operations
+## عملیات
 
-- **Enable two-step:** Owner calls `setConfirmer(confirmerAddress)`. For production, use a different key or multisig for the confirmer.
-- **Disable two-step:** Owner calls `setConfirmer(address(0))`. Finalization then does not require confirm.
-- **View:** `isTimeSlotConfirmed(timeSlot)` returns whether the slot has been confirmed (for UI or automation).
+- **فعال‌سازی دومرحله‌ای:** مالک `setConfirmer(confirmerAddress)` را فراخوانی می‌کند. برای محیط تولید، از یک کلید متفاوت یا multisig برای تأییدکننده استفاده کنید.
+- **غیرفعال‌سازی دومرحله‌ای:** مالک `setConfirmer(address(0))` را فراخوانی می‌کند. در این حالت نهایی‌سازی نیازی به تأیید ندارد.
+- **مشاهده:** `isTimeSlotConfirmed(timeSlot)` نشان می‌دهد آیا بازه تأیید شده است یا خیر (برای رابط کاربری یا اتوماسیون).
 
-## Gas
+## گس (Gas)
 
-- `confirmTimeSlot`: ~50k gas (single storage write + event).
-- No change to `reportProduction` or `finalizeTimeSlot` gas when confirmer is not set.
+- `confirmTimeSlot`: حدود ۵۰ هزار گس (یک نوشتن روی storage به‌همراه یک event).
+- وقتی تأییدکننده تنظیم نشده باشد، هیچ تغییری در گس `reportProduction` یا `finalizeTimeSlot` ایجاد نمی‌شود.

@@ -1,47 +1,47 @@
-# Testnet Deployment & Community Testing
+# استقرار تست‌نت و تست جمعی (Community Testing)
 
-This document covers deploying GRIDSET to a public testnet (e.g. Sepolia) and running a community beta.
+این سند نحوهٔ استقرار GRIDSET روی یک تست‌نت عمومی (مثلاً Sepolia) و اجرای یک بتای جمعی را پوشش می‌دهد.
 
-## Prerequisites
+## پیش‌نیازها
 
-- Deployer wallet with testnet ETH (e.g. [Sepolia faucet](https://sepoliafaucet.com/))
-- `PRIVATE_KEY` and RPC URL for the testnet
+- کیف پول استقرار‌دهنده با ETH تست‌نت (مثلاً [فاست Sepolia](https://sepoliafaucet.com/))
+- `PRIVATE_KEY` و آدرس RPC برای تست‌نت
 
-## Deploy to testnet
+## استقرار روی تست‌نت
 
-1. **Get RPC and key**
-   - Sepolia: `https://sepolia.infura.io/v3/YOUR_KEY` or Alchemy/QuickNode
-   - Set `PRIVATE_KEY` (testnet-only key, no mainnet funds)
+۱. **دریافت RPC و کلید**
+   - Sepolia: `https://sepolia.infura.io/v3/YOUR_KEY` یا Alchemy/QuickNode
+   - تنظیم `PRIVATE_KEY` (کلید مخصوص تست‌نت، بدون وجوه مین‌نت)
 
-2. **Deploy**
+۲. **استقرار**
    ```bash
    forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
    ```
-   Optional: verify on Etherscan
+   اختیاری: تأیید روی Etherscan
    ```bash
    forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
    ```
 
-3. **Publish addresses**
-   - Put deployed addresses in `ui/.env` (or a public `deployments/sepolia.json`) so the UI points to testnet.
-   - Document in README or a pinned issue: “Testnet live at …” with network name, chain ID, and contract links.
+۳. **انتشار آدرس‌ها**
+   - آدرس‌های مستقرشده را در `ui/.env` (یا یک فایل عمومی `deployments/sepolia.json`) قرار دهید تا رابط کاربری به تست‌نت اشاره کند.
+   - در README یا یک ایشوی پین‌شده مستند کنید: «تست‌نت فعال است در …» به‌همراه نام شبکه، شناسهٔ زنجیره و لینک قراردادها.
 
-## Testnet checklist
+## چک‌لیست تست‌نت
 
-- [ ] Deploy suite on testnet (Sepolia or other)
-- [ ] Verify contracts on block explorer
-- [ ] Configure UI (env or Settings) with testnet addresses and correct chain ID
-- [ ] Mint test tokens to a few wallets for testers
-- [ ] Run one full flow: register panel → market bid/ask → clear auction → settle (optional: oracle + settlement)
-- [ ] Pin testnet announcement (issue or README) with network, chain ID, faucet, and feedback channel
+- [ ] استقرار مجموعه روی تست‌نت (Sepolia یا دیگر)
+- [ ] تأیید قراردادها روی block explorer
+- [ ] پیکربندی رابط کاربری (env یا تنظیمات) با آدرس‌های تست‌نت و شناسهٔ زنجیرهٔ درست
+- [ ] ضرب توکن‌های تستی برای چند کیف پول جهت آزمایش‌کنندگان
+- [ ] اجرای یک جریان کامل: ثبت پنل → پیشنهاد خرید/فروش در بازار → تسویهٔ حراج → settle (اختیاری: اوراکل + تسویه)
+- [ ] پین کردن اطلاعیهٔ تست‌نت (ایشو یا README) همراه با شبکه، شناسهٔ زنجیره، فاست و کانال بازخورد
 
-## Community beta testing
+## تست بتای جمعی
 
-- **Invite**: Share testnet URL, chain ID, and faucet link; ask testers to connect wallet and try Energy Wallet, Market, and (if enabled) Governance.
-- **Feedback**: Collect via GitHub Discussions, Discord, or a form (e.g. “What broke? What was confusing?”).
-- **Bug fixes**: Triage and fix in a branch; cut a testnet patch release if useful.
-- **Iterate**: Re-deploy or upgrade (if using proxies later) and re-share testnet info.
+- **دعوت**: آدرس تست‌نت، شناسهٔ زنجیره و لینک فاست را به اشتراک بگذارید؛ از آزمایش‌کنندگان بخواهید کیف پول را وصل کنند و کیف پول انرژی، بازار و (در صورت فعال بودن) حاکمیت را امتحان کنند.
+- **بازخورد**: از طریق GitHub Discussions، دیسکورد یا یک فرم (مثلاً «چه چیزی خراب شد؟ چه چیزی گیج‌کننده بود؟») جمع‌آوری کنید.
+- **رفع باگ**: در یک برنچ اولویت‌بندی و رفع کنید؛ در صورت لزوم یک نسخهٔ وصلهٔ تست‌نت منتشر کنید.
+- **تکرار**: در صورت استفادهٔ آینده از پروکسی، دوباره استقرار یا ارتقا دهید و اطلاعات تست‌نت را دوباره به اشتراک بگذارید.
 
-## Rollback
+## بازگشت (Rollback)
 
-Testnet deployments are not upgradeable by default. For a clean reset, deploy again with the same script (new addresses) and update the UI config.
+استقرارهای تست‌نت به‌طور پیش‌فرض قابل ارتقا نیستند. برای بازنشانی تمیز، دوباره با همان اسکریپت استقرار دهید (آدرس‌های جدید) و پیکربندی رابط کاربری را به‌روزرسانی کنید.

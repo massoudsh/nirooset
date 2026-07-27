@@ -1,30 +1,30 @@
-# EnergyMarket Escrow and SettlementEngine
+# وثیقه (Escrow) در EnergyMarket و SettlementEngine
 
-## Overview
+## نمای کلی
 
-With **NEW-2 (EnergyMarket token escrow)**:
+با **NEW-2 (وثیقهٔ توکن در EnergyMarket)**:
 
-- **EnergyMarket** locks tokens on `placeBid` (buyer: price × quantity) and `placeAsk` (seller: quantity). On `clearAuction` it settles matched fills by moving locked amounts: `transferLocked(buyer, seller, fill × price)` and `transferLocked(seller, buyer, fill)`. On `cancelOrder` it unlocks the remaining locked amount.
+- **EnergyMarket** هنگام `placeBid` (خریدار: قیمت × مقدار) و `placeAsk` (فروشنده: مقدار) توکن‌ها را قفل می‌کند. در `clearAuction`، تطبیق‌های انجام‌شده را با جابه‌جایی مبالغ قفل‌شده تسویه می‌کند: `transferLocked(buyer, seller, fill × price)` و `transferLocked(seller, buyer, fill)`. در `cancelOrder`، باقیماندهٔ مبلغ قفل‌شده آزاد می‌شود.
 
-- **SettlementEngine** runs after a slot is cleared and finalized. It computes net positions from the same order book (energy consumed vs produced) and then:
-  - Collects from net buyers: `transferFrom(participant, engine, owed)`
-  - Pays net sellers: `transfer(participant, paymentAmount)`
+- **SettlementEngine** پس از تسویه و نهایی‌شدن یک بازهٔ زمانی اجرا می‌شود. موقعیت‌های خالص را از همان دفتر سفارش محاسبه می‌کند (انرژی مصرف‌شده در برابر تولیدشده) و سپس:
+  - از خریداران خالص دریافت می‌کند: `transferFrom(participant, engine, owed)`
+  - به فروشندگان خالص پرداخت می‌کند: `transfer(participant, paymentAmount)`
 
-So for a cleared slot, **two layers** move tokens:
+پس برای یک بازهٔ زمانی تسویه‌شده، **دو لایه** توکن جابه‌جا می‌کنند:
 
-1. **Market clear** – actual matched fill transfers (buyer→seller payment, seller→buyer energy).
-2. **Engine settlement** – net settlement at clearing price (collect from net consumers, pay net producers).
+۱. **تسویهٔ بازار (Market clear)** – انتقال‌های واقعی تطبیق‌شده (پرداخت خریدار به فروشنده، انرژی فروشنده به خریدار).
+۲. **تسویهٔ موتور (Engine settlement)** – تسویهٔ خالص بر اساس قیمت تسویه (دریافت از مصرف‌کنندگان خالص، پرداخت به تولیدکنندگان خالص).
 
-## Current behavior and tests
+## رفتار فعلی و تست‌ها
 
-- Unit tests (EnergyMarket.t.sol, SettlementEngine.t.sol) are aligned with this: after clear + settle, expected balances (e.g. alice 92_040, bob 107_960 in the settlement test) reflect both the market’s `transferLocked` and the engine’s collect/pay.
-- No double-spend: the engine uses `transferFrom` for amounts participants still have (after the market has already moved only the matched locked amounts).
+- تست‌های واحد (EnergyMarket.t.sol، SettlementEngine.t.sol) با این منطق هم‌راستا هستند: پس از clear + settle، موجودی‌های مورد انتظار (مثلاً alice برابر ۹۲٬۰۴۰ و bob برابر ۱۰۷٬۹۶۰ در تست تسویه) هم `transferLocked` بازار و هم دریافت/پرداخت موتور را منعکس می‌کنند.
+- بدون خرج مضاعف (double-spend): موتور از `transferFrom` برای مبالغی استفاده می‌کند که شرکت‌کنندگان هنوز دارند (پس از اینکه بازار فقط مبالغ قفل‌شدهٔ تطبیق‌یافته را جابه‌جا کرده است).
 
-## Possible future change
+## تغییر احتمالی در آینده
 
-To avoid overlapping semantics (market already moved tokens on clear; engine does a second pass), a follow-up could:
+برای جلوگیری از هم‌پوشانی معنایی (بازار قبلاً توکن‌ها را در تسویه جابه‌جا کرده؛ موتور یک پاس دوم انجام می‌دهد)، یک اقدام بعدی می‌تواند این باشد:
 
-- Make the engine **skip** or **reduce** token transfers for slots where the market already settled (e.g. only run engine for non-market settlements or for penalties), or
-- Document that “market clear = instant settlement for matched volume” and “engine = net settlement / reconciliation layer” and keep both as designed.
+- موتور را طوری تغییر دهیم که برای بازه‌هایی که بازار قبلاً تسویه کرده، انتقال توکن را **حذف** یا **کاهش** دهد (مثلاً موتور فقط برای تسویه‌های غیربازاری یا جریمه‌ها اجرا شود)، یا
+- مستند کنیم که «تسویهٔ بازار = تسویهٔ فوری برای حجم تطبیق‌یافته» و «موتور = لایهٔ تسویهٔ خالص/تطبیق» است و هر دو را همان‌طور که طراحی شده‌اند نگه داریم.
 
-Until then, both run; test expectations are set accordingly.
+تا آن زمان، هر دو اجرا می‌شوند؛ انتظارات تست بر همین اساس تنظیم شده‌اند.

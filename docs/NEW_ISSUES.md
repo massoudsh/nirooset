@@ -1,237 +1,237 @@
-# New Issues for Development
+# ایشوهای جدید برای توسعه
 
-This document lists **new, concrete issues** to add to the GitHub project. Copy or create GitHub issues from these. Labels and priorities are suggestions.
-
----
-
-## Features
-
-### [NEW-1] Utilities: Cart, checkout, and GRID credit linking
-**Priority:** Medium  
-**Labels:** `enhancement`, `ui`, `phase-7`
-
-- Add cart state (context or local storage) for Utilities products.
-- Implement “Checkout” flow (mock or real payment; document as placeholder if mock).
-- When wallet connected, allow “Link to GRIDSET” to associate a product purchase with wallet for future energy-credit eligibility (store mapping or event).
-- Consider product SKU → PanelNFT or EnergyToken reward rules (design only or stub).
-
-**Acceptance:** Cart persists across nav; checkout shows order summary; linked products appear in a “My utilities” section when connected.
+این سند **ایشوهای جدید و مشخص** را برای افزودن به پروژهٔ گیت‌هاب فهرست می‌کند. از این‌ها کپی کنید یا ایشوهای گیت‌هاب بسازید. برچسب‌ها و اولویت‌ها پیشنهادی هستند.
 
 ---
 
-### [NEW-2] EnergyMarket: Token escrow on place order
-**Priority:** High  
-**Labels:** `smart-contract`, `phase-3`
+## قابلیت‌ها
 
-- Currently orders are intent-only (no token lock). Add integration with EnergyToken: on `placeAsk`, lock seller’s tokens for the order quantity; on `placeBid`, lock buyer’s tokens (or separate collateral).
-- On `clearAuction`, transfer tokens between matched parties or release locks.
-- Define and document escrow/lock rules (e.g. lock until clear or cancel).
+### [NEW-1] یوتیلیتی‌ها: سبد خرید، تسویه‌حساب، و اتصال اعتبار GRID
+**اولویت:** متوسط
+**برچسب‌ها:** `enhancement`, `ui`, `phase-7`
 
-**Acceptance:** Placing an ask/bid locks the required EnergyToken amount; clearing or cancel releases or transfers correctly; tests cover lock/unlock paths.
+- افزودن وضعیت سبد خرید (context یا localStorage) برای محصولات یوتیلیتی‌ها.
+- پیاده‌سازی جریان «تسویه‌حساب» (پرداخت آزمایشی یا واقعی؛ در صورت آزمایشی بودن، به‌عنوان جایگزین مستند شود).
+- وقتی کیف پول وصل است، «اتصال به GRIDSET» اجازه دهد یک خرید محصول به کیف پول برای شایستگی آیندهٔ اعتبار انرژی متصل شود (ذخیرهٔ نگاشت یا رویداد).
+- در نظر گرفتن قواعد پاداش SKU محصول → PanelNFT یا EnergyToken (فقط طراحی یا نمونهٔ اولیه).
 
----
-
-### [NEW-3] SettlementEngine implementation (Phase 4)
-**Priority:** High  
-**Labels:** `smart-contract`, `phase-4`
-
-- Implement net position calculation per participant from EnergyOracle production and EnergyMarket cleared orders.
-- Integrate EnergyToken for payments (transfer from buyer to seller, or via vault).
-- Implement `assessPenalty` (e.g. call StakingVault or burn) and `raiseDispute` (state + event).
-- Add `finalizeTimeSlot` and guard settlement so a slot can only be settled after oracle finalization and market clear.
-
-**Acceptance:** All interface functions implemented; unit tests for net position and payment; integration test with EnergyToken + EnergyMarket + EnergyOracle.
+**معیار پذیرش:** سبد خرید در ناوبری‌ها ماندگار است؛ تسویه‌حساب خلاصهٔ سفارش را نشان می‌دهد؛ محصولات متصل در بخش «یوتیلیتی‌های من» وقتی وصل باشند نمایش داده می‌شوند.
 
 ---
 
-### [NEW-4] GovernanceDAO implementation (Phase 5)
-**Priority:** Medium  
-**Labels:** `smart-contract`, `phase-5`
+### [NEW-2] EnergyMarket: وثیقهٔ توکن هنگام ثبت سفارش
+**اولویت:** بالا
+**برچسب‌ها:** `smart-contract`, `phase-3`
 
-- Implement proposal creation with voting period and snapshot of voting power (e.g. from EnergyToken balance or StakingVault stake).
-- Implement `castVote`, `hasVoted`, `getVote`, and simple majority execution (e.g. call a target contract or emit execution params).
-- Add `cancelProposal` (e.g. only proposer or timelock).
-- Document how “execution” works (parameter change vs. contract call).
+- در حال حاضر سفارش‌ها فقط قصدی هستند (بدون قفل توکن). یکپارچگی با EnergyToken اضافه شود: در `placeAsk`، توکن‌های فروشنده به‌اندازهٔ مقدار سفارش قفل شود؛ در `placeBid`، توکن‌های خریدار (یا وثیقهٔ جداگانه) قفل شود.
+- در `clearAuction`، بین طرفین تطبیق‌یافته توکن منتقل شود یا قفل‌ها آزاد شوند.
+- قواعد وثیقه/قفل تعریف و مستند شود (مثلاً قفل تا زمان تسویه یا لغو).
 
-**Acceptance:** Proposals can be created, voted on, and marked executable; execution step is defined and tested.
-
----
-
-### [NEW-5] UI: Contract addresses and ABIs in env
-**Priority:** Medium  
-**Labels:** `ui`, `phase-7`
-
-- Add `VITE_*` env vars for EnergyToken, EnergyMarket, PanelRegistry, StakingVault, etc.
-- Load ABIs from build output (e.g. `out/EnergyToken.sol/EnergyToken.json`) or a dedicated `ui/abis/` folder.
-- Expose contract instances in Web3Context (or a ContractsContext) so views can call read/write without hardcoding.
-
-**Acceptance:** All contract addresses and ABIs come from env + build; one place (e.g. context) provides contract instances.
+**معیار پذیرش:** ثبت پیشنهاد فروش/خرید مقدار لازم EnergyToken را قفل می‌کند؛ تسویه یا لغو به‌درستی آزاد یا منتقل می‌کند؛ تست‌ها مسیرهای قفل/باز کردن قفل را پوشش می‌دهند.
 
 ---
 
-### [NEW-6] UI: Real-time order book and clearing price
-**Priority:** Medium  
-**Labels:** `ui`, `phase-7`
+### [NEW-3] پیاده‌سازی SettlementEngine (فاز ۴)
+**اولویت:** بالا
+**برچسب‌ها:** `smart-contract`, `phase-4`
 
-- Energy Market view: fetch `getOrderBook(timeSlot)` and `getAuction(timeSlot)` from EnergyMarket contract.
-- Display bids/asks in a table or order-book style; show clearing price and cleared quantity after auction clear.
-- Support selecting time slot (e.g. next slot id or timestamp-based slot).
+- محاسبهٔ موقعیت خالص هر شرکت‌کننده از تولید EnergyOracle و سفارش‌های تسویه‌شدهٔ EnergyMarket پیاده‌سازی شود.
+- یکپارچگی EnergyToken برای پرداخت‌ها (انتقال از خریدار به فروشنده، یا از طریق vault).
+- `assessPenalty` (مثلاً فراخوانی StakingVault یا سوزاندن) و `raiseDispute` (وضعیت + رویداد) پیاده‌سازی شود.
+- `finalizeTimeSlot` اضافه شود و تسویه محافظت شود تا یک بازه فقط پس از نهایی‌سازی اوراکل و تسویهٔ بازار قابل تسویه باشد.
 
-**Acceptance:** Order book and auction state reflect on-chain data; clearing price visible after clear.
-
----
-
-### [NEW-7] PanelRegistry: Link to PanelNFT ownership
-**Priority:** Medium  
-**Labels:** `smart-contract`, `phase-1`
-
-- Restrict `registerPanel` so that `owner` must be the current `ownerOf(tokenId)` on a PanelNFT contract (inject IPanelNFT and token address).
-- Optionally restrict `reportProduction` or panel updates to registry to the panel owner or an authorized reporter only.
-
-**Acceptance:** Only the current PanelNFT owner (or authorized registrar) can register a panel; tests verify reverts when not owner.
+**معیار پذیرش:** همهٔ توابع اینترفیس پیاده‌سازی شده‌اند؛ تست واحد برای موقعیت خالص و پرداخت؛ تست یکپارچگی با EnergyToken + EnergyMarket + EnergyOracle.
 
 ---
 
-### [NEW-8] EnergyOracle: Multi-oracle / consensus
-**Priority:** Medium  
-**Labels:** `smart-contract`, `phase-2`
+### [NEW-4] پیاده‌سازی GovernanceDAO (فاز ۵)
+**اولویت:** متوسط
+**برچسب‌ها:** `smart-contract`, `phase-5`
 
-- Allow multiple oracle addresses; require N-of-M to report the same (panelId, timestamp, energyWh) before accepting.
-- Or: keep single oracle but add “confirm” step by a second role before `finalizeTimeSlot` (e.g. auditor).
-- Document trust model and gas impact.
+- ایجاد پیشنهاد با دورهٔ رأی‌گیری و اسنپ‌شات قدرت رأی (مثلاً از موجودی EnergyToken یا استیک StakingVault) پیاده‌سازی شود.
+- `castVote`، `hasVoted`، `getVote` و اجرای اکثریت ساده (مثلاً فراخوانی یک قرارداد هدف یا انتشار پارامترهای اجرا) پیاده‌سازی شود.
+- `cancelProposal` اضافه شود (مثلاً فقط پیشنهاددهنده یا timelock).
+- مستند شود که «اجرا» چگونه کار می‌کند (تغییر پارامتر در برابر فراخوانی قرارداد).
 
-**Acceptance:** Design doc and (if implemented) tests for multi-oracle or confirm flow.
-
----
-
-## Infrastructure & DX
-
-### [NEW-9] Deployment scripts (Foundry + env)
-**Priority:** High  
-**Labels:** `devops`, `phase-8`
-
-- Add `script/Deploy.s.sol` (or similar) to deploy EnergyToken, PanelNFT, PanelRegistry, StakingVault, EnergyOracle, EnergyMarket in dependency order.
-- Use env or CLI for RPC and deployer key; output deployed addresses to a JSON file or stdout for UI env.
-- Document local (Anvil) and testnet (e.g. Sepolia) deployment steps.
-
-**Acceptance:** One command (e.g. `forge script script/Deploy.s.sol`) deploys full stack; addresses are written for UI consumption.
+**معیار پذیرش:** پیشنهادها قابل ایجاد، رأی‌گیری و علامت‌گذاری برای اجرا هستند؛ مرحلهٔ اجرا تعریف و تست شده است.
 
 ---
 
-### [NEW-10] SDK or client library (JS/TS)
-**Priority:** Low  
-**Labels:** `sdk`, `phase-8`
+### [NEW-5] رابط کاربری: آدرس‌ها و ABIهای قرارداد در env
+**اولویت:** متوسط
+**برچسب‌ها:** `ui`, `phase-7`
 
-- Provide a small JS/TS package that wraps contract calls (ethers/viem): deploy addresses + ABIs, methods for mint, placeBid, placeAsk, clearAuction, getOrderBook, etc.
-- Optional: event subscriptions for OrderPlaced, AuctionCleared, SettlementExecuted.
+- متغیرهای env با پیشوند `VITE_*` برای EnergyToken، EnergyMarket، PanelRegistry، StakingVault و... اضافه شود.
+- ABIها از خروجی بیلد (مثلاً `out/EnergyToken.sol/EnergyToken.json`) یا یک پوشهٔ اختصاصی `ui/abis/` بارگذاری شود.
+- نمونه‌های قرارداد در Web3Context (یا یک ContractsContext) در معرض قرار گیرند تا نماها بدون کدنویسی سخت بتوانند خواندن/نوشتن انجام دهند.
 
-**Acceptance:** Package can be imported in a Node or browser app and used to interact with a deployed GRIDSET suite.
-
----
-
-### [NEW-11] E2E tests (Playwright or Cypress)
-**Priority:** Medium  
-**Labels:** `testing`, `phase-6`
-
-- Add E2E tests for: connect wallet, navigate to Market, place (mock) bid/ask, navigate to Utilities, add to cart.
-- Run against local chain (Anvil) + local UI with deployed contracts, or against a static build with mocked contracts.
-
-**Acceptance:** At least 3 critical user flows covered; CI runs E2E on PR.
+**معیار پذیرش:** همهٔ آدرس‌ها و ABIهای قرارداد از env + بیلد می‌آیند؛ یک محل واحد (مثلاً context) نمونه‌های قرارداد را فراهم می‌کند.
 
 ---
 
-### [NEW-12] Gas optimization pass
-**Priority:** Low  
-**Labels:** `optimization`, `issue-11`
+### [NEW-6] رابط کاربری: دفتر سفارش و قیمت تسویهٔ بلادرنگ
+**اولویت:** متوسط
+**برچسب‌ها:** `ui`, `phase-7`
 
-- Profile EnergyMarket.clearAuction (sorting + loop), PanelRegistry.getProductionInTimeSlot (loop), and StakingVault deposit/withdraw.
-- Apply optimizations (batch storage, reduce loops, use calldata where possible) and document trade-offs.
+- نمای بازار انرژی: `getOrderBook(timeSlot)` و `getAuction(timeSlot)` از قرارداد EnergyMarket گرفته شود.
+- پیشنهادهای خرید/فروش در یک جدول یا سبک دفتر سفارش نمایش داده شوند؛ قیمت تسویه و مقدار تسویه‌شده پس از تسویهٔ حراج نمایش داده شود.
+- انتخاب بازهٔ زمانی پشتیبانی شود (مثلاً شناسهٔ بازهٔ بعدی یا بازهٔ مبتنی بر timestamp).
 
-**Acceptance:** Gas report before/after; no behavior change; notes in code or docs.
-
----
-
-## Product & UX
-
-### [NEW-13] Utilities: Product detail page and filters
-**Priority:** Low  
-**Labels:** `ui`, `enhancement`
-
-- Add a detail view/modal for each product (full specs, gallery, “Add to cart”).
-- Add filters: price range, capacity range, brand, category (power bank vs station vs cell).
-- Optional: sort by price, rating, newest.
-
-**Acceptance:** Clicking a product opens detail; filters and sort update the product list.
+**معیار پذیرش:** دفتر سفارش و وضعیت حراج داده‌های روی‌زنجیره را منعکس می‌کنند؛ قیمت تسویه پس از تسویه قابل مشاهده است.
 
 ---
 
-### [NEW-14] Dashboard: Real metrics from contracts
-**Priority:** Medium  
-**Labels:** `ui`, `phase-7`
+### [NEW-7] PanelRegistry: اتصال به مالکیت PanelNFT
+**اولویت:** متوسط
+**برچسب‌ها:** `smart-contract`, `phase-1`
 
-- Replace mock dashboard data with reads from contracts: total supply (EnergyToken), total staked (StakingVault), registered panels count (PanelRegistry), last clearing price (EnergyMarket).
-- Add loading and error states; consider caching or polling interval.
+- `registerPanel` محدود شود به‌طوری‌که `owner` باید مالک فعلیِ `ownerOf(tokenId)` روی یک قرارداد PanelNFT باشد (تزریق IPanelNFT و آدرس توکن).
+- اختیاری: `reportProduction` یا به‌روزرسانی پنل در رجیستری فقط به مالک پنل یا یک گزارش‌دهندهٔ مجاز محدود شود.
 
-**Acceptance:** Dashboard numbers reflect on-chain state when wallet connected and contracts configured.
-
----
-
-### [NEW-15] Notifications or activity feed
-**Priority:** Low  
-**Labels:** `ui`, `enhancement`
-
-- Show recent activity: “Auction cleared for slot X”, “Proposal #Y created”, “Your order filled”.
-- Source: contract events (via indexer or provider.getLogs) or backend that indexes events.
-- Design as a sidebar widget or a dedicated “Activity” view.
-
-**Acceptance:** At least one event type (e.g. auction cleared) appears in the UI from chain/indexer.
+**معیار پذیرش:** فقط مالک فعلی PanelNFT (یا ثبت‌کنندهٔ مجاز) می‌تواند یک پنل را ثبت کند؛ تست‌ها revert در حالت غیرمالک را تأیید می‌کنند.
 
 ---
 
-## Security & Compliance
+### [NEW-8] EnergyOracle: چند‌اوراکلی / اجماع
+**اولویت:** متوسط
+**برچسب‌ها:** `smart-contract`, `phase-2`
 
-### [NEW-16] Slither / Aderyn (or similar) static analysis
-**Priority:** Medium  
-**Labels:** `security`, `phase-6`
+- امکان چند آدرس اوراکل فراهم شود؛ نیاز به N-از-M برای گزارش همان (panelId, timestamp, energyWh) پیش از پذیرش.
+- یا: تک اوراکل نگه داشته شود ولی یک مرحلهٔ «تأیید» توسط نقش دوم پیش از `finalizeTimeSlot` اضافه شود (مثلاً ممیز).
+- مدل اعتماد و تأثیر گس مستند شود.
 
-- Add Slither (or Aderyn) to CI; fix or document all high/medium findings.
-- Optionally add a security checklist (e.g. access control, reentrancy, integer overflow) in CONTRIBUTING or docs.
-
-**Acceptance:** CI runs static analysis; no unacknowledged high/medium in main branch.
-
----
-
-### [NEW-17] Rate limiting or circuit breaker on market/oracle
-**Priority:** Low  
-**Labels:** `smart-contract`, `security`
-
-- Consider rate limits (e.g. max orders per user per slot) or pause by owner in EnergyMarket to mitigate abuse or bugs.
-- Document operational runbook (when to pause, who can unpause).
-
-**Acceptance:** Design doc or implemented pause/rate limit with tests and docs.
+**معیار پذیرش:** سند طراحی و (در صورت پیاده‌سازی) تست برای جریان چند‌اوراکلی یا تأیید.
 
 ---
 
-## Summary
+## زیرساخت و تجربهٔ توسعه‌دهنده
 
-| Id      | Title (short)                          | Priority |
+### [NEW-9] اسکریپت‌های استقرار (Foundry + env)
+**اولویت:** بالا
+**برچسب‌ها:** `devops`, `phase-8`
+
+- `script/Deploy.s.sol` (یا مشابه) برای استقرار EnergyToken، PanelNFT، PanelRegistry، StakingVault، EnergyOracle، EnergyMarket به ترتیب وابستگی اضافه شود.
+- از env یا CLI برای RPC و کلید استقرار‌دهنده استفاده شود؛ آدرس‌های مستقرشده در یک فایل JSON یا stdout برای env رابط کاربری خروجی داده شود.
+- مراحل استقرار محلی (Anvil) و تست‌نت (مثلاً Sepolia) مستند شود.
+
+**معیار پذیرش:** یک دستور (مثلاً `forge script script/Deploy.s.sol`) کل مجموعه را مستقر می‌کند؛ آدرس‌ها برای استفادهٔ رابط کاربری نوشته می‌شوند.
+
+---
+
+### [NEW-10] SDK یا کتابخانهٔ کلاینت (JS/TS)
+**اولویت:** پایین
+**برچسب‌ها:** `sdk`, `phase-8`
+
+- یک پکیج کوچک JS/TS ارائه شود که فراخوانی‌های قرارداد را در بر می‌گیرد (ethers/viem): آدرس‌های استقرار + ABIها، متدهایی برای mint، placeBid، placeAsk، clearAuction، getOrderBook و...
+- اختیاری: اشتراک رویدادها برای OrderPlaced، AuctionCleared، SettlementExecuted.
+
+**معیار پذیرش:** پکیج در یک اپلیکیشن Node یا مرورگر قابل import است و می‌تواند با یک مجموعهٔ GRIDSETِ مستقرشده تعامل کند.
+
+---
+
+### [NEW-11] تست‌های E2E (Playwright یا Cypress)
+**اولویت:** متوسط
+**برچسب‌ها:** `testing`, `phase-6`
+
+- تست‌های E2E برای موارد زیر اضافه شود: اتصال کیف پول، ناوبری به بازار، ثبت پیشنهاد خرید/فروش (ساختگی)، ناوبری به یوتیلیتی‌ها، افزودن به سبد.
+- در برابر زنجیرهٔ محلی (Anvil) + رابط کاربری محلی با قراردادهای مستقرشده، یا در برابر یک بیلد ثابت با قراردادهای ساختگی اجرا شود.
+
+**معیار پذیرش:** حداقل ۳ جریان کاربریِ حیاتی پوشش داده شده؛ CI روی هر PR، E2E را اجرا می‌کند.
+
+---
+
+### [NEW-12] گذر بهینه‌سازی گس
+**اولویت:** پایین
+**برچسب‌ها:** `optimization`, `issue-11`
+
+- پروفایل‌گیری از EnergyMarket.clearAuction (مرتب‌سازی + حلقه)، PanelRegistry.getProductionInTimeSlot (حلقه) و StakingVault deposit/withdraw.
+- بهینه‌سازی‌ها اعمال شود (storage دسته‌ای، کاهش حلقه‌ها، استفاده از calldata در صورت امکان) و موازنه‌ها مستند شود.
+
+**معیار پذیرش:** گزارش گس پیش/پس؛ بدون تغییر رفتار؛ یادداشت در کد یا مستندات.
+
+---
+
+## محصول و تجربهٔ کاربری
+
+### [NEW-13] یوتیلیتی‌ها: صفحهٔ جزئیات محصول و فیلترها
+**اولویت:** پایین
+**برچسب‌ها:** `ui`, `enhancement`
+
+- یک نمای/مودال جزئیات برای هر محصول اضافه شود (مشخصات کامل، گالری، «افزودن به سبد»).
+- فیلترها اضافه شود: بازهٔ قیمت، بازهٔ ظرفیت، برند، دسته (پاوربانک در برابر ایستگاه در برابر سلول).
+- اختیاری: مرتب‌سازی بر اساس قیمت، امتیاز، جدیدترین.
+
+**معیار پذیرش:** کلیک روی محصول جزئیات را باز می‌کند؛ فیلتر و مرتب‌سازی فهرست محصول را به‌روز می‌کنند.
+
+---
+
+### [NEW-14] داشبورد: متریک‌های واقعی از قراردادها
+**اولویت:** متوسط
+**برچسب‌ها:** `ui`, `phase-7`
+
+- داده‌های ساختگی داشبورد با خواندن از قراردادها جایگزین شود: total supply (EnergyToken)، total staked (StakingVault)، تعداد پنل‌های ثبت‌شده (PanelRegistry)، آخرین قیمت تسویه (EnergyMarket).
+- حالت‌های بارگذاری و خطا اضافه شود؛ کش یا فاصلهٔ polling در نظر گرفته شود.
+
+**معیار پذیرش:** اعداد داشبورد وقتی کیف پول وصل و قراردادها پیکربندی شده باشند، وضعیت روی‌زنجیره را منعکس می‌کنند.
+
+---
+
+### [NEW-15] اعلان‌ها یا فید فعالیت
+**اولویت:** پایین
+**برچسب‌ها:** `ui`, `enhancement`
+
+- فعالیت اخیر نمایش داده شود: «حراج برای بازهٔ X تسویه شد»، «پیشنهاد #Y ایجاد شد»، «سفارش شما پر شد».
+- منبع: رویدادهای قرارداد (از طریق ایندکسر یا provider.getLogs) یا یک بک‌اند که رویدادها را ایندکس می‌کند.
+- به‌صورت ویجت سایدبار یا یک نمای اختصاصیِ «فعالیت» طراحی شود.
+
+**معیار پذیرش:** حداقل یک نوع رویداد (مثلاً تسویهٔ حراج) از زنجیره/ایندکسر در رابط کاربری نمایش داده می‌شود.
+
+---
+
+## امنیت و انطباق
+
+### [NEW-16] تحلیل استاتیک Slither / Aderyn (یا مشابه)
+**اولویت:** متوسط
+**برچسب‌ها:** `security`, `phase-6`
+
+- Slither (یا Aderyn) به CI اضافه شود؛ همهٔ یافته‌های high/medium رفع یا مستند شود.
+- اختیاری: یک چک‌لیست امنیتی (مثلاً کنترل دسترسی، reentrancy، سرریز عدد صحیح) در CONTRIBUTING یا مستندات اضافه شود.
+
+**معیار پذیرش:** CI تحلیل استاتیک را اجرا می‌کند؛ هیچ high/medium بدون تأیید در برنچ اصلی وجود ندارد.
+
+---
+
+### [NEW-17] محدودسازی نرخ یا قطع‌کنندهٔ مدار روی بازار/اوراکل
+**اولویت:** پایین
+**برچسب‌ها:** `smart-contract`, `security`
+
+- محدودیت نرخ (مثلاً حداکثر سفارش به ازای هر کاربر در هر بازه) یا توقف توسط مالک در EnergyMarket برای کاهش سوءاستفاده یا باگ در نظر گرفته شود.
+- رانبوک عملیاتی مستند شود (چه زمانی توقف شود، چه کسی می‌تواند لغو کند).
+
+**معیار پذیرش:** سند طراحی یا توقف/محدودیت نرخِ پیاده‌سازی‌شده با تست و مستندات.
+
+---
+
+## خلاصه
+
+| شناسه | عنوان (کوتاه) | اولویت |
 |---------|----------------------------------------|----------|
-| NEW-1   | Utilities cart, checkout, GRID linking  | Medium   |
-| NEW-2   | EnergyMarket token escrow              | High     |
-| NEW-3   | SettlementEngine implementation        | High     |
-| NEW-4   | GovernanceDAO implementation           | Medium   |
-| NEW-5   | UI: Contract addresses and ABIs in env | Medium   |
-| NEW-6   | UI: Real-time order book               | Medium   |
-| NEW-7   | PanelRegistry link to PanelNFT         | Medium   |
-| NEW-8   | EnergyOracle multi-oracle              | Medium   |
-| NEW-9   | Deployment scripts                     | High     |
-| NEW-10  | SDK / client library                   | Low      |
-| NEW-11  | E2E tests                              | Medium   |
-| NEW-12  | Gas optimization pass                  | Low      |
-| NEW-13  | Utilities detail page and filters      | Low      |
-| NEW-14  | Dashboard real metrics                 | Medium   |
-| NEW-15  | Notifications / activity feed          | Low      |
-| NEW-16  | Static analysis (Slither/Aderyn)       | Medium   |
-| NEW-17  | Rate limit / circuit breaker           | Low      |
+| NEW-1   | سبد خرید یوتیلیتی‌ها، تسویه‌حساب، اتصال GRID  | متوسط   |
+| NEW-2   | وثیقهٔ توکن EnergyMarket              | بالا     |
+| NEW-3   | پیاده‌سازی SettlementEngine        | بالا     |
+| NEW-4   | پیاده‌سازی GovernanceDAO           | متوسط   |
+| NEW-5   | رابط کاربری: آدرس‌ها و ABIها در env | متوسط   |
+| NEW-6   | رابط کاربری: دفتر سفارش بلادرنگ               | متوسط   |
+| NEW-7   | اتصال PanelRegistry به PanelNFT         | متوسط   |
+| NEW-8   | چند‌اوراکلیِ EnergyOracle              | متوسط   |
+| NEW-9   | اسکریپت‌های استقرار                     | بالا     |
+| NEW-10  | SDK / کتابخانهٔ کلاینت                   | پایین    |
+| NEW-11  | تست‌های E2E                              | متوسط   |
+| NEW-12  | گذر بهینه‌سازی گس                  | پایین    |
+| NEW-13  | صفحهٔ جزئیات و فیلترهای یوتیلیتی‌ها      | پایین    |
+| NEW-14  | متریک‌های واقعی داشبورد                 | متوسط   |
+| NEW-15  | اعلان‌ها / فید فعالیت          | پایین    |
+| NEW-16  | تحلیل استاتیک (Slither/Aderyn)       | متوسط   |
+| NEW-17  | محدودیت نرخ / قطع‌کنندهٔ مدار           | پایین    |
 
-Use this list to create GitHub issues (e.g. title “NEW-1: Utilities cart, checkout, GRID linking” and paste the body from above).
+از این فهرست برای ایجاد ایشوهای گیت‌هاب استفاده کنید (مثلاً عنوان «NEW-1: سبد خرید یوتیلیتی‌ها، تسویه‌حساب، اتصال GRID» و چسباندن متن از بالا).

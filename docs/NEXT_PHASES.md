@@ -1,63 +1,63 @@
-# Next Phases
+# فازهای بعدی
 
-Summary of where the project is and recommended next steps. See [ROADMAP.md](../ROADMAP.md) and [NEW_ISSUES.md](NEW_ISSUES.md) for full context.
-
----
-
-## Current state (done)
-
-- **Phases 1–8:** Core contracts, Oracle, Market (with escrow), Settlement, Governance, testing, UI integration, docs, deployment script — all completed.
-- **Enhancements done:** Gas optimization (#11), multi-chain support (#12), dashboard metrics (#13).
-- **NEW issues done:** NEW-1, NEW-2, NEW-5, NEW-6, NEW-7, NEW-8, NEW-9, NEW-10 (SDK), NEW-11 (E2E), NEW-12, NEW-13, NEW-14, NEW-15, NEW-16 (Slither doc), NEW-17 (pause + doc).
-- **140 Forge tests** passing; demo mode, confirmation flows, and testnet-ready UI in place.
+خلاصه‌ای از جایگاه فعلی پروژه و گام‌های بعدی پیشنهادی. برای زمینهٔ کامل [ROADMAP.md](../ROADMAP.md) و [NEW_ISSUES.md](NEW_ISSUES.md) را ببینید.
 
 ---
 
-## Immediate next phases
+## وضعیت فعلی (انجام‌شده)
 
-### Phase 9: Testnet deployment & community testing (in progress)
-
-**Goal:** Run a real testnet (e.g. Sepolia), verify contracts, and collect feedback.
-
-- **Deploy:** Use [DEPLOYMENT.md](DEPLOYMENT.md) and `script/deploy-sepolia.sh` (or `Deploy.s.sol`). Ensure deployer has testnet ETH (faucet).
-- **UI:** Set `ui/.env` with `VITE_*` contract addresses; run UI and test connect, market, wallet, staking, governance.
-- **Verify:** Contract verification on block explorer (Sepolia).
-- **Test:** End-to-end flows (register panel, place bid/ask, clear auction, settle, stake, create proposal, vote). Fix bugs and iterate.
-- **Docs:** Keep [TESTNET.md](TESTNET.md) and release notes updated; optional “Testnet live” announcement.
-
-**Output:** Stable testnet deployment and a short testnet report (what was tested, known limitations).
+- **فازهای ۱ تا ۸:** قراردادهای هسته، اوراکل، بازار (با وثیقه)، تسویه، حاکمیت، تست‌نویسی، یکپارچگی رابط کاربری، مستندات، اسکریپت استقرار — همه تکمیل شده‌اند.
+- **بهبودهای انجام‌شده:** بهینه‌سازی گس (#11)، پشتیبانی چندزنجیره‌ای (#12)، متریک‌های داشبورد (#13).
+- **ایشوهای NEW انجام‌شده:** NEW-1، NEW-2، NEW-5، NEW-6، NEW-7، NEW-8، NEW-9، NEW-10 (SDK)، NEW-11 (E2E)، NEW-12، NEW-13، NEW-14، NEW-15، NEW-16 (مستند Slither)، NEW-17 (توقف + مستند).
+- **۱۴۰ تست Forge** موفق؛ حالت دمو، جریان‌های تأیید و رابط کاربری آمادهٔ تست‌نت برقرار است.
 
 ---
 
-### Phase 10: Mainnet preparation & launch
+## فازهای بعدیِ فوری
 
-**Goal:** Complete pre-mainnet checklist, then deploy and launch mainnet.
+### فاز ۹: استقرار تست‌نت و تست جمعی (در حال انجام)
 
-- **Pre-mainnet:** Follow [MAINNET_CHECKLIST.md](MAINNET_CHECKLIST.md):
-  - Security: audit (and/or bounty) when ready; update SECURITY.md and ROADMAP Phase 6.
-  - Testnet: Phase 9 done; critical bugs fixed.
-  - Code: 131+ tests passing; deployment script and roles (owner, minter, locker, penalizer) defined; multisig/timelock if desired.
-  - Docs: README/ROADMAP and public mainnet chain/explorer/addresses.
-- **Deploy:** Mainnet RPC and secure key management; run deploy script; verify contracts; set and verify roles.
-- **UI:** Production build with mainnet addresses and chain ID; no testnet keys or debug flags.
-- **Post-deploy:** Monitoring (RPC, events, errors); launch announcement; support channel and incident process.
+**هدف:** اجرای یک تست‌نت واقعی (مثلاً Sepolia)، تأیید قراردادها و جمع‌آوری بازخورد.
 
-**Output:** Mainnet live with monitoring and clear ownership/ops plan.
+- **استقرار:** از [DEPLOYMENT.md](DEPLOYMENT.md) و `script/deploy-sepolia.sh` (یا `Deploy.s.sol`) استفاده کنید. مطمئن شوید استقرار‌دهنده ETH تست‌نت دارد (فاست).
+- **رابط کاربری:** آدرس‌های قرارداد `VITE_*` را در `ui/.env` تنظیم کنید؛ رابط کاربری را اجرا کنید و اتصال، بازار، کیف پول، استیکینگ و حاکمیت را تست کنید.
+- **تأیید:** تأیید قرارداد روی block explorer (Sepolia).
+- **تست:** جریان‌های سرتاسری (ثبت پنل، ثبت پیشنهاد خرید/فروش، تسویهٔ حراج، settle، استیک، ایجاد پیشنهاد، رأی‌گیری). باگ‌ها را رفع و تکرار کنید.
+- **مستندات:** [TESTNET.md](TESTNET.md) و یادداشت‌های انتشار را به‌روز نگه دارید؛ اطلاعیهٔ اختیاری «تست‌نت فعال».
 
----
-
-## Backlog (after testnet / mainnet)
-
-Prioritized by impact; can be scheduled in parallel with Phase 9/10 where it makes sense.
-
-Backlog cleared for NEW-10, NEW-11, NEW-16, NEW-17. Remaining optional: further E2E coverage, Aderyn, stricter Slither policy.
+**خروجی:** استقرار پایدار تست‌نت و یک گزارش کوتاه تست‌نت (چه چیزی تست شد، محدودیت‌های شناخته‌شده).
 
 ---
 
-## Suggested order
+### فاز ۱۰: آماده‌سازی و راه‌اندازی مین‌نت
 
-1. **Now:** Finish Phase 9 — get testnet deployed (faucet if needed), verify, run full user flows, document.
-2. **Next:** Phase 10 — complete mainnet checklist (audit when ready, testnet sign-off, roles, docs), then mainnet deploy and monitoring.
-3. **In parallel or after:** Optional: more E2E coverage, Aderyn, or stricter Slither policy.
+**هدف:** تکمیل چک‌لیست پیش از مین‌نت، سپس استقرار و راه‌اندازی مین‌نت.
 
-For detailed issue text and acceptance criteria, see [NEW_ISSUES.md](NEW_ISSUES.md).
+- **پیش از مین‌نت:** طبق [MAINNET_CHECKLIST.md](MAINNET_CHECKLIST.md) عمل کنید:
+  - امنیت: ممیزی (و/یا باگ‌بانتی) در زمان آماده بودن؛ SECURITY.md و فاز ۶ ROADMAP را به‌روز کنید.
+  - تست‌نت: فاز ۹ انجام شده؛ باگ‌های حیاتی رفع شده‌اند.
+  - کد: ۱۳۱+ تست موفق؛ اسکریپت استقرار و نقش‌ها (owner، minter، locker، penalizer) تعریف شده؛ در صورت تمایل multisig/timelock.
+  - مستندات: README/ROADMAP و شبکه/explorer/آدرس‌های عمومی مین‌نت.
+- **استقرار:** RPC مین‌نت و مدیریت امن کلید؛ اجرای اسکریپت استقرار؛ تأیید قراردادها؛ تنظیم و تأیید نقش‌ها.
+- **رابط کاربری:** بیلد تولیدی با آدرس‌های مین‌نت و شناسهٔ زنجیره؛ بدون کلید تست‌نت یا پرچم دیباگ.
+- **پس از استقرار:** پایش (RPC، رویدادها، خطاها)؛ اطلاعیهٔ راه‌اندازی؛ کانال پشتیبانی و فرآیند رخداد.
+
+**خروجی:** مین‌نت فعال با پایش و برنامهٔ روشن مالکیت/عملیات.
+
+---
+
+## بک‌لاگ (پس از تست‌نت / مین‌نت)
+
+بر اساس تأثیر اولویت‌بندی شده؛ در صورت لزوم می‌تواند به‌موازات فاز ۹/۱۰ برنامه‌ریزی شود.
+
+بک‌لاگ NEW-10، NEW-11، NEW-16، NEW-17 پاک‌سازی شده است. باقیمانده اختیاری: پوشش بیشتر E2E، Aderyn، سیاست سخت‌گیرانه‌تر Slither.
+
+---
+
+## ترتیب پیشنهادی
+
+۱. **اکنون:** فاز ۹ را تمام کنید — تست‌نت را مستقر کنید (در صورت نیاز فاست)، تأیید کنید، جریان‌های کامل کاربری را اجرا کنید، مستند کنید.
+۲. **بعدی:** فاز ۱۰ — چک‌لیست مین‌نت را تکمیل کنید (ممیزی وقتی آماده شد، تأیید تست‌نت، نقش‌ها، مستندات)، سپس استقرار و پایش مین‌نت.
+۳. **به‌موازات یا پس از آن:** اختیاری: پوشش بیشتر E2E، Aderyn، یا سیاست سخت‌گیرانه‌تر Slither.
+
+برای متن کامل ایشوها و معیارهای پذیرش، [NEW_ISSUES.md](NEW_ISSUES.md) را ببینید.

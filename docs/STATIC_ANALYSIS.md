@@ -1,39 +1,39 @@
-# Static Analysis (Slither)
+# تحلیل استاتیک (Slither)
 
-The project runs [Slither](https://github.com/crytic/slither) in CI (`.github/workflows/ci.yml`) to report potential issues in Solidity contracts.
+این پروژه [Slither](https://github.com/crytic/slither) را در CI (`.github/workflows/ci.yml`) اجرا می‌کند تا مشکلات احتمالی قراردادهای Solidity را گزارش دهد.
 
-## Running locally
+## اجرای محلی
 
-1. Install Slither (and its deps, e.g. solc-select):
+۱. Slither (و وابستگی‌های آن، مثل solc-select) را نصب کنید:
    ```bash
    pip install slither-analyzer
    ```
 
-2. Build with Foundry so Slither can use the artifacts:
+۲. با Foundry بیلد بگیرید تا Slither بتواند از artifact‌ها استفاده کند:
    ```bash
    forge build
    ```
 
-3. Run Slither (from repo root):
+۳. Slither را اجرا کنید (از ریشهٔ ریپو):
    ```bash
    slither . --compile-force-framework foundry --filter-paths "lib|test"
    ```
 
-The `--filter-paths "lib|test"` option limits analysis to the `src/` contracts and excludes dependencies and tests.
+گزینهٔ `--filter-paths "lib|test"` تحلیل را به قراردادهای `src/` محدود می‌کند و وابستگی‌ها و تست‌ها را کنار می‌گذارد.
 
-## CI behavior
+## رفتار در CI
 
-- The **slither** job runs on push/PR to `main`.
-- It compiles with Foundry, installs Slither, and runs the command above.
-- The step is set to `continue-on-error: true` so CI does not block on findings; the log is available in the workflow run.
-- Before mainnet, consider: addressing or documenting all high/medium findings, or removing `continue-on-error` and fixing remaining issues.
+- جاب **slither** روی هر push/PR به شاخهٔ `main` اجرا می‌شود.
+- با Foundry کامپایل می‌کند، Slither را نصب می‌کند و دستور بالا را اجرا می‌کند.
+- این مرحله با `continue-on-error: true` تنظیم شده تا CI با یافته‌ها متوقف نشود؛ لاگ در اجرای workflow در دسترس است.
+- پیش از مین‌نت، این موارد را در نظر بگیرید: رفع یا مستندسازی همهٔ یافته‌های high/medium، یا حذف `continue-on-error` و رفع مشکلات باقی‌مانده.
 
-## Policy
+## سیاست
 
-- **High/medium:** Fix or document accepted risk (e.g. in code comments or SECURITY.md). Do not leave unacknowledged.
-- **Low/informational:** Optional to fix; can be tracked in issues.
-- Add new contracts under `src/` to the scope; keep `test/` and `lib/` filtered out.
+- **High/medium:** رفع کنید یا ریسک پذیرفته‌شده را مستند کنید (مثلاً در کامنت‌های کد یا SECURITY.md). بدون تأیید رها نکنید.
+- **Low/informational:** رفعشان اختیاری است؛ می‌توان در ایشوها پیگیری کرد.
+- قراردادهای جدید زیر `src/` را در محدودهٔ تحلیل قرار دهید؛ `test/` و `lib/` را فیلترشده نگه دارید.
 
-## Optional: Aderyn
+## گزینهٔ اختیاری: Aderyn
 
-[Aderyn](https://github.com/Cyfrin/aderyn) is an alternative. To use it in CI, add a job that runs `aderyn .` (or equivalent) after `forge build`. The same “fix or document high/medium” policy applies.
+[Aderyn](https://github.com/Cyfrin/aderyn) یک جایگزین است. برای استفاده در CI، جابی اضافه کنید که پس از `forge build`، دستور `aderyn .` (یا معادل آن) را اجرا کند. همان سیاست «رفع یا مستندسازی high/medium» اعمال می‌شود.

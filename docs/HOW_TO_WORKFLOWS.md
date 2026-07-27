@@ -1,147 +1,147 @@
-# GRIDSET App – How-To & User Workflows
+# اپلیکیشن GRIDSET – راهنما و جریان‌های کاری کاربر
 
-This guide describes how different users can use the GRIDSET app: **panel owners**, **market participants (small capital)**, and **long-term infrastructure investors** (batteries, panels, infra).
+این راهنما توضیح می‌دهد که کاربران مختلف چگونه می‌توانند از اپلیکیشن GRIDSET استفاده کنند: **مالکان پنل**، **شرکت‌کنندگان بازار (سرمایهٔ کم)**، و **سرمایه‌گذاران بلندمدت زیرساخت** (باتری، پنل، زیرساخت).
 
 ---
 
-## Personas Overview
+## نمای کلی پرسوناها
 
-| Persona | Goal | Main app areas |
+| پرسونا | هدف | بخش‌های اصلی اپلیکیشن |
 |--------|------|-----------------|
-| **Panel owner** | Monetize production, register panels, get settlements | Panel Registry, Energy Wallet, Settlement, Energy Market (sell) |
-| **Market participant (small)** | Trade energy credits with limited capital | Energy Market, Energy Wallet, Dashboard |
-| **Long-term infra investor** | Buy hardware, stake, govern | Utilities (products), Staking, Governance, Panel Registry |
+| **مالک پنل** | کسب درآمد از تولید، ثبت پنل‌ها، دریافت تسویه | رجیستری پنل، کیف پول انرژی، تسویه، بازار انرژی (فروش) |
+| **شرکت‌کنندهٔ بازار (کوچک)** | معاملهٔ اعتبار انرژی با سرمایهٔ محدود | بازار انرژی، کیف پول انرژی، داشبورد |
+| **سرمایه‌گذار بلندمدت زیرساخت** | خرید سخت‌افزار، استیک، حاکمیت | یوتیلیتی‌ها (محصولات)، استیکینگ، حاکمیت، رجیستری پنل |
 
 ---
 
-## 1. Panel owners (I have panels)
+## ۱. مالکان پنل (پنل دارم)
 
-**Goal:** Register my production assets, receive energy credits for production, sell or use them, and get settled.
+**هدف:** ثبت دارایی‌های تولیدم، دریافت اعتبار انرژی برای تولید، فروش یا استفادهٔ آن‌ها، و دریافت تسویه.
 
-### Workflow
+### جریان کار
 
-1. **Connect wallet** (header). Use a wallet with testnet ETH on Sepolia (or mainnet when live).
-2. **Register panels** (Panel Registry)
-   - Click “Register New Panel”.
-   - Enter capacity (kW), location, installation date, metadata URI.
-   - Confirm via Email / Text / Google; submit. Panel is linked to your wallet.
-3. **View production & balance**
-   - **Energy Wallet:** See total, available, and locked GRID (energy credits). Production and settlements update these.
-   - **Settlement:** View settlement history and net positions per time slot.
-4. **Sell energy credits** (Energy Market)
-   - Go to Energy Market, choose time slot, place an **Ask** (sell) with price and quantity.
-   - Confirm with Email / Text / Google. When the auction clears, you receive payment (or tokens) per protocol rules.
-5. **Optional: Stake** (Staking Vault) to back larger positions or earn governance power.
+۱. **اتصال کیف پول** (هدر). از کیف پولی با ETH تست‌نتِ Sepolia استفاده کنید (یا مین‌نت وقتی فعال شد).
+۲. **ثبت پنل‌ها** (رجیستری پنل)
+   - روی «ثبت پنل جدید» کلیک کنید.
+   - ظرفیت (kW)، مکان، تاریخ نصب و آدرس متادیتا را وارد کنید.
+   - از طریق ایمیل/پیامک/گوگل تأیید کنید؛ ارسال کنید. پنل به کیف پول شما متصل می‌شود.
+۳. **مشاهدهٔ تولید و موجودی**
+   - **کیف پول انرژی:** موجودی کل، در دسترس و قفل‌شدهٔ GRID (اعتبار انرژی) را ببینید. تولید و تسویه‌ها این‌ها را به‌روز می‌کنند.
+   - **تسویه:** تاریخچهٔ تسویه و موقعیت‌های خالص هر بازهٔ زمانی را مشاهده کنید.
+۴. **فروش اعتبار انرژی** (بازار انرژی)
+   - به بازار انرژی بروید، بازهٔ زمانی را انتخاب کنید و یک **پیشنهاد فروش** (Ask) با قیمت و مقدار ثبت کنید.
+   - با ایمیل/پیامک/گوگل تأیید کنید. وقتی حراج تسویه شود، طبق قواعد پروتکل پرداخت (یا توکن) دریافت می‌کنید.
+۵. **اختیاری: استیک کنید** (خزانهٔ استیکینگ) تا از موقعیت‌های بزرگ‌تر پشتیبانی کنید یا قدرت حاکمیت کسب کنید.
 
-### Big picture
+### تصویر کلی
 
-- Panel owners are the **supply side**: they register assets, get credited for production, and can sell GRID in the market or hold for settlement.
-
----
-
-## 2. Market participants (small money, trading)
-
-**Goal:** Buy and sell energy credits in the market with limited capital; no panels.
-
-### Workflow
-
-1. **Connect wallet.** Get testnet ETH from the faucet (Sepolia) so you can pay gas.
-2. **Get GRID** (demo or testnet)
-   - In **demo mode** you start with a simulated balance to try the app.
-   - On testnet/mainnet: receive GRID from a faucet, airdrop, or buy in the market (place a bid and get filled).
-3. **Trade on Energy Market**
-   - **Dashboard** or **Energy Market:** Pick a time slot, see order book (bids/asks).
-   - Place a **Bid** (buy) or **Ask** (sell) with price and quantity. Confirm with Email / Text / Google.
-   - After the auction clears, your balance and positions update.
-4. **Energy Wallet**
-   - Check balance (total, available, locked). Transfer GRID to another address if needed (with confirmation flow).
-5. **Settlement**
-   - If you have a net position in a time slot, view settlement and payments in Settlement.
-
-### Big picture
-
-- Market participants provide **liquidity** and **price discovery**; they trade GRID without owning physical panels.
+- مالکان پنل **سمت عرضه** هستند: دارایی ثبت می‌کنند، برای تولید اعتبار می‌گیرند و می‌توانند GRID را در بازار بفروشند یا برای تسویه نگه دارند.
 
 ---
 
-## 3. Long-term investors (batteries, panels, infra)
+## ۲. شرکت‌کنندگان بازار (پول کم، معامله‌گری)
 
-**Goal:** Buy hardware (batteries, panels, power stations), stake GRID, and participate in governance.
+**هدف:** خرید و فروش اعتبار انرژی در بازار با سرمایهٔ محدود؛ بدون پنل.
 
-### Workflow
+### جریان کار
 
-1. **Connect wallet.**
-2. **Browse and buy hardware** (Utilities)
-   - Browse power banks, power stations, solar cells. Use filters (e.g. capacity, brand).
-   - Add products to **cart**, go to **checkout**, complete order (mock or real per deployment).
-   - Optionally **“Link to GRIDSET”** so the purchase can be tied to your wallet for future energy-credit eligibility.
-3. **Stake GRID** (Staking Vault)
-   - Deposit GRID to increase protocol security and (if applicable) governance weight.
-   - Withdraw when unlocked. Understand lock period and penalties (see Staking info in the app).
-4. **Governance** (Governance DAO)
-   - View **active proposals** (e.g. parameter changes, oracle rules).
-   - **Create a proposal** (title, description, voting period); confirm with Email / Text / Google.
-   - **Vote** For or Against on proposals; confirm with the same flow.
-5. **Panel Registry** (if you deploy new panels)
-   - Same as “Panel owners”: register panels linked to your wallet for production and settlements.
+۱. **اتصال کیف پول.** ETH تست‌نت را از فاست (Sepolia) بگیرید تا بتوانید گس بپردازید.
+۲. **دریافت GRID** (دمو یا تست‌نت)
+   - در **حالت دمو** با یک موجودی شبیه‌سازی‌شده شروع می‌کنید تا اپلیکیشن را امتحان کنید.
+   - روی تست‌نت/مین‌نت: GRID را از فاست، ایردراپ یا خرید در بازار دریافت کنید (یک پیشنهاد خرید ثبت کنید و پر شود).
+۳. **معامله در بازار انرژی**
+   - **داشبورد** یا **بازار انرژی:** یک بازهٔ زمانی انتخاب کنید، دفتر سفارش (پیشنهادهای خرید/فروش) را ببینید.
+   - یک **پیشنهاد خرید** (Bid) یا **پیشنهاد فروش** (Ask) با قیمت و مقدار ثبت کنید. با ایمیل/پیامک/گوگل تأیید کنید.
+   - پس از تسویهٔ حراج، موجودی و موقعیت‌های شما به‌روز می‌شود.
+۴. **کیف پول انرژی**
+   - موجودی (کل، در دسترس، قفل‌شده) را بررسی کنید. در صورت نیاز GRID را به آدرس دیگری منتقل کنید (با جریان تأیید).
+۵. **تسویه**
+   - اگر موقعیت خالصی در یک بازهٔ زمانی دارید، تسویه و پرداخت‌ها را در بخش تسویه ببینید.
 
-### Big picture
+### تصویر کلی
 
-- Long-term investors **consume Utilities**, **stake**, and **govern**; they may also become panel owners over time.
+- شرکت‌کنندگان بازار **نقدینگی** و **کشف قیمت** فراهم می‌کنند؛ بدون مالکیت پنل فیزیکی، GRID معامله می‌کنند.
 
 ---
 
-## App entry points (all users)
+## ۳. سرمایه‌گذاران بلندمدت (باتری، پنل، زیرساخت)
 
-- **Demo mode:** Open the app without connecting; you can try balances, orders, transfers, and confirmations. Connect wallet when you want to use testnet/mainnet.
-- **Connect wallet:** Single CTA in the header. Supports **multiple chains** (Sepolia, OP Sepolia, Ethereum mainnet when deployed). Use the **chain selector** next to your address to switch network.
-- **Confirmations:** Sensitive actions (transfer, place order, stake, register panel, create proposal, vote) use Email / Text (SMS) or Google verification before executing.
+**هدف:** خرید سخت‌افزار (باتری، پنل، ایستگاه برق)، استیک کردن GRID و مشارکت در حاکمیت.
+
+### جریان کار
+
+۱. **اتصال کیف پول.**
+۲. **مرور و خرید سخت‌افزار** (یوتیلیتی‌ها)
+   - پاوربانک‌ها، ایستگاه‌های برق، سلول‌های خورشیدی را مرور کنید. از فیلترها استفاده کنید (مثلاً ظرفیت، برند).
+   - محصولات را به **سبد خرید** اضافه کنید، به **تسویه‌حساب** بروید، سفارش را تکمیل کنید (پرداخت آزمایشی یا واقعی بسته به استقرار).
+   - اختیاری **«اتصال به GRIDSET»** را بزنید تا خرید بتواند برای شایستگی آیندهٔ اعتبار انرژی به کیف پول شما متصل شود.
+۳. **استیک کردن GRID** (خزانهٔ استیکینگ)
+   - برای افزایش امنیت پروتکل و (در صورت اعمال) وزن حاکمیت، GRID واریز کنید.
+   - وقتی باز شد، برداشت کنید. دورهٔ قفل و جریمه‌ها را درک کنید (به اطلاعات استیکینگ در اپلیکیشن نگاه کنید).
+۴. **حاکمیت** (DAO حاکمیت)
+   - **پیشنهادهای فعال** (مثلاً تغییر پارامتر، قواعد اوراکل) را ببینید.
+   - **یک پیشنهاد ایجاد کنید** (عنوان، توضیحات، دورهٔ رأی‌گیری)؛ با ایمیل/پیامک/گوگل تأیید کنید.
+   - به پیشنهادها **رأی** موافق یا مخالف بدهید؛ با همان جریان تأیید کنید.
+۵. **رجیستری پنل** (در صورت استقرار پنل‌های جدید)
+   - مانند «مالکان پنل»: پنل‌های متصل به کیف پول خود را برای تولید و تسویه ثبت کنید.
+
+### تصویر کلی
+
+- سرمایه‌گذاران بلندمدت **از یوتیلیتی‌ها استفاده می‌کنند**، **استیک می‌کنند** و **حاکمیت می‌کنند**؛ ممکن است در طول زمان مالک پنل هم بشوند.
 
 ---
 
-## Where workflows are implemented
+## نقاط ورود اپلیکیشن (همهٔ کاربران)
 
-| Feature | Status / doc |
+- **حالت دمو:** اپلیکیشن را بدون اتصال باز کنید؛ می‌توانید موجودی، سفارش، انتقال و تأییدها را امتحان کنید. وقتی خواستید از تست‌نت/مین‌نت استفاده کنید، کیف پول را وصل کنید.
+- **اتصال کیف پول:** یک دکمهٔ فراخوان اقدام واحد در هدر. از **چند زنجیره** پشتیبانی می‌کند (Sepolia، OP Sepolia، مین‌نت اتریوم وقتی مستقر شود). از **انتخاب‌گر زنجیره** کنار آدرستان برای تغییر شبکه استفاده کنید.
+- **تأییدها:** اقدام‌های حساس (انتقال، ثبت سفارش، استیک، ثبت پنل، ایجاد پیشنهاد، رأی‌گیری) پیش از اجرا از تأیید ایمیل/پیامک (SMS) یا گوگل استفاده می‌کنند.
+
+---
+
+## جای پیاده‌سازیِ جریان‌های کاری
+
+| قابلیت | وضعیت / مستند |
 |--------|----------------|
-| Panel registration + confirmation | Implemented (Panel Registry + ConfirmActionModal) |
-| Energy Market bid/ask + confirmation | Implemented (Energy Market + ConfirmActionModal) |
-| Energy Wallet transfer + confirmation | Implemented (TransferConfirmModal) |
-| Staking deposit/withdraw + confirmation | Implemented (StakingVault + ConfirmActionModal) |
-| Governance create proposal / vote + confirmation | Implemented (Governance + ConfirmActionModal) |
-| Utilities cart, checkout, GRID linking | Implemented (cart in header, checkout with “Link to GRIDSET”, My linked purchases) |
-| Real-time order book from chain | See NEW-6 (issue #19) |
-| Activity feed / notifications | See NEW-15 (issue #28) |
+| ثبت پنل + تأیید | پیاده‌سازی‌شده (رجیستری پنل + ConfirmActionModal) |
+| پیشنهاد خرید/فروش بازار انرژی + تأیید | پیاده‌سازی‌شده (بازار انرژی + ConfirmActionModal) |
+| انتقال کیف پول انرژی + تأیید | پیاده‌سازی‌شده (TransferConfirmModal) |
+| واریز/برداشت استیکینگ + تأیید | پیاده‌سازی‌شده (StakingVault + ConfirmActionModal) |
+| ایجاد پیشنهاد/رأی حاکمیت + تأیید | پیاده‌سازی‌شده (Governance + ConfirmActionModal) |
+| سبد خرید، تسویه‌حساب، اتصال GRID یوتیلیتی‌ها | پیاده‌سازی‌شده (سبد در هدر، تسویه‌حساب با «اتصال به GRIDSET»، بخش «خریدهای متصل من») |
+| دفتر سفارشِ بلادرنگ از زنجیره | به NEW-6 (ایشو #19) نگاه کنید |
+| فید فعالیت / اعلان‌ها | به NEW-15 (ایشو #28) نگاه کنید |
 
 ---
 
-## Completed issues & big picture
+## ایشوهای تکمیل‌شده و تصویر کلی
 
-- **#12 Multi-chain support:** Header chain selector; switch between Sepolia, OP Sepolia, Ethereum. Unsupported chain is highlighted. See [MULTICHAIN.md](MULTICHAIN.md). *Big picture:* Same app for testnets and mainnet; one-click network switch for all personas.
+- **#۱۲ پشتیبانی چندزنجیره‌ای:** انتخاب‌گر زنجیره در هدر؛ تغییر بین Sepolia، OP Sepolia، اتریوم. زنجیرهٔ پشتیبانی‌نشده هایلایت می‌شود. به [MULTICHAIN.md](MULTICHAIN.md) نگاه کنید. *تصویر کلی:* یک اپلیکیشن برای تست‌نت‌ها و مین‌نت؛ تغییر شبکه با یک کلیک برای همهٔ پرسوناها.
 
-- **#14 NEW-1 Utilities cart, checkout, GRID linking:** Cart persists in localStorage and across nav; header cart icon with count; cart drawer with list, quantity, remove; checkout flow with order summary and Email/Text/Google verification; “Link to GRIDSET” checkbox when wallet connected (associates purchase with wallet); “My linked purchases” section in Utilities when connected. *Big picture:* Long-term infra investors can browse, add to cart, checkout (placeholder payment), and link orders to their wallet for future energy-credit eligibility; cart is always available.
+- **#۱۴ NEW-1 سبد خرید یوتیلیتی‌ها، تسویه‌حساب، اتصال GRID:** سبد خرید در localStorage و بین ناوبری‌ها ماندگار است؛ آیکون سبد در هدر با تعداد؛ کشوی سبد با فهرست، تعداد، حذف؛ جریان تسویه‌حساب با خلاصهٔ سفارش و تأیید ایمیل/پیامک/گوگل؛ چک‌باکس «اتصال به GRIDSET» وقتی کیف پول وصل است (خرید را به کیف پول مرتبط می‌کند)؛ بخش «خریدهای متصل من» در یوتیلیتی‌ها وقتی وصل است. *تصویر کلی:* سرمایه‌گذاران بلندمدت زیرساخت می‌توانند مرور کنند، به سبد اضافه کنند، تسویه‌حساب کنند (پرداخت جایگزین)، و سفارش‌ها را به کیف پول خود متصل کنند برای شایستگی آیندهٔ اعتبار انرژی؛ سبد همیشه در دسترس است.
 
-- **#15 NEW-2 EnergyMarket token escrow:** On placeBid the buyer’s EnergyToken is locked (price × quantity); on placeAsk the seller’s quantity is locked. On clearAuction, matched fills are settled via transferLocked (buyer→seller payment, seller→buyer quantity). On cancelOrder, remaining locked amount is unlocked. EnergyToken has transferLocked(from, to, amount); deploy sets EnergyMarket as locker. *Big picture:* Orders are collateralized; no intent-only exposure.
+- **#۱۵ NEW-2 وثیقهٔ توکن EnergyMarket:** با placeBid، EnergyToken خریدار قفل می‌شود (قیمت × مقدار)؛ با placeAsk، مقدار فروشنده قفل می‌شود. در clearAuction، تطبیق‌های انجام‌شده از طریق transferLocked تسویه می‌شوند (پرداخت خریدار به فروشنده، مقدار فروشنده به خریدار). در cancelOrder، مبلغ قفل‌شدهٔ باقیمانده آزاد می‌شود. EnergyToken دارای transferLocked(from, to, amount) است؛ استقرار، EnergyMarket را به‌عنوان locker تنظیم می‌کند. *تصویر کلی:* سفارش‌ها وثیقه‌گذاری‌شده‌اند؛ بدون قرار گرفتن در معرض ریسک فقط بر مبنای قصد.
 
-- **#19 NEW-6 Real-time order book:** Energy Market view fetches getOrderBook(timeSlot) and getAuction(timeSlot) from the EnergyMarket contract. Bids/asks are shown in order-book style; when the slot is cleared, clearing price and cleared quantity are displayed. Time slot selector and refresh load on-chain data; mock data is used when no contract or empty book. *Big picture:* Order book and auction state reflect chain; clearing price visible after clear.
+- **#۱۹ NEW-6 دفتر سفارش بلادرنگ:** نمای بازار انرژی، getOrderBook(timeSlot) و getAuction(timeSlot) را از قرارداد EnergyMarket می‌گیرد. پیشنهادهای خرید/فروش به سبک دفتر سفارش نمایش داده می‌شوند؛ وقتی بازه تسویه شود، قیمت تسویه و مقدار تسویه‌شده نمایش داده می‌شود. انتخاب‌گر بازهٔ زمانی و رفرش، داده‌های روی زنجیره را بارگذاری می‌کنند؛ در نبود قرارداد یا دفتر خالی، از داده‌های ساختگی استفاده می‌شود. *تصویر کلی:* دفتر سفارش و وضعیت حراج منعکس‌کنندهٔ زنجیره هستند؛ قیمت تسویه پس از تسویه قابل مشاهده است.
 
-- **#26 NEW-13 Utilities detail and filters:** Product detail modal (full specs, gallery, Add to cart) opens on card click or “View details”. Filters: category, brand, price range, capacity range. Sort: price low/high, rating, newest. *Big picture:* Clicking a product opens detail; filters and sort update the list.
+- **#۲۶ NEW-13 جزئیات و فیلترهای یوتیلیتی‌ها:** مودال جزئیات محصول (مشخصات کامل، گالری، افزودن به سبد) با کلیک روی کارت یا «مشاهدهٔ جزئیات» باز می‌شود. فیلترها: دسته، برند، بازهٔ قیمت، بازهٔ ظرفیت. مرتب‌سازی: قیمت کم/زیاد، امتیاز، جدیدترین. *تصویر کلی:* کلیک روی محصول جزئیات را باز می‌کند؛ فیلتر و مرتب‌سازی فهرست را به‌روز می‌کنند.
 
-- **#28 NEW-15 Activity feed:** Dedicated “Activity” view (sidebar) shows recent items: “Auction cleared for slot X”, “Proposal #Y created”, “Order filled”. When wallet is connected and EnergyMarket is set, the feed fetches AuctionCleared and OrderPlaced from the contract (last 50k blocks); mock feed when no provider or no events. *Big picture:* At least one event type from chain (auction cleared, order placed) when contracts are deployed.
+- **#۲۸ NEW-15 فید فعالیت:** نمای اختصاصی «فعالیت» (سایدبار) موارد اخیر را نشان می‌دهد: «حراج برای بازهٔ X تسویه شد»، «پیشنهاد #Y ایجاد شد»، «سفارش پر شد». وقتی کیف پول وصل است و EnergyMarket تنظیم شده، فید از قرارداد AuctionCleared و OrderPlaced را می‌گیرد (۵۰ هزار بلاک آخر)؛ در نبود provider یا رویداد، فید ساختگی نمایش داده می‌شود. *تصویر کلی:* حداقل یک نوع رویداد از زنجیره (تسویهٔ حراج، ثبت سفارش) وقتی قراردادها مستقر باشند.
 
-- **NEW-5 UI: Contract addresses and ABIs:** All addresses from VITE_* env; minimal ABIs for EnergyToken, EnergyMarket, StakingVault, PanelRegistry, SettlementEngine, GovernanceDAO, EnergyOracle. Web3Context exposes contracts.panelRegistry, settlementEngine, governanceDAO, energyOracle. *Big picture:* One place provides all contract instances.
+- **NEW-5 رابط کاربری: آدرس‌ها و ABIهای قرارداد:** همهٔ آدرس‌ها از env با پیشوند VITE_*؛ ABIهای حداقلی برای EnergyToken، EnergyMarket، StakingVault، PanelRegistry، SettlementEngine، GovernanceDAO، EnergyOracle. Web3Context موارد contracts.panelRegistry، settlementEngine، governanceDAO، energyOracle را در معرض قرار می‌دهد. *تصویر کلی:* یک محل واحد همهٔ نمونه‌های قرارداد را فراهم می‌کند.
 
-- **NEW-14 Dashboard real metrics:** Overview loads Total Supply, Total Staked, Registered Panels count, Last Clearing Price (slot 1000 when cleared). Loading state and Live when from chain. *Big picture:* Dashboard reflects on-chain state when configured.
+- **NEW-14 متریک‌های واقعیِ داشبورد:** نمای کلی، Total Supply، Total Staked، تعداد پنل‌های ثبت‌شده، آخرین قیمت تسویه (بازهٔ ۱۰۰۰ وقتی تسویه شده) را بارگذاری می‌کند. حالت بارگذاری و Live وقتی از زنجیره است. *تصویر کلی:* داشبورد وضعیت روی‌زنجیره را وقتی پیکربندی شده باشد منعکس می‌کند.
 
-- **NEW-7 PanelRegistry link to PanelNFT:** When PanelRegistry has a PanelNFT address set (via setPanelNFT), registerPanel requires the given owner to be the current ownerOf(tokenId) on that PanelNFT. Deploy script sets panelRegistry.setPanelNFT(panelNFT). *Big picture:* Only the current PanelNFT owner can be registered as the panel owner; tests verify revert when not owner.
+- **NEW-7 اتصال PanelRegistry به PanelNFT:** وقتی PanelRegistry آدرس PanelNFT تنظیم‌شده دارد (از طریق setPanelNFT)، registerPanel نیازمند این است که مالک داده‌شده همان ownerOf(tokenId) فعلی روی آن PanelNFT باشد. اسکریپت استقرار panelRegistry.setPanelNFT(panelNFT) را تنظیم می‌کند. *تصویر کلی:* فقط مالک فعلی PanelNFT می‌تواند به‌عنوان مالک پنل ثبت شود؛ تست‌ها revert در غیرمالک را تأیید می‌کنند.
 
-- **NEW-8 EnergyOracle confirm step:** Optional confirmer role: when set, finalizeTimeSlot requires confirmTimeSlot(timeSlot) to be called first (by confirmer or owner). Single-oracle when confirmer is not set; two-step (report → confirm → finalize) when confirmer is set. See [ORACLE_TRUST_MODEL.md](ORACLE_TRUST_MODEL.md). *Big picture:* Second role can be used to audit or sign off before slot finalization.
+- **NEW-8 مرحلهٔ تأییدِ EnergyOracle:** نقش تأییدکنندهٔ اختیاری: وقتی تنظیم شود، finalizeTimeSlot نیازمند فراخوانی اولیهٔ confirmTimeSlot(timeSlot) است (توسط تأییدکننده یا مالک). وقتی تأییدکننده تنظیم نشده باشد تک‌اوراکلی؛ وقتی تنظیم شده باشد دومرحله‌ای (گزارش → تأیید → نهایی‌سازی). به [ORACLE_TRUST_MODEL.md](ORACLE_TRUST_MODEL.md) نگاه کنید. *تصویر کلی:* نقش دوم می‌تواند برای ممیزی یا تأیید نهایی پیش از نهایی‌سازی بازه استفاده شود.
 
-- **NEW-10 SDK:** Minimal `sdk/` package (gridset-sdk): getContracts(provider, addresses) returns energyToken, energyMarket, stakingVault Contract instances; minimal ABIs for read/write and events. See `sdk/README.md`.
+- **NEW-10 SDK:** پکیج حداقلیِ `sdk/` (gridset-sdk): getContracts(provider, addresses) نمونه‌های Contract برای energyToken، energyMarket، stakingVault برمی‌گرداند؛ ABIهای حداقلی برای خواندن/نوشتن و رویدادها. به `sdk/README.md` نگاه کنید.
 
-- **NEW-11 E2E:** Playwright tests in `ui/e2e/`: dashboard load and sidebar nav, Energy Market (order book, place order), Utilities and cart (add to cart, open cart drawer). CI runs them with `npm run preview`; run locally with `npm run dev` then `npm run test:e2e` in ui.
+- **NEW-11 E2E:** تست‌های Playwright در `ui/e2e/`: بارگذاری داشبورد و ناوبری سایدبار، بازار انرژی (دفتر سفارش، ثبت سفارش)، یوتیلیتی‌ها و سبد خرید (افزودن به سبد، باز کردن کشوی سبد). CI آن‌ها را با `npm run preview` اجرا می‌کند؛ برای اجرای محلی، `npm run dev` و سپس `npm run test:e2e` را در ui اجرا کنید.
 
-- **NEW-16 Static analysis:** Slither runs in CI; see [STATIC_ANALYSIS.md](STATIC_ANALYSIS.md) for local run and policy (fix or document high/medium).
+- **NEW-16 تحلیل استاتیک:** Slither در CI اجرا می‌شود؛ برای اجرای محلی و سیاست (رفع یا مستندسازی high/medium) به [STATIC_ANALYSIS.md](STATIC_ANALYSIS.md) نگاه کنید.
 
-- **NEW-17 Pause and rate-limit design:** EnergyMarket has owner-only setPaused(bool); when paused, placeBid, placeAsk, startAuction revert. Design doc [RATE_LIMIT_AND_PAUSE.md](RATE_LIMIT_AND_PAUSE.md) (runbook, optional rate limits).
+- **NEW-17 طراحی توقف و محدودسازی نرخ:** EnergyMarket دارای setPaused(bool) فقط‌مالک است؛ وقتی متوقف شده، placeBid، placeAsk، startAuction revert می‌کنند. سند طراحی [RATE_LIMIT_AND_PAUSE.md](RATE_LIMIT_AND_PAUSE.md) (رانبوک، محدودیت نرخ اختیاری).
 
-This doc will be updated as more issues are completed and new flows are added.
+این سند با تکمیل ایشوهای بیشتر و افزوده‌شدن جریان‌های کاری جدید به‌روزرسانی خواهد شد.

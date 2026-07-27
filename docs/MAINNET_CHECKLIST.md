@@ -1,47 +1,47 @@
-# Mainnet Deployment & Launch Checklist
+# چک‌لیست استقرار و راه‌اندازی مین‌نت
 
-Use this checklist when preparing for and executing mainnet deployment. Do not deploy mainnet until security review and testnet validation are complete.
+از این چک‌لیست هنگام آماده‌سازی و اجرای استقرار مین‌نت استفاده کنید. تا زمانی که بازبینی امنیتی و اعتبارسنجی تست‌نت کامل نشده، مین‌نت را مستقر نکنید.
 
-## Pre–mainnet
+## پیش از مین‌نت
 
-- [ ] **Security**
-  - [ ] Professional audit completed and findings addressed or accepted
-  - [ ] Bug bounty (if any) scope and rules published
-  - [ ] [SECURITY.md](../SECURITY.md) and [Phase 6](../ROADMAP.md) status updated
-- [ ] **Testnet**
-  - [ ] Testnet deployed and contracts verified
-  - [ ] Community/testing period completed; critical bugs fixed
-  - [ ] [docs/TESTNET.md](TESTNET.md) and testnet announcement updated
-- [ ] **Code & config**
-  - [ ] All 130+ tests passing; coverage ≥95%
-  - [ ] Deployment script and [DEPLOYMENT.md](DEPLOYMENT.md) reviewed for mainnet (RPC, keys, gas)
-  - [ ] Owner/minter/registrar/penalizer roles and keys defined; multisig or timelock if applicable
-- [ ] **Documentation**
-  - [ ] README and ROADMAP reflect “mainnet” or “live” where appropriate
-  - [ ] Public docs for mainnet chain ID, explorer, and contract addresses
+- [ ] **امنیت**
+  - [ ] ممیزی حرفه‌ای انجام شده و یافته‌ها رفع یا پذیرفته شده‌اند
+  - [ ] در صورت وجود باگ‌بانتی، محدوده و قوانین آن منتشر شده باشد
+  - [ ] وضعیت [SECURITY.md](../SECURITY.md) و [فاز ۶](../ROADMAP.md) به‌روزرسانی شده باشد
+- [ ] **تست‌نت**
+  - [ ] تست‌نت مستقر و قراردادها تأیید شده‌اند
+  - [ ] دورهٔ تست/جامعه کامل شده؛ باگ‌های حیاتی رفع شده‌اند
+  - [ ] [docs/TESTNET.md](TESTNET.md) و اطلاعیهٔ تست‌نت به‌روزرسانی شده باشد
+- [ ] **کد و پیکربندی**
+  - [ ] همهٔ ۱۳۰+ تست موفق است؛ پوشش خطی ≥۹۵٪
+  - [ ] اسکریپت استقرار و [DEPLOYMENT.md](DEPLOYMENT.md) برای مین‌نت بازبینی شده (RPC، کلیدها، گس)
+  - [ ] نقش‌ها و کلیدهای owner/minter/registrar/penalizer تعریف شده؛ در صورت لزوم multisig یا timelock
+- [ ] **مستندات**
+  - [ ] README و ROADMAP در جای مناسب وضعیت «مین‌نت» یا «فعال» را منعکس می‌کنند
+  - [ ] مستندات عمومی برای شناسهٔ شبکهٔ مین‌نت، explorer و آدرس قراردادها
 
-## Mainnet deployment
+## استقرار مین‌نت
 
-- [ ] **Environment**
-  - [ ] Mainnet RPC and deployer key (secure key management; consider hardware/multisig)
-  - [ ] Gas and deployer balance checked
-- [ ] **Deploy**
-  - [ ] Run `forge script script/Deploy.s.sol --rpc-url <MAINNET_RPC> --broadcast` (or equivalent)
-  - [ ] Verify contracts on block explorer
-  - [ ] Set and verify roles (minter, locker, registrar, penalizer) per [DEPLOYMENT.md](DEPLOYMENT.md)
-- [ ] **UI & config**
-  - [ ] Production UI env uses mainnet contract addresses and correct chain ID
-  - [ ] No testnet/development keys or debug flags in production build
+- [ ] **محیط**
+  - [ ] RPC مین‌نت و کلید استقرار‌دهنده (مدیریت امن کلید؛ hardware یا multisig را در نظر بگیرید)
+  - [ ] گس و موجودی استقرار‌دهنده بررسی شده
+- [ ] **استقرار**
+  - [ ] اجرای `forge script script/Deploy.s.sol --rpc-url <MAINNET_RPC> --broadcast` (یا معادل آن)
+  - [ ] تأیید قراردادها روی block explorer
+  - [ ] تنظیم و تأیید نقش‌ها (minter، locker، registrar، penalizer) طبق [DEPLOYMENT.md](DEPLOYMENT.md)
+- [ ] **رابط کاربری و پیکربندی**
+  - [ ] env تولیدیِ رابط کاربری از آدرس‌های قرارداد مین‌نت و شناسهٔ زنجیرهٔ درست استفاده می‌کند
+  - [ ] هیچ کلید تست‌نت/توسعه یا پرچم دیباگی در بیلد تولید نباشد
 
-## Post-deploy: monitoring & launch
+## پس از استقرار: پایش و راه‌اندازی
 
-- [ ] **Monitoring**
-  - [ ] RPC and node health (alerts if using own node)
-  - [ ] Contract events (e.g. OrderPlaced, AuctionCleared, SettlementExecuted) and dashboards if needed
-  - [ ] Error tracking for frontend (e.g. Sentry) and API if any
-- [ ] **Launch**
-  - [ ] Mainnet announcement (blog, Twitter, Discord, etc.) with network, explorer, and “use at your own risk” disclaimer
-  - [ ] Support channel and incident process (who to contact, how to pause or respond if critical bug)
-- [ ] **Ongoing**
-  - [ ] Plan for upgrades (if applicable) or parameter changes via Governance
-  - [ ] Regular dependency and security updates
+- [ ] **پایش**
+  - [ ] سلامت RPC و node (هشدار در صورت استفاده از node اختصاصی)
+  - [ ] رویدادهای قرارداد (مثلاً OrderPlaced، AuctionCleared، SettlementExecuted) و داشبورد در صورت نیاز
+  - [ ] ردیابی خطای فرانت‌اند (مثلاً Sentry) و API در صورت وجود
+- [ ] **راه‌اندازی**
+  - [ ] اطلاعیهٔ مین‌نت (بلاگ، توییتر، دیسکورد و...) همراه با شبکه، explorer و سلب مسئولیت «استفاده با ریسک خودتان»
+  - [ ] کانال پشتیبانی و فرآیند رخداد (چه کسی تماس بگیرد، چگونه در صورت باگ حیاتی توقف یا پاسخ داده شود)
+- [ ] **مستمر**
+  - [ ] برنامه‌ای برای ارتقا (در صورت وجود) یا تغییر پارامترها از طریق حاکمیت
+  - [ ] به‌روزرسانی‌های منظم وابستگی‌ها و امنیت
