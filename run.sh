@@ -1,9 +1,9 @@
 #!/bin/bash
-# GRIDSET Protocol - Run Script
+# نیروست Protocol - Run Script
 
 cd "$(dirname "$0")"
 
-echo "🔨 Building GRIDSET Protocol..."
+echo "🔨 Building نیروست Protocol..."
 forge build
 
 echo ""

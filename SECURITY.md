@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-If you believe you have found a security vulnerability in the GRIDSET Protocol contracts or tooling:
+If you believe you have found a security vulnerability in the نیروست Protocol contracts or tooling:
 
 1. **Do not** open a public GitHub issue.
 2. Email the maintainers or report via your preferred private channel with:

@@ -13,7 +13,7 @@ import "../src/GovernanceDAO.sol";
 
 /**
  * @title Deploy
- * @notice Deploys the full GRIDSET contract suite. Run with:
+ * @notice Deploys the full نیروست contract suite. Run with:
  *   forge script script/Deploy.s.sol --rpc-url <RPC> [--broadcast --private-key <KEY>]
  *   For local Anvil: forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
  * Output addresses to ui/.env (VITE_*_ADDRESS) for the web UI.

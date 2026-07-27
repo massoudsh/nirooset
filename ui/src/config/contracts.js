@@ -1,5 +1,5 @@
 /**
- * contracts.js — Smart contract addresses and ABIs for GRIDSET Protocol
+ * contracts.js — Smart contract addresses and ABIs for نیروست Protocol
  *
  * Issue #12: Multi-chain Support
  *

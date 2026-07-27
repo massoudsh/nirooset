@@ -8,7 +8,7 @@ export default function Settings() {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold text-white mb-2">Settings</h2>
-        <p className="text-gray-400">Configure your GRIDSET Protocol preferences</p>
+        <p className="text-gray-400">Configure your نیروست Protocol preferences</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -127,10 +127,10 @@ export default function Settings() {
       </div>
 
       <div className="card">
-        <h3 className="text-xl font-semibold text-white mb-4">About GRIDSET Protocol</h3>
+        <h3 className="text-xl font-semibold text-white mb-4">About نیروست Protocol</h3>
         <div className="space-y-3 text-gray-300">
           <p>
-            GRIDSET is a market-based energy and compute settlement system that enables financial settlement
+            نیروست is a market-based energy and compute settlement system that enables financial settlement
             of energy obligations through blockchain infrastructure.
           </p>
           <p className="text-sm text-gray-400">

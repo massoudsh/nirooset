@@ -1,7 +1,7 @@
 {
-  "name": "@gridset/sdk",
+  "name": "@niroset/sdk",
   "version": "0.1.0",
-  "description": "JavaScript/TypeScript client library for the GRIDSET Protocol smart contracts",
+  "description": "JavaScript/TypeScript client library for the نیروست Protocol smart contracts",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
     "lint": "eslint src"
   },
   "keywords": [
-    "gridset",
+    "niroset",
     "energy",
     "blockchain",
     "ethereum",

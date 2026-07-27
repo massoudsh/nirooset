@@ -1,4 +1,4 @@
-# GRIDSET Protocol Roadmap
+# نیروست Protocol Roadmap
 
 ## Current Version: 0.0.1
 
@@ -19,7 +19,7 @@
 **Status:** ✅ Completed  
 **Priority:** High  
 **Estimated Duration:** 3-4 weeks  
-**Issue:** [#1](https://github.com/massoudsh/gridset-protocol/issues/1)
+**Issue:** [#1](https://github.com/massoudsh/niroset-protocol/issues/1)
 
 Implement core functionality for:
 - EnergyToken (ERC20 with lock/unlock)
@@ -33,7 +33,7 @@ Implement core functionality for:
 **Status:** ✅ Completed  
 **Priority:** High  
 **Estimated Duration:** 2-3 weeks  
-**Issue:** [#2](https://github.com/massoudsh/gridset-protocol/issues/2)
+**Issue:** [#2](https://github.com/massoudsh/niroset-protocol/issues/2)
 
 Implement oracle system for:
 - Production data reporting
@@ -47,7 +47,7 @@ Implement oracle system for:
 **Status:** ✅ Completed  
 **Priority:** High  
 **Estimated Duration:** 3-4 weeks  
-**Issue:** [#3](https://github.com/massoudsh/gridset-protocol/issues/3)
+**Issue:** [#3](https://github.com/massoudsh/niroset-protocol/issues/3)
 
 Implement market mechanism:
 - Order placement (bids/asks)
@@ -61,7 +61,7 @@ Implement market mechanism:
 **Status:** ✅ Completed  
 **Priority:** High  
 **Estimated Duration:** 4-5 weeks  
-**Issue:** [#4](https://github.com/massoudsh/gridset-protocol/issues/4)
+**Issue:** [#4](https://github.com/massoudsh/niroset-protocol/issues/4)
 
 Implement settlement system:
 - Net position calculation
@@ -75,7 +75,7 @@ Implement settlement system:
 **Status:** ✅ Completed  
 **Priority:** Medium  
 **Estimated Duration:** 2-3 weeks  
-**Issue:** [#5](https://github.com/massoudsh/gridset-protocol/issues/5)
+**Issue:** [#5](https://github.com/massoudsh/niroset-protocol/issues/5)
 
 Implement governance:
 - Proposal creation
@@ -89,7 +89,7 @@ Implement governance:
 **Status:** ✅ Completed (testing); audit/bounty when ready  
 **Priority:** Critical  
 **Estimated Duration:** 6-8 weeks  
-**Issue:** [#6](https://github.com/massoudsh/gridset-protocol/issues/6)
+**Issue:** [#6](https://github.com/massoudsh/niroset-protocol/issues/6)
 
 Security measures:
 - **Testing**: >95% line coverage; 131 tests (Forge); fuzz tests (EnergyToken, StakingVault); CI (`.github/workflows/ci.yml`) runs build, test, coverage on push/PR
@@ -102,7 +102,7 @@ Security measures:
 **Status:** ✅ Completed  
 **Priority:** Medium  
 **Estimated Duration:** 3-4 weeks  
-**Issue:** [#7](https://github.com/massoudsh/gridset-protocol/issues/7)
+**Issue:** [#7](https://github.com/massoudsh/niroset-protocol/issues/7)
 
 UI improvements:
 - Real contract integration: EnergyToken (Energy Wallet), EnergyMarket (order book per time slot)
@@ -115,7 +115,7 @@ UI improvements:
 **Status:** ✅ Completed  
 **Priority:** Medium  
 **Estimated Duration:** 2-3 weeks  
-**Issue:** [#8](https://github.com/massoudsh/gridset-protocol/issues/8)
+**Issue:** [#8](https://github.com/massoudsh/niroset-protocol/issues/8)
 
 Developer resources:
 - **Documentation**: [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md), [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md); README updated
@@ -128,7 +128,7 @@ Developer resources:
 **Status:** 🟡 In Progress  
 **Priority:** High  
 **Estimated Duration:** 4-6 weeks  
-**Issue:** [#9](https://github.com/massoudsh/gridset-protocol/issues/9)
+**Issue:** [#9](https://github.com/massoudsh/niroset-protocol/issues/9)
 
 Testnet activities:
 - **Docs**: [docs/TESTNET.md](docs/TESTNET.md) – testnet deploy steps, checklist, community beta, feedback
@@ -141,7 +141,7 @@ Testnet activities:
 **Status:** 🟡 In Progress  
 **Priority:** Critical  
 **Estimated Duration:** 2-3 weeks  
-**Issue:** [#10](https://github.com/massoudsh/gridset-protocol/issues/10)
+**Issue:** [#10](https://github.com/massoudsh/niroset-protocol/issues/10)
 
 Mainnet launch:
 - **Checklist**: [docs/MAINNET_CHECKLIST.md](docs/MAINNET_CHECKLIST.md) – pre-mainnet (audit, testnet), deploy, monitoring, launch
@@ -153,17 +153,17 @@ Mainnet launch:
 
 ### Gas Optimization
 **Status:** ✅ Completed  
-**Issue:** [#11](https://github.com/massoudsh/gridset-protocol/issues/11)
+**Issue:** [#11](https://github.com/massoudsh/niroset-protocol/issues/11)
 - Unchecked blocks where overflow/underflow ruled out (EnergyToken, StakingVault, EnergyMarket, GovernanceDAO)
 
 ### Multi-chain Support
 **Status:** ✅ Completed  
-**Issue:** [#12](https://github.com/massoudsh/gridset-protocol/issues/12)
+**Issue:** [#12](https://github.com/massoudsh/niroset-protocol/issues/12)
 - Header chain selector (Sepolia, OP Sepolia, Ethereum); switchChain; unsupported-chain highlight. See [docs/MULTICHAIN.md](docs/MULTICHAIN.md).
 
 ### Advanced Analytics Dashboard
 **Status:** ✅ Completed  
-**Issue:** [#13](https://github.com/massoudsh/gridset-protocol/issues/13)
+**Issue:** [#13](https://github.com/massoudsh/niroset-protocol/issues/13)
 - Dashboard (Overview) shows live Total Supply and Total Staked from contracts when addresses set
 
 ---
@@ -205,6 +205,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to the pro
 
 ## Links
 
-- **Repository:** https://github.com/massoudsh/gridset-protocol
-- **Issues:** https://github.com/massoudsh/gridset-protocol/issues
-- **Releases:** https://github.com/massoudsh/gridset-protocol/releases
+- **Repository:** https://github.com/massoudsh/niroset-protocol
+- **Issues:** https://github.com/massoudsh/niroset-protocol/issues
+- **Releases:** https://github.com/massoudsh/niroset-protocol/releases

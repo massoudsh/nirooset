@@ -1,5 +1,5 @@
 /**
- * chains.js — Supported blockchain networks for GRIDSET Protocol
+ * chains.js — Supported blockchain networks for نیروست Protocol
  *
  * Issue #12: Multi-chain Support
  *

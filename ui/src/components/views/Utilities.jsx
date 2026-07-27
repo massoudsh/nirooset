@@ -246,7 +246,7 @@ export default function Utilities() {
           <div>
             <p className="text-sm font-medium text-white">Connect your wallet</p>
             <p className="text-xs text-slate-400">
-              Link purchases to your GRIDSET account and earn energy credits.
+              Link purchases to your نیروست account and earn energy credits.
             </p>
           </div>
         </div>

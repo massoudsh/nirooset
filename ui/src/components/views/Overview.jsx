@@ -25,7 +25,7 @@ const mockPriceData = [
 
 const DEFAULT_SLOT_FOR_PRICE = 1000
 
-const ONBOARDING_DISMISSED_KEY = 'gridset-onboarding-dismissed'
+const ONBOARDING_DISMISSED_KEY = 'niroset-onboarding-dismissed'
 
 export default function Overview({ setActiveView }) {
   const { account, contracts } = useWeb3()
@@ -125,7 +125,7 @@ export default function Overview({ setActiveView }) {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold text-white mb-2">Energy Dashboard</h2>
-        <p className="text-gray-400">Real-time overview of the GRIDSET Protocol</p>
+        <p className="text-gray-400">Real-time overview of the نیروست Protocol</p>
       </div>
 
       {isDemoMode && !onboardingDismissed && (

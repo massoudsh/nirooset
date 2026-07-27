@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy GRIDSET contracts to Sepolia. Requires PRIVATE_KEY and ~0.01 Sepolia ETH.
+# Deploy نیروست contracts to Sepolia. Requires PRIVATE_KEY and ~0.01 Sepolia ETH.
 # Get test ETH: https://sepoliafaucet.com/
 set -e
 cd "$(dirname "$0")/.."

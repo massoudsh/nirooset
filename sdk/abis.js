@@ -1,5 +1,5 @@
 /**
- * Minimal ABIs for GRIDSET contracts. For full ABIs use forge build output.
+ * Minimal ABIs for نیروست contracts. For full ABIs use forge build output.
  */
 export const energyTokenAbi = [
   { inputs: [{ name: 'account', type: 'address' }], name: 'balanceOf', outputs: [{ type: 'uint256' }], stateMutability: 'view', type: 'function' },

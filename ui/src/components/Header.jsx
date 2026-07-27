@@ -29,7 +29,7 @@ export default function Header({ sidebarOpen, setSidebarOpen, setCartOpen }) {
           </button>
           <div className="flex items-center gap-2">
             <Zap className="w-8 h-8 text-energy-green" />
-            <h1 className="text-2xl font-bold text-white">GRIDSET Protocol</h1>
+            <h1 className="text-2xl font-bold text-white">نیروست Protocol</h1>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-# پروتکل GRIDSET - دیاگرام‌های معماری
+# پروتکل نیروست - دیاگرام‌های معماری
 
 > توضیح: عنوان‌ها و متن توضیحی این سند به فارسی ترجمه شده‌اند. کدهای دیاگرام Mermaid (شناسه‌های گره، برچسب‌ها، sequenceDiagram و classDiagram) به‌عمد به انگلیسی نگه داشته شده‌اند تا نحو (syntax) دیاگرام‌ها و رندر صحیح آن‌ها در GitHub/VS Code/Mermaid Live Editor حفظ شود.
 
@@ -693,7 +693,7 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    subgraph "GRIDSET Protocol"
+    subgraph "نیروست Protocol"
         subgraph "Assets"
             NFT[Panel NFT]
             TOKEN[Energy Token]

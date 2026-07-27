@@ -1,17 +1,17 @@
-# @gridset/sdk
+# @niroset/sdk
 
-کتابخانهٔ کلاینت جاوااسکریپت/تایپ‌اسکریپت برای پروتکل GRIDSET.
+کتابخانهٔ کلاینت جاوااسکریپت/تایپ‌اسکریپت برای پروتکل نیروست.
 
 ## نصب
 
 ```bash
-npm install @gridset/sdk ethers
+npm install @niroset/sdk ethers
 ```
 
 ## شروع سریع
 
 ```ts
-import { createSDKFromBrowser } from '@gridset/sdk';
+import { createSDKFromBrowser } from '@niroset/sdk';
 
 const sdk = await createSDKFromBrowser(window.ethereum, {
   energyToken:  '0x...',
@@ -22,12 +22,12 @@ const sdk = await createSDKFromBrowser(window.ethereum, {
 });
 
 // دریافت دفتر سفارش زنده
-const book = await sdk.getOrderBook(GridsetSDK.currentTimeSlot());
+const book = await sdk.getOrderBook(NirosetSDK.currentTimeSlot());
 console.log('Bids:', book.bids);
 console.log('Asks:', book.asks);
 
 // ثبت یک پیشنهاد خرید (نیاز به signer)
-await sdk.placeBid(GridsetSDK.currentTimeSlot(), ethers.parseEther('0.012'), 10n);
+await sdk.placeBid(NirosetSDK.currentTimeSlot(), ethers.parseEther('0.012'), 10n);
 
 // ضرب توکن انرژی (فقط مالک)
 await sdk.mint('0xYourAddress', ethers.parseEther('1000'));
@@ -36,10 +36,10 @@ await sdk.mint('0xYourAddress', ethers.parseEther('1000'));
 ## فقط‌خواندنی (بدون کیف پول)
 
 ```ts
-import { createSDKFromRPC } from '@gridset/sdk';
+import { createSDKFromRPC } from '@niroset/sdk';
 
 const sdk = createSDKFromRPC('https://sepolia.infura.io/v3/YOUR_KEY', addresses);
-const auction = await sdk.getAuction(GridsetSDK.currentTimeSlot());
+const auction = await sdk.getAuction(NirosetSDK.currentTimeSlot());
 ```
 
 ## رابط برنامه‌نویسی (API)
@@ -64,5 +64,5 @@ const auction = await sdk.getAuction(GridsetSDK.currentTimeSlot());
 | `getPanelOwner(tokenId)` | مالک یک NFT پنل |
 | `getTimeSlotData(slot)` | داده‌های اوراکل برای یک بازهٔ زمانی |
 | `getTotalProduction(slot)` | مجموع وات-ساعت تولیدشده در یک بازهٔ زمانی |
-| `GridsetSDK.currentTimeSlot()` | بازهٔ زمانی ساعتی فعلی (استاتیک) |
-| `GridsetSDK.timeSlotFor(date)` | بازهٔ زمانی برای یک تاریخ مشخص (استاتیک) |
+| `NirosetSDK.currentTimeSlot()` | بازهٔ زمانی ساعتی فعلی (استاتیک) |
+| `NirosetSDK.timeSlotFor(date)` | بازهٔ زمانی برای یک تاریخ مشخص (استاتیک) |

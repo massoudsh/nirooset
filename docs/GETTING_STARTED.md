@@ -11,8 +11,8 @@
 ## ۱. کلون و بیلد
 
 ```bash
-git clone https://github.com/massoudsh/gridset-protocol.git
-cd gridset-protocol
+git clone https://github.com/massoudsh/niroset-protocol.git
+cd niroset-protocol
 forge build
 ```
 

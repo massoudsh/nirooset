@@ -1,12 +1,12 @@
 /**
- * @gridset/sdk — JavaScript/TypeScript client library for GRIDSET Protocol
+ * @niroset/sdk — JavaScript/TypeScript client library for نیروست Protocol
  *
  * Issue #23: SDK or client library (JS/TS)
  *
  * Usage:
- *   import { GridsetSDK } from '@gridset/sdk';
+ *   import { NirosetSDK } from '@niroset/sdk';
  *
- *   const sdk = new GridsetSDK(provider, {
+ *   const sdk = new NirosetSDK(provider, {
  *     energyToken:  '0x...',
  *     energyMarket: '0x...',
  *     panelNFT:     '0x...',
@@ -99,7 +99,7 @@ const GOVERNANCE_DAO_ABI = [
 // Types
 // ---------------------------------------------------------------------------
 
-export interface GridsetAddresses {
+export interface NirosetAddresses {
   energyToken?: string;
   energyMarket?: string;
   panelNFT?: string;
@@ -296,9 +296,9 @@ const SLOT_SECONDS = 3600n; // 1 hour, matches EnergyOracle.SLOT_DURATION
 // Main SDK class
 // ---------------------------------------------------------------------------
 
-export class GridsetSDK {
+export class NirosetSDK {
   private runner: ContractRunner;
-  private addresses: GridsetAddresses;
+  private addresses: NirosetAddresses;
 
   // Contract instances (lazy-initialised)
   private _energyToken?: Contract;
@@ -310,7 +310,7 @@ export class GridsetSDK {
   private _settlementEngine?: Contract;
   private _governanceDAO?: Contract;
 
-  constructor(runner: ContractRunner, addresses: GridsetAddresses) {
+  constructor(runner: ContractRunner, addresses: NirosetAddresses) {
     this.runner    = runner;
     this.addresses = addresses;
   }
@@ -689,10 +689,10 @@ export class GridsetSDK {
     return slots;
   }
 
-  private _assertAddress(key: keyof GridsetAddresses): void {
+  private _assertAddress(key: keyof NirosetAddresses): void {
     const addr = this.addresses[key];
     if (!addr || addr.length < 20) {
-      throw new Error(`[GridsetSDK] Missing contract address for "${key}". Pass it in the constructor.`);
+      throw new Error(`[NirosetSDK] Missing contract address for "${key}". Pass it in the constructor.`);
     }
   }
 
@@ -732,27 +732,27 @@ export {
 // ---------------------------------------------------------------------------
 
 /**
- * Create a GridsetSDK instance from a browser wallet (ethers v6 BrowserProvider).
+ * Create a NirosetSDK instance from a browser wallet (ethers v6 BrowserProvider).
  *
  * @example
  * const sdk = await createSDKFromBrowser(window.ethereum, addresses);
  */
 export async function createSDKFromBrowser(
   ethereum: unknown,
-  addresses: GridsetAddresses,
-): Promise<GridsetSDK> {
+  addresses: NirosetAddresses,
+): Promise<NirosetSDK> {
   const provider = new ethers.BrowserProvider(ethereum as Parameters<typeof ethers.BrowserProvider>[0]);
   const signer   = await provider.getSigner();
-  return new GridsetSDK(signer, addresses);
+  return new NirosetSDK(signer, addresses);
 }
 
 /**
- * Create a read-only GridsetSDK instance from an RPC URL (no signer).
+ * Create a read-only NirosetSDK instance from an RPC URL (no signer).
  *
  * @example
  * const sdk = createSDKFromRPC('https://sepolia.infura.io/v3/...', addresses);
  */
-export function createSDKFromRPC(rpcUrl: string, addresses: GridsetAddresses): GridsetSDK {
+export function createSDKFromRPC(rpcUrl: string, addresses: NirosetAddresses): NirosetSDK {
   const provider = new ethers.JsonRpcProvider(rpcUrl);
-  return new GridsetSDK(provider, addresses);
+  return new NirosetSDK(provider, addresses);
 }

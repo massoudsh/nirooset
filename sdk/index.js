@@ -1,6 +1,6 @@
 /**
- * GRIDSET SDK – client for GRIDSET protocol contracts.
- * Usage: import { getContracts } from 'gridset-sdk'; const c = getContracts(provider, addresses);
+ * نیروست SDK – client for نیروست protocol contracts.
+ * Usage: import { getContracts } from 'niroset-sdk'; const c = getContracts(provider, addresses);
  * Requires ethers ^6.
  */
 import { Contract } from 'ethers'

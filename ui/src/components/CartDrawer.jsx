@@ -9,7 +9,7 @@ export default function CartDrawer({ open, onClose }) {
   const { cart, cartCount, removeItem, setQuantity, clearCart, linkOrder } = useCart()
   const { isConnected, account } = useWeb3()
   const [checkoutOpen, setCheckoutOpen] = useState(false)
-  const [linkToGridset, setLinkToGridset] = useState(true)
+  const [linkToNiroset, setLinkToNiroset] = useState(true)
 
   if (!open) return null
 
@@ -21,7 +21,7 @@ export default function CartDrawer({ open, onClose }) {
   const total = lines.reduce((s, l) => s + l.lineTotal, 0)
 
   const handleCheckoutConfirm = () => {
-    if (isConnected && account && linkToGridset) {
+    if (isConnected && account && linkToNiroset) {
       linkOrder(account, cart.map((i) => i.productId), total)
     }
     clearCart()
@@ -123,11 +123,11 @@ export default function CartDrawer({ open, onClose }) {
           <label className="flex items-center gap-2 mt-4 text-sm text-gray-300">
             <input
               type="checkbox"
-              checked={linkToGridset}
-              onChange={(e) => setLinkToGridset(e.target.checked)}
+              checked={linkToNiroset}
+              onChange={(e) => setLinkToNiroset(e.target.checked)}
               className="rounded border-gray-600"
             />
-            Link to GRIDSET — associate this purchase with my wallet for future energy-credit eligibility
+            Link to نیروست — associate this purchase with my wallet for future energy-credit eligibility
           </label>
         )}
         <p className="text-gray-500 text-xs mt-2">Checkout is a placeholder; no real payment is processed.</p>

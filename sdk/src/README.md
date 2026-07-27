@@ -1,17 +1,17 @@
-# @gridset/sdk
+# @niroset/sdk
 
-کتابخانهٔ کلاینت جاوااسکریپت/تایپ‌اسکریپت برای پروتکل GRIDSET.
+کتابخانهٔ کلاینت جاوااسکریپت/تایپ‌اسکریپت برای پروتکل نیروست.
 
 ## نصب
 
 ```bash
-npm install @gridset/sdk ethers
+npm install @niroset/sdk ethers
 ```
 
 ## شروع سریع
 
 ```ts
-import { createSDKFromBrowser } from '@gridset/sdk';
+import { createSDKFromBrowser } from '@niroset/sdk';
 
 const sdk = await createSDKFromBrowser(window.ethereum, {
   energyToken:  '0x...',
@@ -22,12 +22,12 @@ const sdk = await createSDKFromBrowser(window.ethereum, {
 });
 
 // دریافت دفتر سفارش زنده
-const book = await sdk.getOrderBook(GridsetSDK.currentTimeSlot());
+const book = await sdk.getOrderBook(NirosetSDK.currentTimeSlot());
 console.log('Bids:', book.bids);
 console.log('Asks:', book.asks);
 
 // ثبت یک پیشنهاد خرید (نیاز به signer)
-await sdk.placeBid(GridsetSDK.currentTimeSlot(), ethers.parseEther('0.012'), 10n);
+await sdk.placeBid(NirosetSDK.currentTimeSlot(), ethers.parseEther('0.012'), 10n);
 
 // ضرب توکن انرژی (فقط مالک)
 await sdk.mint('0xYourAddress', ethers.parseEther('1000'));
@@ -36,10 +36,10 @@ await sdk.mint('0xYourAddress', ethers.parseEther('1000'));
 ## فقط‌خواندنی (بدون کیف پول)
 
 ```ts
-import { createSDKFromRPC } from '@gridset/sdk';
+import { createSDKFromRPC } from '@niroset/sdk';
 
 const sdk = createSDKFromRPC('https://sepolia.infura.io/v3/YOUR_KEY', addresses);
-const auction = await sdk.getAuction(GridsetSDK.currentTimeSlot());
+const auction = await sdk.getAuction(NirosetSDK.currentTimeSlot());
 ```
 
 ## رابط برنامه‌نویسی (API)
@@ -68,8 +68,8 @@ const auction = await sdk.getAuction(GridsetSDK.currentTimeSlot());
 | `forecastSupplyDemand(slot, lookback?)` | پیش‌بینی عرضه/تقاضای بازهٔ بعدی به‌همراه میزان اطمینان |
 | `suggestFairPrice(slot, lookback?)` | پیشنهاد قیمت منصفانه با وزن‌دهی بر اساس تازگی |
 | `detectProductionAnomalies(panelId, timestamps, zThreshold?)` | علامت‌گذاری گزارش‌های تولید پرت (ناهنجار) |
-| `GridsetSDK.currentTimeSlot()` | بازهٔ زمانی ساعتی فعلی (استاتیک) |
-| `GridsetSDK.timeSlotFor(date)` | بازهٔ زمانی برای یک تاریخ مشخص (استاتیک) |
+| `NirosetSDK.currentTimeSlot()` | بازهٔ زمانی ساعتی فعلی (استاتیک) |
+| `NirosetSDK.timeSlotFor(date)` | بازهٔ زمانی برای یک تاریخ مشخص (استاتیک) |
 
 ## هوش بازار (نسخهٔ بتا)
 
@@ -78,10 +78,10 @@ const auction = await sdk.getAuction(GridsetSDK.currentTimeSlot());
 را ببینید.
 
 ```ts
-const forecast = await sdk.forecastSupplyDemand(GridsetSDK.currentTimeSlot());
+const forecast = await sdk.forecastSupplyDemand(NirosetSDK.currentTimeSlot());
 console.log(forecast.predictedSupply, forecast.predictedDemand, forecast.confidence);
 
-const price = await sdk.suggestFairPrice(GridsetSDK.currentTimeSlot());
+const price = await sdk.suggestFairPrice(NirosetSDK.currentTimeSlot());
 console.log(price.suggestedPrice, price.basis);
 
 const anomalies = await sdk.detectProductionAnomalies(panelId, recentTimestamps);

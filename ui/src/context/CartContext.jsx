@@ -25,8 +25,8 @@ import { getProduct } from '../config/products';
 // localStorage helpers
 // ---------------------------------------------------------------------------
 
-const CART_KEY   = 'gridset_cart_v1';
-const ORDERS_KEY = 'gridset_linked_orders_v1';
+const CART_KEY   = 'niroset_cart_v1';
+const ORDERS_KEY = 'niroset_linked_orders_v1';
 
 function loadCart() {
   try {
