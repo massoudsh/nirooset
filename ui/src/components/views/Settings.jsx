@@ -127,14 +127,14 @@ export default function Settings() {
       </div>
 
       <div className="card">
-        <h3 className="text-xl font-semibold text-white mb-4">About نیروست Protocol</h3>
+        <h3 className="text-xl font-semibold text-white mb-4">دربارهٔ پروتکل نیروست</h3>
         <div className="space-y-3 text-gray-300">
           <p>
-            نیروست is a market-based energy and compute settlement system that enables financial settlement
-            of energy obligations through blockchain infrastructure.
+            نیروست یک سیستم تسویه‌حساب انرژی و محاسبات مبتنی بر بازار است که تسویهٔ مالی تعهدات انرژی را
+            از طریق زیرساخت بلاک‌چین امکان‌پذیر می‌کند.
           </p>
           <p className="text-sm text-gray-400">
-            Version 1.0.0 • Built with React & Vite
+            نسخهٔ ۱.۰.۰ • ساخته‌شده با React و Vite
           </p>
         </div>
       </div>
