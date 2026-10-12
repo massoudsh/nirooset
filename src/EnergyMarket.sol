@@ -25,6 +25,7 @@ contract EnergyMarket is IEnergyMarket {
     error Unauthorized();
     error InvalidTimeSlot();
     error AuctionNotOpen();
+    error AuctionAlreadyStarted();
     error AuctionAlreadyCleared();
     error InvalidOrder();
     error OrderNotActive();
@@ -54,10 +55,10 @@ contract EnergyMarket is IEnergyMarket {
     function startAuction(uint256 timeSlot, uint256 duration) external override onlyOwner whenNotPaused {
         if (duration == 0) revert InvalidTimeSlot();
         Auction storage a = _auctions[timeSlot];
+        if (a.endTime != 0) revert AuctionAlreadyStarted();
         a.timeSlot = timeSlot;
         a.startTime = block.timestamp;
         a.endTime = block.timestamp + duration;
-        a.isCleared = false;
         emit AuctionStarted(timeSlot, a.startTime, a.endTime);
     }
 
@@ -141,6 +142,7 @@ contract EnergyMarket is IEnergyMarket {
 
     function clearAuction(uint256 timeSlot) external override onlyOwner returns (uint256 clearingPrice) {
         Auction storage a = _auctions[timeSlot];
+        if (a.endTime == 0 || block.timestamp < a.endTime) revert AuctionNotOpen();
         if (a.isCleared) revert AuctionAlreadyCleared();
 
         uint256[] memory bidIds = _sortedBidIds(timeSlot);
