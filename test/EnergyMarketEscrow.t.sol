@@ -30,9 +30,7 @@ contract EnergyMarketEscrowTest is Test {
         token  = new EnergyToken();
         market = new EnergyMarket(IEnergyToken(address(token)));
 
-        // Grant market the LOCKER role (or equivalent) so it can call lock/unlock/transferLocked.
-        // EnergyToken uses an allowance/role pattern — set market as approved operator.
-        token.setMarket(address(market));
+        token.setLocker(address(market), true);
 
         // Fund buyer and seller
         token.mint(buyer,  INITIAL);
@@ -179,6 +177,21 @@ contract EnergyMarketEscrowTest is Test {
         assertEq(clearingPrice, 0);
     }
 
+    function test_ClearAuction_RevertsBeforeAuctionEnds() public {
+        vm.expectRevert(EnergyMarket.AuctionNotOpen.selector);
+        market.clearAuction(timeSlot);
+    }
+
+    function test_ClearAuction_RevertsIfAuctionWasNotStarted() public {
+        vm.expectRevert(EnergyMarket.AuctionNotOpen.selector);
+        market.clearAuction(timeSlot + 1 hours);
+    }
+
+    function test_StartAuction_RevertsForExistingTimeSlot() public {
+        vm.expectRevert(EnergyMarket.AuctionAlreadyStarted.selector);
+        market.startAuction(timeSlot, 1 hours);
+    }
+
     function test_ClearAuction_RevertsIfAlreadyCleared() public {
         vm.warp(block.timestamp + 3 hours);
         market.clearAuction(timeSlot);
@@ -216,7 +229,7 @@ contract EnergyMarketEscrowTest is Test {
     // -------------------------------------------------------------------------
 
     function _balances(address account) internal view returns (uint256 available, uint256 locked) {
-        available = token.getEnergyBalance(account);
-        locked    = token.getLockedBalance(account);
+        IEnergyToken.EnergyBalance memory balance = token.getEnergyBalance(account);
+        return (balance.available, balance.locked);
     }
 }
