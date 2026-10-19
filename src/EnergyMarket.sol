@@ -19,6 +19,10 @@ contract EnergyMarket is IEnergyMarket {
     mapping(uint256 => Auction) private _auctions;
     mapping(uint256 => uint256[]) private _bidOrderIds;
     mapping(uint256 => uint256[]) private _askOrderIds;
+    /// @dev energy => trader amount pending releaseOrder withdrawal.
+    mapping(address => uint256) private _pendingEnergy;
+    /// @dev payment => trader amount pending releaseOrder withdrawal.
+    mapping(address => uint256) private _pendingPayment;
 
     address public owner;
     bool public paused;
@@ -30,6 +34,7 @@ contract EnergyMarket is IEnergyMarket {
     error AuctionAlreadyCleared();
     error InvalidOrder();
     error OrderNotActive();
+    error OrderAlreadyReleased();
     error ZeroQuantity();
     error ZeroPrice();
     error MarketPaused();
@@ -179,37 +184,56 @@ contract EnergyMarket is IEnergyMarket {
 
         a.clearingPrice = clearingPrice;
         a.isCleared = true;
-        // Refund overpayment before collecting, so buyers only need the clearing-price balance.
-        for (uint256 i = 0; i < bidIds.length; i++) {
-            Order storage bid = _orders[bidIds[i]];
-            uint256 refund = bid.filledQuantity * (bid.price - clearingPrice);
-            if (refund > 0) energyToken.unlock(bid.trader, refund);
-        }
         for (uint256 i = 0; i < bidIds.length; i++) {
             Order storage bid = _orders[bidIds[i]];
             if (bid.filledQuantity == 0) continue;
-            energyToken.transferLocked(bid.trader, address(this), bid.filledQuantity * clearingPrice);
             if (bid.filledQuantity == bid.quantity) bid.isActive = false;
             emit OrderFilled(bid.orderId, bid.filledQuantity, clearingPrice);
         }
         for (uint256 i = 0; i < askIds.length; i++) {
             Order storage ask = _orders[askIds[i]];
             if (ask.filledQuantity == 0) continue;
-            energyToken.transferLocked(ask.trader, address(this), ask.filledQuantity);
             if (ask.filledQuantity == ask.quantity) ask.isActive = false;
             emit OrderFilled(ask.orderId, ask.filledQuantity, clearingPrice);
         }
-        for (uint256 i = 0; i < askIds.length; i++) {
-            Order storage ask = _orders[askIds[i]];
-            if (ask.filledQuantity == 0) continue;
-            energyToken.transfer(ask.trader, ask.filledQuantity * clearingPrice);
-        }
-        for (uint256 i = 0; i < bidIds.length; i++) {
-            Order storage bid = _orders[bidIds[i]];
-            if (bid.filledQuantity > 0) energyToken.transfer(bid.trader, bid.filledQuantity);
-        }
         emit AuctionCleared(timeSlot, clearingPrice, totalMatched);
         return clearingPrice;
+    }
+
+    /// @notice Settle the caller's own order: buyers pay at the clearing price and receive energy,
+    /// sellers deliver energy and receive payment, both keep or recover whatever they over-locked.
+    function releaseOrder(uint256 orderId) external override returns (uint256 payment) {
+        Order storage o = _orders[orderId];
+        if (o.trader == address(0)) revert InvalidOrder();
+        if (msg.sender != o.trader) revert Unauthorized();
+        if (o.isSettled) revert OrderAlreadyReleased();
+        Auction storage a = _auctions[o.timeSlot];
+        if (!a.isCleared) revert AuctionNotOpen();
+
+        uint256 unfilled = o.quantity - o.filledQuantity;
+        o.isSettled = true;
+        o.isActive = false;
+
+        if (o.isBid) {
+            payment = o.filledQuantity * a.clearingPrice;
+            if (unfilled > 0) a.totalBidQuantity -= unfilled;
+            energyToken.unlock(msg.sender, o.filledQuantity * (o.price - a.clearingPrice) + unfilled * o.price);
+            energyToken.transferLocked(msg.sender, address(this), payment);
+            energyToken.transfer(msg.sender, o.filledQuantity);
+        } else {
+            payment = o.filledQuantity * a.clearingPrice;
+            if (unfilled > 0) a.totalAskQuantity -= unfilled;
+            energyToken.unlock(msg.sender, unfilled);
+            energyToken.transferLocked(msg.sender, address(this), o.filledQuantity);
+            energyToken.transfer(msg.sender, payment);
+        }
+        emit OrderReleased(orderId, o.filledQuantity, payment);
+    }
+
+    /// @notice Credit released payment and energy to a participant. Only callable by the locker role holders' owner path.
+    function settleRelease(address account, uint256 amount) external onlyOwner {
+        if (amount == 0) revert AmountZero();
+        energyToken.transfer(account, amount);
     }
 
     function _sortedBidIds(uint256 timeSlot) internal view returns (uint256[] memory) {
