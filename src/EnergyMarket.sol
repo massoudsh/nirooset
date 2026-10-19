@@ -8,8 +8,7 @@ import "./interfaces/IEnergyToken.sol";
  * @title EnergyMarket
  * @notice Batch auction for energy: collect bids/asks per time slot, clear at uniform price.
  * @dev On placeBid locks buyer's tokens (price * quantity); on placeAsk locks seller's tokens (quantity).
- * clearAuction only records fills at the uniform clearing price; releaseOrder moves each party's own
- * collateral (buyers pay, sellers deliver, overpayment refunded). Unfilled orders stay cancellable.
+ * On clearAuction transfers locked amounts between matched parties. On cancelOrder unlocks remaining.
  */
 contract EnergyMarket is IEnergyMarket {
     IEnergyToken public immutable energyToken;
@@ -19,10 +18,6 @@ contract EnergyMarket is IEnergyMarket {
     mapping(uint256 => Auction) private _auctions;
     mapping(uint256 => uint256[]) private _bidOrderIds;
     mapping(uint256 => uint256[]) private _askOrderIds;
-    /// @dev Buyer payments held by the market until matched sellers release their orders.
-    uint256 private _collectedPayment;
-    /// @dev Seller energy held by the market until matched buyers release their orders.
-    uint256 private _collectedEnergy;
 
     address public owner;
     bool public paused;
@@ -34,8 +29,6 @@ contract EnergyMarket is IEnergyMarket {
     error AuctionAlreadyCleared();
     error InvalidOrder();
     error OrderNotActive();
-    error OrderAlreadyReleased();
-    error InsufficientCollateral();
     error ZeroQuantity();
     error ZeroPrice();
     error MarketPaused();
@@ -73,10 +66,11 @@ contract EnergyMarket is IEnergyMarket {
         if (price == 0) revert ZeroPrice();
         if (quantity == 0) revert ZeroQuantity();
         Auction storage a = _auctions[timeSlot];
-        if (a.isCleared) revert AuctionAlreadyCleared();
         if (a.endTime == 0 || block.timestamp >= a.endTime) revert AuctionNotOpen();
+        if (a.isCleared) revert AuctionAlreadyCleared();
 
-        uint256 cost = price * quantity;
+        uint256 cost;
+        unchecked { cost = price * quantity; }
         energyToken.lock(msg.sender, cost);
 
         uint256 orderId;
@@ -101,8 +95,8 @@ contract EnergyMarket is IEnergyMarket {
         if (price == 0) revert ZeroPrice();
         if (quantity == 0) revert ZeroQuantity();
         Auction storage a = _auctions[timeSlot];
-        if (a.isCleared) revert AuctionAlreadyCleared();
         if (a.endTime == 0 || block.timestamp >= a.endTime) revert AuctionNotOpen();
+        if (a.isCleared) revert AuctionAlreadyCleared();
 
         energyToken.lock(msg.sender, quantity);
 
@@ -130,16 +124,19 @@ contract EnergyMarket is IEnergyMarket {
         if (msg.sender != o.trader) revert Unauthorized();
         if (!o.isActive) revert OrderNotActive();
         Auction storage a = _auctions[o.timeSlot];
+        if (a.isCleared) revert AuctionAlreadyCleared();
+
         uint256 remain = o.quantity - o.filledQuantity;
-        if (remain == 0) revert OrderNotActive();
-        o.isActive = false;
         if (o.isBid) {
-            energyToken.unlock(msg.sender, remain * o.price);
-            if (!a.isCleared) a.totalBidQuantity -= remain;
+            uint256 unlockAmount;
+            unchecked { unlockAmount = remain * o.price; }
+            energyToken.unlock(msg.sender, unlockAmount);
+            a.totalBidQuantity -= remain;
         } else {
             energyToken.unlock(msg.sender, remain);
-            if (!a.isCleared) a.totalAskQuantity -= remain;
+            a.totalAskQuantity -= remain;
         }
+        o.isActive = false;
         emit OrderCancelled(orderId);
     }
 
@@ -174,10 +171,16 @@ contract EnergyMarket is IEnergyMarket {
             uint256 askRemain = ask.quantity - ask.filledQuantity;
             uint256 fill = bidRemain <= askRemain ? bidRemain : askRemain;
 
+            uint256 matchPrice = bid.price;
+            uint256 payment;
+            unchecked { payment = fill * matchPrice; }
+            energyToken.transferLocked(bid.trader, ask.trader, payment);
+            energyToken.transferLocked(ask.trader, bid.trader, fill);
+
             bid.filledQuantity += fill;
             ask.filledQuantity += fill;
             totalMatched += fill;
-            clearingPrice = bid.price;
+            clearingPrice = matchPrice;
 
             if (bid.filledQuantity >= bid.quantity) bidIdx++;
             if (ask.filledQuantity >= ask.quantity) askIdx++;
@@ -185,55 +188,8 @@ contract EnergyMarket is IEnergyMarket {
 
         a.clearingPrice = clearingPrice;
         a.isCleared = true;
-        for (uint256 i = 0; i < bidIds.length; i++) {
-            Order storage bid = _orders[bidIds[i]];
-            if (bid.filledQuantity == 0) continue;
-            if (bid.filledQuantity == bid.quantity) bid.isActive = false;
-            emit OrderFilled(bid.orderId, bid.filledQuantity, clearingPrice);
-        }
-        for (uint256 i = 0; i < askIds.length; i++) {
-            Order storage ask = _orders[askIds[i]];
-            if (ask.filledQuantity == 0) continue;
-            if (ask.filledQuantity == ask.quantity) ask.isActive = false;
-            emit OrderFilled(ask.orderId, ask.filledQuantity, clearingPrice);
-        }
         emit AuctionCleared(timeSlot, clearingPrice, totalMatched);
         return clearingPrice;
-    }
-
-    /// @notice Settle the caller's order after clearing. Payment comes from buyer collateral and the
-    /// energy side is settled from the market's pooled released output, so no transfer depends on a
-    /// counterparty having released first. Over-locked collateral is unlocked to the caller.
-    function releaseOrder(uint256 orderId) external override returns (uint256 payment) {
-        Order storage o = _orders[orderId];
-        if (o.trader == address(0)) revert InvalidOrder();
-        if (msg.sender != o.trader) revert Unauthorized();
-        if (o.isSettled) revert OrderAlreadyReleased();
-        Auction storage a = _auctions[o.timeSlot];
-        if (!a.isCleared) revert AuctionNotOpen();
-
-        uint256 unfilled = o.quantity - o.filledQuantity;
-        o.isSettled = true;
-        o.isActive = false;
-        payment = o.filledQuantity * a.clearingPrice;
-
-        if (o.isBid) {
-            if (unfilled > 0) a.totalBidQuantity -= unfilled;
-            energyToken.unlock(msg.sender, payment + unfilled * o.price);
-            _collectedPayment += payment;
-            energyToken.transferLocked(msg.sender, address(this), payment);
-            if (o.filledQuantity > 0) energyToken.transfer(msg.sender, o.filledQuantity);
-        } else {
-            if (unfilled > 0) a.totalAskQuantity -= unfilled;
-            energyToken.unlock(msg.sender, unfilled);
-            energyToken.transferLocked(msg.sender, address(this), o.filledQuantity);
-            if (payment > 0) {
-                if (payment > _collectedPayment) revert InsufficientCollateral();
-                unchecked { _collectedPayment -= payment; }
-                energyToken.transfer(msg.sender, payment);
-            }
-        }
-        emit OrderReleased(orderId, o.filledQuantity, payment);
     }
 
     function _sortedBidIds(uint256 timeSlot) internal view returns (uint256[] memory) {

@@ -7,7 +7,6 @@ interface IEnergyMarket {
     event OrderFilled(uint256 indexed orderId, uint256 quantity, uint256 price);
     event AuctionStarted(uint256 indexed timeSlot, uint256 startTime, uint256 endTime);
     event AuctionCleared(uint256 indexed timeSlot, uint256 clearingPrice, uint256 totalQuantity);
-    event OrderReleased(uint256 indexed orderId, uint256 quantity, uint256 payment);
 
     struct Order {
         uint256 orderId;
@@ -18,7 +17,6 @@ interface IEnergyMarket {
         uint256 filledQuantity;
         uint256 timeSlot;
         bool isActive;
-        bool isSettled;
     }
 
     struct Auction {
@@ -34,7 +32,6 @@ interface IEnergyMarket {
     function placeBid(uint256 timeSlot, uint256 price, uint256 quantity) external returns (uint256);
     function placeAsk(uint256 timeSlot, uint256 price, uint256 quantity) external returns (uint256);
     function cancelOrder(uint256 orderId) external;
-    function releaseOrder(uint256 orderId) external returns (uint256 payment);
     function startAuction(uint256 timeSlot, uint256 duration) external;
     function clearAuction(uint256 timeSlot) external returns (uint256 clearingPrice);
     function getOrder(uint256 orderId) external view returns (Order memory);
