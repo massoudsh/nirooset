@@ -7,8 +7,9 @@ import "./interfaces/IEnergyMarket.sol";
 
 /**
  * @title SettlementEngine
- * @notice Settles energy positions per time slot using market clearing price and order fills.
- * @dev paymentAmount in SettlementRecord = amount participant receives (0 if they are net payers).
+ * @notice Records positions already settled by market clearing; settlement does not transfer funds.
+ * @dev paymentAmount in SettlementRecord = value the participant received at market clearing
+ *      (0 if they were a net buyer). Settlement is accounting only, so no approval or balance is needed.
  */
 contract SettlementEngine is ISettlementEngine {
     IEnergyToken public immutable token;
@@ -16,7 +17,6 @@ contract SettlementEngine is ISettlementEngine {
 
     mapping(uint256 => TimeSlotSettlement) private _slotSettlement;
     mapping(uint256 => mapping(address => SettlementRecord)) private _records;
-    mapping(uint256 => mapping(address => uint256)) private _amountOwed;
     mapping(uint256 => bool) private _slotSettled;
     mapping(uint256 => mapping(address => bool)) private _disputes;
 
@@ -59,7 +59,9 @@ contract SettlementEngine is ISettlementEngine {
         TimeSlotSettlement storage slot = _slotSettlement[timeSlot];
         if (slot.isFinalized) return;
 
-        uint256 totalEnergy = a.totalBidQuantity < a.totalAskQuantity ? a.totalBidQuantity : a.totalAskQuantity;
+        (IEnergyMarket.Order[] memory bids,) = market.getOrderBook(timeSlot);
+        uint256 totalEnergy;
+        for (uint256 i = 0; i < bids.length; i++) totalEnergy += bids[i].filledQuantity;
         uint256 totalPayment = totalEnergy * a.clearingPrice;
 
         slot.timeSlot = timeSlot;
@@ -71,7 +73,7 @@ contract SettlementEngine is ISettlementEngine {
 
     function settleTimeSlot(uint256 timeSlot) external override onlyOwner {
         TimeSlotSettlement storage slot = _slotSettlement[timeSlot];
-        if (!slot.isFinalized || slot.timeSlot == 0) revert SlotNotFinalized();
+        if (!slot.isFinalized) revert SlotNotFinalized();
         if (_slotSettled[timeSlot]) revert SlotAlreadySettled();
 
         (IEnergyMarket.Order[] memory bids, IEnergyMarket.Order[] memory asks) = market.getOrderBook(timeSlot);
@@ -80,18 +82,8 @@ contract SettlementEngine is ISettlementEngine {
         address[] memory participants = _aggregateAndStore(timeSlot, bids, asks, clearingPrice);
         for (uint256 i = 0; i < participants.length; i++) {
             address p = participants[i];
-            uint256 owed = _amountOwed[timeSlot][p];
-            if (owed > 0) {
-                if (!token.transferFrom(p, address(this), owed)) revert TransferFailed();
-            }
-        }
-        for (uint256 i = 0; i < participants.length; i++) {
-            address p = participants[i];
             SettlementRecord storage rec = _records[timeSlot][p];
             rec.isSettled = true;
-            if (rec.paymentAmount > 0) {
-                if (!token.transfer(p, rec.paymentAmount)) revert TransferFailed();
-            }
             emit SettlementExecuted(timeSlot, p, rec.netEnergy, rec.paymentAmount);
         }
 
@@ -136,7 +128,6 @@ contract SettlementEngine is ISettlementEngine {
             } else {
                 rec.netEnergy = 0;
                 rec.paymentAmount = 0;
-                _amountOwed[timeSlot][p] = (rec.energyConsumed - rec.energyProduced) * clearingPrice;
             }
         }
     }
@@ -146,14 +137,7 @@ contract SettlementEngine is ISettlementEngine {
         if (rec.participant == address(0)) return rec;
         if (rec.isSettled) return rec;
 
-        uint256 owed = _amountOwed[timeSlot][participant];
-        if (owed > 0) {
-            if (!token.transferFrom(participant, address(this), owed)) revert TransferFailed();
-        }
         rec.isSettled = true;
-        if (rec.paymentAmount > 0) {
-            if (!token.transfer(participant, rec.paymentAmount)) revert TransferFailed();
-        }
         emit SettlementExecuted(timeSlot, participant, rec.netEnergy, rec.paymentAmount);
         return rec;
     }

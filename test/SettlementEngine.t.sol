@@ -39,6 +39,7 @@ contract SettlementEngineTest is Test {
         market.placeBid(SLOT, 100, 50);
         vm.prank(bob);
         market.placeAsk(SLOT, 90, 40);
+        vm.warp(block.timestamp + DURATION);
         market.clearAuction(SLOT);
     }
 
@@ -52,11 +53,8 @@ contract SettlementEngineTest is Test {
 
     function test_settleTimeSlot_Success() public {
         engine.finalizeTimeSlot(SLOT);
-        token.approve(address(engine), 4000);
-        vm.prank(alice);
-        token.approve(address(engine), 4000);
-        vm.prank(bob);
-        token.approve(address(engine), type(uint256).max);
+        uint256 aliceBefore = token.balanceOf(alice);
+        uint256 bobBefore = token.balanceOf(bob);
 
         engine.settleTimeSlot(SLOT);
 
@@ -66,14 +64,16 @@ contract SettlementEngineTest is Test {
         assertEq(rAlice.energyConsumed, 40);
         assertEq(rAlice.energyProduced, 0);
         assertEq(rAlice.paymentAmount, 0);
-        // After market escrow: clear moved 4000 alice->bob and 40 bob->alice. Alice total 95_040 (1k locked).
-        // settleTimeSlot collects _amountOwed from alice and pays paymentAmount to bob. Balances reflect that.
-        assertEq(token.balanceOf(alice), 92_040);
+        // Market clearing already moved the funds; settlement only records the resulting positions.
+        assertEq(token.balanceOf(alice), aliceBefore);
+        assertEq(token.balanceOf(alice), 96_000);
 
         ISettlementEngine.SettlementRecord memory rBob = engine.getSettlementRecord(SLOT, bob);
         assertEq(rBob.energyProduced, 40);
         assertEq(rBob.paymentAmount, 4000);
-        assertEq(token.balanceOf(bob), 107_960);
+        assertEq(token.balanceOf(bob), bobBefore);
+        assertEq(token.balanceOf(bob), 104_000);
+        assertEq(token.balanceOf(address(engine)), 0);
     }
 
     function test_finalizeTimeSlot_RevertsWhenNotCleared() public {
@@ -134,16 +134,13 @@ contract SettlementEngineTest is Test {
         assertEq(token.balanceOf(alice), aliceBefore);
     }
 
-    function test_settleParticipant_UnchangedWhenAlreadySettled() public {
+    function test_settleParticipant_NoTransferForSettledParticipant() public {
         engine.finalizeTimeSlot(SLOT);
-        token.approve(address(engine), type(uint256).max);
-        vm.prank(alice);
-        token.approve(address(engine), type(uint256).max);
-        vm.prank(bob);
-        token.approve(address(engine), type(uint256).max);
         engine.settleTimeSlot(SLOT);
+        uint256 balanceBefore = token.balanceOf(alice);
         ISettlementEngine.SettlementRecord memory r = engine.settleParticipant(SLOT, alice);
         assertTrue(r.isSettled);
+        assertEq(token.balanceOf(alice), balanceBefore);
     }
 
     function test_assessPenalty_RevertsAmountZero() public {
