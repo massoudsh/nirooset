@@ -21,6 +21,8 @@ contract EnergyMarket is IEnergyMarket {
     mapping(uint256 => uint256[]) private _askOrderIds;
     /// @dev Buyer payments held by the market until matched sellers release their orders.
     uint256 private _collectedPayment;
+    /// @dev Seller energy held by the market until matched buyers release their orders.
+    uint256 private _collectedEnergy;
 
     address public owner;
     bool public paused;

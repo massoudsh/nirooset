@@ -18,6 +18,7 @@ interface IEnergyMarket {
         uint256 filledQuantity;
         uint256 timeSlot;
         bool isActive;
+        bool isSettled;
     }
 
     struct Auction {
