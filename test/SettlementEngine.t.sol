@@ -134,16 +134,13 @@ contract SettlementEngineTest is Test {
         assertEq(token.balanceOf(alice), aliceBefore);
     }
 
-    function test_settleParticipant_UnchangedWhenAlreadySettled() public {
+    function test_settleParticipant_NoTransferForSettledParticipant() public {
         engine.finalizeTimeSlot(SLOT);
-        token.approve(address(engine), type(uint256).max);
-        vm.prank(alice);
-        token.approve(address(engine), type(uint256).max);
-        vm.prank(bob);
-        token.approve(address(engine), type(uint256).max);
         engine.settleTimeSlot(SLOT);
+        uint256 balanceBefore = token.balanceOf(alice);
         ISettlementEngine.SettlementRecord memory r = engine.settleParticipant(SLOT, alice);
         assertTrue(r.isSettled);
+        assertEq(token.balanceOf(alice), balanceBefore);
     }
 
     function test_assessPenalty_RevertsAmountZero() public {

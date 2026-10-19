@@ -7,8 +7,9 @@ import "./interfaces/IEnergyMarket.sol";
 
 /**
  * @title SettlementEngine
- * @notice Records positions already paid by market clearing; settlement does not transfer funds.
- * @dev paymentAmount in SettlementRecord = amount participant receives (0 if they are net payers).
+ * @notice Records positions already settled by market clearing; settlement does not transfer funds.
+ * @dev paymentAmount in SettlementRecord = value the participant received at market clearing
+ *      (0 if they were a net buyer). Settlement is accounting only, so no approval or balance is needed.
  */
 contract SettlementEngine is ISettlementEngine {
     IEnergyToken public immutable token;
