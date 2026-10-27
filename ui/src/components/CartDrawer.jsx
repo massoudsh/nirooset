@@ -95,7 +95,7 @@ export default function CartDrawer({ open, onClose }) {
               onClick={() => setCheckoutOpen(true)}
               className="w-full btn-primary"
             >
-              Proceed to checkout
+              Try demo checkout
             </button>
           </div>
         )}
@@ -105,7 +105,7 @@ export default function CartDrawer({ open, onClose }) {
         open={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
         onConfirm={handleCheckoutConfirm}
-        title="Checkout"
+        title="Demo checkout"
       >
         <div className="space-y-2 mb-4">
           {lines.map((item) => (
@@ -127,10 +127,10 @@ export default function CartDrawer({ open, onClose }) {
               onChange={(e) => setLinkToNirooset(e.target.checked)}
               className="rounded border-gray-600"
             />
-            Link to نیروست — associate this purchase with my wallet for future energy-credit eligibility
+            Save a demo record linked to my wallet on this device; no energy credits
           </label>
         )}
-        <p className="text-gray-500 text-xs mt-2">Checkout is a placeholder; no real payment is processed.</p>
+        <p className="text-gray-500 text-xs mt-2">This simulation clears your cart. It does not create a real order, process payment, reserve stock or arrange shipping.</p>
       </ConfirmActionModal>
     </>
   )

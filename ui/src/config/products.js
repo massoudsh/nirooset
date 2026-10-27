@@ -27,17 +27,38 @@ export const CATEGORIES = [
 
 export const BRANDS = [...new Set(PRODUCTS.map((p) => p.brand))].sort().map((id) => ({ id, label: id }))
 
-/** Parse capacity string to a number for filtering/sorting (mAh, Wh, kWh, W). Returns 0 if unparseable. */
+// Charge (Ah/mAh) needs voltage; panel output (W) is not stored energy.
 export function parseCapacity(capacity) {
-  if (!capacity || capacity === '—') return 0
-  const s = String(capacity).replace(/,/g, '').trim()
-  const match = s.match(/^([\d.]+)\s*(mAh|Ah|Wh|kWh|W|W\/cell)?$/i)
-  if (!match) return 0
-  let n = parseFloat(match[1])
-  const unit = (match[2] || '').toLowerCase()
-  if (unit === 'kwh') n *= 1000
-  if (unit === 'ah') n *= 1000 // treat Ah as mAh for comparison
-  return n
+  const match = String(capacity ?? '').replace(/,/g, '').trim().match(/^(\d+(?:\.\d+)?)\s*(kWh|Wh)$/i)
+  if (!match) return null
+  const wh = Number(match[1]) * (match[2].toLowerCase() === 'kwh' ? 1000 : 1)
+  return Number.isFinite(wh) && wh > 0 ? wh : null
+}
+
+export function filterProducts(products, filters) {
+  const list = products.filter((product) => {
+    if (filters.category !== 'all' && product.category !== filters.category) return false
+    if (filters.brand !== 'all' && product.brand !== filters.brand) return false
+    if (filters.priceMin != null && product.price < filters.priceMin) return false
+    if (filters.priceMax != null && product.price > filters.priceMax) return false
+    if (filters.capacityMin != null || filters.capacityMax != null) {
+      const wh = parseCapacity(product.capacity)
+      if (wh == null) return false
+      if (filters.capacityMin != null && wh < filters.capacityMin) return false
+      if (filters.capacityMax != null && wh > filters.capacityMax) return false
+    }
+    return true
+  })
+  if (filters.sort === 'price-asc') list.sort((a, b) => a.price - b.price)
+  if (filters.sort === 'price-desc') list.sort((a, b) => b.price - a.price)
+  if (filters.sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name))
+  return list
+}
+
+export function estimateRuntime(energyWh, loadWatts, usablePercent) {
+  if (![energyWh, loadWatts, usablePercent].every((value) => Number.isFinite(value) && value > 0) || usablePercent > 100) return null
+  const hours = energyWh * (usablePercent / 100) / loadWatts
+  return Number.isFinite(hours) && hours > 0 ? hours : null
 }
 
 export function getProduct(id) {
@@ -51,6 +72,5 @@ export function formatPrice(price, currency = 'USD') {
 export const SORT_OPTIONS = [
   { id: 'price-asc', label: 'Price: Low to High' },
   { id: 'price-desc', label: 'Price: High to Low' },
-  { id: 'rating', label: 'Rating' },
-  { id: 'newest', label: 'Newest' },
+  { id: 'name', label: 'Name' },
 ]

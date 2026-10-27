@@ -6,7 +6,7 @@
  *
  * Features:
  *  - Category, brand, price-range, and capacity-range filters
- *  - Sort by price / rating / newest
+ *  - Sort by price / name
  *  - Product card grid with Add-to-Cart and detail buttons
  *  - ProductDetailModal on click
  *  - "My linked purchases" section when wallet is connected
@@ -23,18 +23,38 @@ import {
   SORT_OPTIONS,
   getProduct,
   formatPrice,
-  parseCapacity,
+  filterProducts,
+  estimateRuntime,
 } from '../../config/products';
 import ProductDetailModal from '../ProductDetailModal';
 
-// ---------------------------------------------------------------------------
-// Star rating helper
-// ---------------------------------------------------------------------------
-function Stars({ rating }) {
+function RuntimeEstimator() {
+  const [energy, setEnergy] = useState('40');
+  const [load, setLoad] = useState('10');
+  const [usable, setUsable] = useState('80');
+  const hours = estimateRuntime(Number(energy), Number(load), Number(usable));
   return (
-    <span className="text-yellow-400 text-xs">
-      {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
-    </span>
+    <section className="rounded-xl border border-slate-700 bg-slate-800 p-4 space-y-3">
+      <h2 className="font-semibold text-white">Backup runtime estimator</h2>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          ['Battery energy (Wh)', energy, setEnergy],
+          ['Actual device load (W)', load, setLoad],
+          ['Usable energy (%)', usable, setUsable],
+        ].map(([label, value, setValue]) => (
+          <label key={label} className="text-sm text-slate-300">
+            {label}
+            <input type="number" min="0" max={label.includes('%') ? 100 : undefined} step="any" value={value}
+              onChange={(event) => setValue(event.target.value)}
+              className="mt-1 w-full rounded bg-slate-700 px-3 py-2 text-white" />
+          </label>
+        ))}
+      </div>
+      <p role="status" className="text-energy-green">
+        {hours == null ? 'Enter positive values and a usable percentage up to 100.' : `Estimated runtime: ${hours.toFixed(2)} hours`}
+      </p>
+      <p className="text-xs text-slate-400">Wh × usable percentage ÷ actual W. The 80% example is an assumption, not measured performance. Losses, battery age and idle consumption affect results. Check voltage, polarity, connectors and output power separately. A powered modem does not guarantee ISP service.</p>
+    </section>
   );
 }
 
@@ -50,15 +70,15 @@ function FilterPanel({ filters, setFilters, onReset }) {
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setFilters((f) => ({ ...f, category: cat }))}
+              key={cat.id}
+              onClick={() => setFilters((f) => ({ ...f, category: cat.id }))}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                filters.category === cat
+                filters.category === cat.id
                   ? 'bg-energy-green text-slate-900'
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
-              {cat}
+              {cat.label}
             </button>
           ))}
         </div>
@@ -72,9 +92,9 @@ function FilterPanel({ filters, setFilters, onReset }) {
           onChange={(e) => setFilters((f) => ({ ...f, brand: e.target.value }))}
           className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white"
         >
-          <option value="All">All Brands</option>
+          <option value="all">All Brands</option>
           {BRANDS.map((b) => (
-            <option key={b} value={b}>{b}</option>
+            <option key={b.id} value={b.id}>{b.label}</option>
           ))}
         </select>
       </div>
@@ -108,7 +128,7 @@ function FilterPanel({ filters, setFilters, onReset }) {
       {/* Capacity range */}
       <div>
         <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-          Capacity
+          Capacity (Wh; unknown units excluded)
         </h3>
         <div className="flex gap-2 items-center">
           <input
@@ -145,13 +165,13 @@ function FilterPanel({ filters, setFilters, onReset }) {
 // Default filter state
 // ---------------------------------------------------------------------------
 const DEFAULT_FILTERS = {
-  category: 'All',
-  brand: 'All',
+  category: 'all',
+  brand: 'all',
   priceMin: null,
   priceMax: null,
   capacityMin: null,
   capacityMax: null,
-  sort: SORT_OPTIONS[0].value,
+  sort: SORT_OPTIONS[0].id,
 };
 
 // ---------------------------------------------------------------------------
@@ -165,44 +185,7 @@ export default function Utilities() {
   const [detailId, setDetailId]     = useState(null);
   const [addedId, setAddedId]       = useState(null);
 
-  // --- Filtered + sorted product list ---
-  const filtered = useMemo(() => {
-    let list = [...PRODUCTS];
-
-    // Category
-    if (filters.category !== 'All') {
-      list = list.filter((p) => p.category === filters.category);
-    }
-
-    // Brand
-    if (filters.brand !== 'All') {
-      list = list.filter((p) => p.brand === filters.brand);
-    }
-
-    // Price range
-    if (filters.priceMin != null) {
-      list = list.filter((p) => p.price >= filters.priceMin);
-    }
-    if (filters.priceMax != null) {
-      list = list.filter((p) => p.price <= filters.priceMax);
-    }
-
-    // Capacity range (parse capacity string to numeric Wh)
-    if (filters.capacityMin != null) {
-      list = list.filter((p) => parseCapacity(p.capacity) >= filters.capacityMin);
-    }
-    if (filters.capacityMax != null) {
-      list = list.filter((p) => parseCapacity(p.capacity) <= filters.capacityMax);
-    }
-
-    // Sort
-    const opt = SORT_OPTIONS.find((s) => s.value === filters.sort);
-    if (opt?.compareFn) {
-      list = list.sort(opt.compareFn);
-    }
-
-    return list;
-  }, [filters]);
+  const filtered = useMemo(() => filterProducts(PRODUCTS, filters), [filters]);
 
   // --- Add to cart with brief confirmation flash ---
   const handleAddToCart = (productId) => {
@@ -233,11 +216,16 @@ export default function Utilities() {
             className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-white"
           >
             {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <option key={opt.id} value={opt.id}>{opt.label}</option>
             ))}
           </select>
         </div>
       </div>
+
+      <div className="rounded-xl border border-amber-500/40 p-4 text-sm text-amber-200">
+        Demo catalog: illustrative products, images, specifications and USD prices only. Stock and warranties are not verified. No real payment, shipment or energy credits are provided. No wallet is required to browse or try the cart.
+      </div>
+      <RuntimeEstimator />
 
       {/* Wallet CTA */}
       {!isConnected && !account && (
@@ -246,7 +234,7 @@ export default function Utilities() {
           <div>
             <p className="text-sm font-medium text-white">Connect your wallet</p>
             <p className="text-xs text-slate-400">
-              Link purchases to your نیروست account and earn energy credits.
+              Optionally associate demo cart records with your wallet on this device. No credits are issued.
             </p>
           </div>
         </div>
@@ -313,11 +301,6 @@ export default function Utilities() {
                     </button>
                     <p className="text-xs text-slate-500 mt-0.5">{product.capacity}</p>
 
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      <Stars rating={product.rating} />
-                      <span className="text-xs text-slate-500">({product.reviews})</span>
-                    </div>
-
                     <div className="mt-auto pt-3 flex items-center justify-between">
                       <span className="text-base font-bold text-white">
                         {formatPrice(product.price)}
@@ -354,7 +337,7 @@ export default function Utilities() {
       {(isConnected || account) && linkedOrders.length > 0 && (
         <div className="bg-slate-800 rounded-xl border border-slate-700 p-5">
           <h2 className="text-sm font-semibold text-white mb-3">
-            My Linked Purchases
+            My Linked Demo Records
             <span className="ml-2 text-xs text-slate-400">wallet: {account?.slice(0, 6)}…{account?.slice(-4)}</span>
           </h2>
           <div className="space-y-2">
