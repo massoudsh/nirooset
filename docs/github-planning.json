@@ -1,0 +1,132 @@
+{
+  "milestones": [
+    {
+      "title": "Shop foundation and trust",
+      "description": "Turn the existing demo shop into a trustworthy foundation without representing sample data as live commerce."
+    },
+    {
+      "title": "Real commerce",
+      "description": "Build server-authoritative ordering, inventory and Iranian payment verification before accepting real payments."
+    },
+    {
+      "title": "Office fulfillment and after-sales",
+      "description": "Establish evidence-based shipping, pickup, testing, warranty and returns operations."
+    },
+    {
+      "title": "Evidence-based AI assistance",
+      "description": "Add consented label extraction and deterministic compatibility checks without inventing technical facts."
+    },
+    {
+      "title": "Sustainable growth",
+      "description": "Expand from verified retail fulfillment to B2B assessment and privacy-conscious unit economics."
+    },
+    {
+      "title": "Protocol correctness",
+      "description": "Complete unresolved market, oracle, settlement, governance and dispute invariants before production financial use."
+    }
+  ],
+  "issues": [
+    {
+      "title": "Replace demo catalog with verified inventory and compatibility data",
+      "milestone": "Shop foundation and trust",
+      "labels": ["shop", "high-priority"],
+      "body": "## Goal\nReplace illustrative products with supplier-verified SKUs.\n\n## Acceptance criteria\n- Every SKU records model, source, verification date, price validity, nominal Wh, voltage/current, connector and polarity where relevant.\n- Output/PD profiles, warranty provider and evidence are explicit.\n- Unknown data stays unknown; reviews, stock and warranties are never fabricated.\n- Start with modem/router UPS, compatible power banks, lighting and accessories; treat large stations as quote-only until supply is verified."
+    },
+    {
+      "title": "Deliver a Persian responsive storefront without wallet dependency",
+      "milestone": "Shop foundation and trust",
+      "labels": ["shop", "ui", "high-priority"],
+      "body": "## Goal\nMake the customer shop understandable and usable independently of the protocol dashboard.\n\n## Acceptance criteria\n- Persian RTL catalog, cart and form flows with accessible labels and keyboard use.\n- Mobile layouts are verified manually.\n- Retail browsing and cart use do not require a wallet.\n- Protocol routes remain available without forcing blockchain concepts into retail checkout."
+    },
+    {
+      "title": "Implement server-authoritative orders and inventory reservations",
+      "milestone": "Real commerce",
+      "labels": ["shop", "backend", "high-priority"],
+      "body": "## Goal\nPrevent stale prices, overselling and duplicate orders before real sales.\n\n## Acceptance criteria\n- Server computes totals using integer money amounts.\n- Inventory reservations expire and release on cancellation or payment failure.\n- Reservation/decrement transitions are atomic and order creation is idempotent.\n- Order status changes and administration are access-controlled.\n- Replacement cost, supplier availability timestamp and quote expiry are recorded."
+    },
+    {
+      "title": "Integrate Iranian payment verification with currency-safe accounting",
+      "milestone": "Real commerce",
+      "labels": ["shop", "payments", "high-priority"],
+      "body": "## Goal\nAccept payments only after verifiable server-side confirmation.\n\n## Acceptance criteria\n- Toman display and rial gateway conversion are explicit and tested.\n- Gateway callback verifies merchant reference, amount and success server-side.\n- Replayed callbacks cannot double-fulfill.\n- Failed or canceled payments release reservations.\n- Refund and reconciliation workflow is documented and tested.\n- Provider credentials never enter browser bundles or logs."
+    },
+    {
+      "title": "Add guest checkout, receipts and protected order tracking",
+      "milestone": "Real commerce",
+      "labels": ["shop", "backend"],
+      "body": "## Goal\nSupport real retail customers without blockchain account requirements.\n\n## Acceptance criteria\n- Phone/address validation and minimal personal-data collection.\n- Guest tracking uses appropriate access controls.\n- Receipts show real order state rather than simulated checkout.\n- Wallet linking is optional and never required.\n- Retention and privacy obligations are reviewed before launch."
+    },
+    {
+      "title": "Verify battery shipping eligibility and office pickup operations",
+      "milestone": "Office fulfillment and after-sales",
+      "labels": ["shop", "operations", "high-priority"],
+      "body": "## Goal\nShip only products accepted by carriers under documented handling requirements.\n\n## Acceptance criteria\n- Carrier confirms battery restrictions for each supported SKU and route.\n- Packaging, labels, dispatch cutoff and pricing are documented.\n- Unsupported shipping combinations are blocked.\n- Pickup address and hours are published only after approval.\n\nBeing near a post office is not evidence that a battery shipment will be accepted."
+    },
+    {
+      "title": "Record serials, bench tests, warranty and returns evidence",
+      "milestone": "Office fulfillment and after-sales",
+      "labels": ["shop", "operations"],
+      "body": "## Goal\nMake after-sales claims auditable and truthful.\n\n## Acceptance criteria\n- Serial number and condition are captured before dispatch.\n- Switching/runtime tests record load, method, date and measured result.\n- Warranty and return terms match supplier evidence.\n- Support tickets link to the order and serial with restricted access."
+    },
+    {
+      "title": "Track supplier risk and inventory unit economics",
+      "milestone": "Office fulfillment and after-sales",
+      "labels": ["shop", "operations"],
+      "body": "## Goal\nProtect replenishment capacity during price volatility.\n\n## Acceptance criteria\n- Replacement cost, packing/shipping, fees, acquisition cost, return reserve and contribution margin are separate fields.\n- Reorder thresholds and stock age are reported.\n- Business inventory funding is separated from personal savings.\n- No margin or revenue guarantee is presented."
+    },
+    {
+      "title": "Extract device labels with consent and human confirmation",
+      "milestone": "Evidence-based AI assistance",
+      "labels": ["shop", "ai"],
+      "body": "## Goal\nUse AI to reduce transcription effort without making unsourced electrical claims.\n\n## Acceptance criteria\n- Users consent before label-image processing.\n- Extracted model, voltage, current and polarity show source and confidence.\n- Users confirm extracted values; uncertain labels require manual entry.\n- Uploaded images are retained only as long as necessary."
+    },
+    {
+      "title": "Build deterministic compatibility rules with AI explanations",
+      "milestone": "Evidence-based AI assistance",
+      "labels": ["shop", "ai", "high-priority"],
+      "body": "## Goal\nGive safe recommendations based on verified electrical constraints.\n\n## Acceptance criteria\n- Voltage, polarity, connector, PD profile and output-power rules determine compatibility.\n- Missing data blocks definitive recommendations.\n- AI explains sourced rule results but cannot invent stock, specifications or safe connections.\n- Measured runtime evidence is preferred; estimates display assumptions.\n- Incompatible and incomplete-data cases are tested."
+    },
+    {
+      "title": "Offer opt-in B2B backup assessments and installation referrals",
+      "milestone": "Sustainable growth",
+      "labels": ["shop", "growth"],
+      "body": "## Goal\nExtend verified retail operations to businesses without unsafe installation promises.\n\n## Acceptance criteria\n- Office/shop load survey is opt-in.\n- Quotes state assumptions and expiry.\n- Approved installation partners have clear handoff, responsibility and warranty boundaries.\n- No unsafe DIY mains advice is provided."
+    },
+    {
+      "title": "Report privacy-conscious retail conversion and unit economics",
+      "milestone": "Sustainable growth",
+      "labels": ["shop", "analytics"],
+      "body": "## Goal\nMeasure whether the shop is sustainable without treating demo events as sales.\n\n## Acceptance criteria\n- Browsing, quotes, paid orders, delivery, returns and net contribution are distinct.\n- Demo records are excluded.\n- Acquisition spend and replacement-cost margin are visible.\n- Reporting is aggregated and minimizes personal identifiers."
+    },
+    {
+      "title": "Release unfilled market collateral safely",
+      "milestone": "Protocol correctness",
+      "labels": ["protocol", "security", "high-priority"],
+      "body": "## Goal\nEnsure unfilled buyer payment and seller energy are recoverable under explicit auction lifecycle rules.\n\n## Acceptance criteria\n- Release paths preserve filled obligations and prevent double release.\n- Authorization and lifecycle conditions are tested.\n- Regression tests cover no fills, partial fills, repeated calls and invalid slots."
+    },
+    {
+      "title": "Implement and verify actual uniform-price clearing",
+      "milestone": "Protocol correctness",
+      "labels": ["protocol", "security", "high-priority"],
+      "body": "## Goal\nAlign auction pricing, transfers and reported settlement amounts.\n\n## Acceptance criteria\n- All matched positions use the defined clearing-price rule.\n- Market transfers and settlement records agree.\n- Tests cover multiple bid prices and partial fills.\n- Economic invariants are documented and independently reviewed."
+    },
+    {
+      "title": "Require consistent multi-oracle production reports",
+      "milestone": "Protocol correctness",
+      "labels": ["protocol", "security"],
+      "body": "## Goal\nRequire agreement on reported production data, not only reporter count.\n\n## Acceptance criteria\n- Consensus compares report content under a documented aggregation rule.\n- Conflicts, late reports and quorum failure are handled explicitly.\n- Tests cover divergent reports and finalization boundaries."
+    },
+    {
+      "title": "Make governance execution change protected protocol state",
+      "milestone": "Protocol correctness",
+      "labels": ["protocol", "governance", "security"],
+      "body": "## Goal\nEnsure approved governance decisions execute their intended parameter changes safely.\n\n## Acceptance criteria\n- Proposals map to authorized, validated state changes.\n- Timelock/role constraints are enforced.\n- Tests prove proposal execution changes the intended parameter and rejects invalid actions."
+    },
+    {
+      "title": "Define authorized dispute workflow and resolution effects",
+      "milestone": "Protocol correctness",
+      "labels": ["protocol", "security"],
+      "body": "## Goal\nPrevent unauthorized or ambiguous dispute outcomes.\n\n## Acceptance criteria\n- Eligible parties, evidence windows and resolution authority are defined.\n- Resolution effects on settlement and stakes are explicit.\n- Tests cover unauthorized calls, expiry and conflicting resolutions."
+    }
+  ]
+}

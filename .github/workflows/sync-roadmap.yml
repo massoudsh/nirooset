@@ -1,0 +1,79 @@
+name: Synchronize roadmap
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [docs/github-planning.json, .github/workflows/sync-roadmap.yml]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  synchronize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const plan = JSON.parse(fs.readFileSync('docs/github-planning.json', 'utf8'))
+            const { owner, repo } = context.repo
+
+            async function listAll(method, params) {
+              const records = []
+              for (let page = 1; ; page += 1) {
+                const { data } = await method({ owner, repo, per_page: 100, page, ...params })
+                records.push(...data)
+                if (data.length < 100) return records
+              }
+            }
+
+            const key = (title) => title.trim().toLocaleLowerCase('en-US')
+            const milestones = await listAll(github.rest.issues.listMilestones, { state: 'all' })
+            const milestoneByTitle = new Map(milestones.map((milestone) => [key(milestone.title), milestone]))
+
+            for (const item of plan.milestones) {
+              const existing = milestoneByTitle.get(key(item.title))
+              if (existing) continue
+              const { data: milestone } = await github.rest.issues.createMilestone({
+                owner,
+                repo,
+                title: item.title,
+                description: item.description,
+              })
+              milestoneByTitle.set(key(milestone.title), milestone)
+              core.info(`Created milestone: ${milestone.title}`)
+            }
+
+            const issues = (await listAll(github.rest.issues.listForRepo, { state: 'all' }))
+              .filter((issue) => !issue.pull_request)
+            const issueByTitle = new Map(issues.map((issue) => [key(issue.title), issue]))
+
+            for (const item of plan.issues) {
+              const milestone = milestoneByTitle.get(key(item.milestone))
+              if (!milestone) throw new Error(`Missing planned milestone: ${item.milestone}`)
+              const existing = issueByTitle.get(key(item.title))
+              if (!existing) {
+                const { data: issue } = await github.rest.issues.create({
+                  owner,
+                  repo,
+                  title: item.title,
+                  body: item.body,
+                  labels: item.labels,
+                  milestone: milestone.number,
+                })
+                issueByTitle.set(key(issue.title), issue)
+                core.info(`Created issue #${issue.number}: ${issue.title}`)
+              } else if (existing.milestone?.number !== milestone.number) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  milestone: milestone.number,
+                })
+                core.info(`Assigned issue #${existing.number} to ${milestone.title}`)
+              }
+            }
