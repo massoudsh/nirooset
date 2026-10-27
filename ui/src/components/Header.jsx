@@ -18,10 +18,12 @@ export default function Header({ sidebarOpen, setSidebarOpen, setCartOpen }) {
 
   return (
     <header className="bg-slate-800 border-b border-gray-700 sticky top-0 z-50">
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <div className="flex items-center gap-4">
           <button
             type="button"
+            aria-label="باز و بسته‌کردن فهرست"
+            aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
           >
@@ -39,7 +41,8 @@ export default function Header({ sidebarOpen, setSidebarOpen, setCartOpen }) {
               type="button"
               onClick={() => setCartOpen(true)}
               className="relative p-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white"
-              title="Cart"
+              title="سبد خرید آزمایشی"
+              aria-label={`سبد خرید آزمایشی، ${cartCount} کالا`}
             >
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (

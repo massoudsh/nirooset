@@ -19,7 +19,10 @@ Goal: make the existing demo usable without pretending it is a live retailer.
 ### Persian retail experience and storefront separation
 - Priority: high. Reuse the existing i18n issue where applicable.
 - Acceptance: Persian RTL catalog/cart/forms, accessible labels and keyboard flows, mobile layouts, clear shop navigation, no wallet requirement for retail; protocol dashboard remains accessible separately.
-- Decision needed: independent storefront versus shop within current app; do not migrate protocol routes without agreement.
+- Implementation: Persian RTL product names, categories, controls, runtime estimates, detail dialogs and guest cart; Persian numbers with explicit sample USD currency. Catalog/cart layouts adapt to narrow widths. Selecting a sidebar view on mobile closes the menu; protocol routes are unchanged.
+- Guest checkout uses `CartContext.items` and no longer opens the simulated identity-verification modal. Wallet-linked local demo records require explicit opt-in.
+- Verification: `npm --prefix ui test` runs 8 catalog/calculation tests and 7 non-browser component tests, covering cart persistence, quantity/removal, guest confirmation, optional wallet linking, filtering/reset/sorting, product details and native-dialog lifecycle callbacks.
+- Still open: manual mobile/keyboard/focus review in a real browser, verified supplier data, and any decision to split into an independent storefront. Native dialog focus behavior is not established by mocked component tests. The matching roadmap item is not marked complete here; its live GitHub number/status cannot be verified without API authentication.
 
 ### Verified catalog and compatibility schema
 - Priority: high. Depends on supplier evidence.

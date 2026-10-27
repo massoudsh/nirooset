@@ -15,7 +15,7 @@ const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'market', label: 'Energy Market', icon: TrendingUp },
   { id: 'panels', label: 'Panel Registry', icon: Sun },
-  { id: 'utilities', label: 'Utilities', icon: BatteryCharging },
+  { id: 'utilities', label: 'فروشگاه تجهیزات انرژی', icon: BatteryCharging },
   { id: 'wallet', label: 'Energy Wallet', icon: Wallet },
   { id: 'settlement', label: 'Settlement', icon: Gauge },
   { id: 'staking', label: 'Staking Vault', icon: Lock },
@@ -28,7 +28,7 @@ export default function Sidebar({ activeView, setActiveView, isOpen }) {
   if (!isOpen) return null
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-slate-800 border-r border-gray-700 overflow-y-auto">
+    <aside className="fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-64 bg-slate-800 border-r border-gray-700 overflow-y-auto">
       <nav className="p-4">
         <ul className="space-y-2">
           {menuItems.map((item) => {

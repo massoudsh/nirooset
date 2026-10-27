@@ -29,10 +29,13 @@ function App() {
           <div className="flex">
             <Sidebar 
               activeView={activeView} 
-              setActiveView={setActiveView}
+              setActiveView={(view) => {
+                setActiveView(view)
+                if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false)
+              }}
               isOpen={sidebarOpen}
             />
-            <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+            <main className={`min-w-0 flex-1 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
               <Dashboard activeView={activeView} setActiveView={setActiveView} />
             </main>
           </div>

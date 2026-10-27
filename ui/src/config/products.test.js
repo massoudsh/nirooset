@@ -1,6 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { PRODUCTS, CATEGORIES, BRANDS, SORT_OPTIONS, parseCapacity, filterProducts, estimateRuntime } from './products.js'
+import { PRODUCTS, CATEGORIES, BRANDS, SORT_OPTIONS, parseCapacity, filterProducts, estimateRuntime, formatNumber, formatPrice } from './products.js'
+
+test('shop labels and currency stay Persian without inventing local prices', () => {
+  for (const item of [...CATEGORIES, ...SORT_OPTIONS]) assert.match(item.label, /[\u0600-\u06ff]/)
+  for (const product of PRODUCTS) assert.match(product.name, /[\u0600-\u06ff]/)
+  assert.equal(formatNumber(1234), '۱٬۲۳۴')
+  assert.equal(formatNumber(3.2, { maximumFractionDigits: 2 }), '۳٫۲')
+  assert.match(formatPrice(49.99), /USD/)
+  assert.match(formatPrice(49.99), /۴۹٫۹۹/)
+})
 
 const defaults = { category: 'all', brand: 'all', sort: 'price-asc' }
 
@@ -41,7 +50,7 @@ test('all supported sort orders work without mutating the catalog', () => {
   for (const sort of ['price-asc', 'price-desc', 'name']) {
     const result = filterProducts(PRODUCTS, { ...defaults, sort })
     for (let i = 1; i < result.length; i++) {
-      if (sort === 'name') assert.ok(result[i - 1].name.localeCompare(result[i].name) <= 0)
+      if (sort === 'name') assert.ok(result[i - 1].name.localeCompare(result[i].name, 'fa') <= 0)
       else if (sort === 'price-asc') assert.ok(result[i - 1].price <= result[i].price)
       else assert.ok(result[i - 1].price >= result[i].price)
     }
