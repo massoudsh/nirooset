@@ -12,12 +12,10 @@ import {
   createContext,
   useContext,
   useState,
-  useEffect,
   useMemo,
   useCallback,
 } from 'react';
 import { ethers } from 'ethers';
-import { subscribeWalletEvents } from './wallet-events.js';
 import {
   getAddresses,
   hasAddressesForChain,
@@ -152,53 +150,6 @@ export function Web3Provider({ children }) {
       }
     }
   }, []);
-
-  // -------------------------------------------------------------------------
-  // Listen for wallet events
-  // -------------------------------------------------------------------------
-
-  useEffect(() => {
-    if (!isConnected || !provider) return undefined;
-
-    let active = true;
-    const handleAccountsChanged = async (accounts) => {
-      if (!active) return;
-      if (accounts.length === 0) {
-        disconnectWallet();
-      } else if (isConnected) {
-        setAccount(accounts[0]);
-        setSigner(null);
-        if (provider) {
-          try {
-            const nextSigner = await provider.getSigner(accounts[0]);
-            if (active) setSigner(nextSigner);
-          } catch (error) {
-            if (active) disconnectWallet();
-            console.error('Wallet account update failed:', error);
-          }
-        }
-      }
-    };
-
-    const handleChainChanged = () => {
-      // Reload is recommended by MetaMask to avoid stale state
-      window.location.reload();
-    };
-
-    const unsubscribe = subscribeWalletEvents(
-      () => window.ethereum,
-      { accountsChanged: handleAccountsChanged, chainChanged: handleChainChanged },
-      (error) => {
-        if (active) disconnectWallet();
-        console.error('Wallet events unavailable:', error);
-      },
-    );
-
-    return () => {
-      active = false;
-      unsubscribe();
-    };
-  }, [isConnected, provider, disconnectWallet]);
 
   // -------------------------------------------------------------------------
   // Computed helpers
