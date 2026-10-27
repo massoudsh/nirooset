@@ -158,6 +158,8 @@ export function Web3Provider({ children }) {
   // -------------------------------------------------------------------------
 
   useEffect(() => {
+    if (!isConnected || !provider) return undefined;
+
     let active = true;
     const handleAccountsChanged = async (accounts) => {
       if (!active) return;
