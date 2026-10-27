@@ -17,6 +17,7 @@ import {
   useCallback,
 } from 'react';
 import { ethers } from 'ethers';
+import { subscribeWalletEvents } from './wallet-events.js';
 import {
   getAddresses,
   hasAddressesForChain,
@@ -85,13 +86,15 @@ export function Web3Provider({ children }) {
   // -------------------------------------------------------------------------
 
   const connectWallet = useCallback(async () => {
-    const eth = window.ethereum;
-    if (!eth) {
-      alert('No Web3 wallet detected. Please install MetaMask or a compatible wallet.');
-      return;
-    }
-
     try {
+      const eth = window.ethereum;
+      if (!eth) {
+        alert('No Web3 wallet detected. Please install MetaMask or a compatible wallet.');
+        return;
+      }
+      if (typeof eth.on !== 'function' || typeof eth.removeListener !== 'function') {
+        throw new TypeError('Wallet event subscriptions are unavailable.');
+      }
       const accounts = await eth.request({ method: 'eth_requestAccounts' });
       const _provider = new ethers.BrowserProvider(eth);
       const _signer   = await _provider.getSigner();
@@ -125,10 +128,10 @@ export function Web3Provider({ children }) {
   // -------------------------------------------------------------------------
 
   const switchChain = useCallback(async (targetChainId) => {
-    const eth = window.ethereum;
-    if (!eth) return;
-
+    let eth;
     try {
+      eth = window.ethereum;
+      if (!eth) return;
       await eth.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: `0x${targetChainId.toString(16)}` }],
@@ -155,17 +158,22 @@ export function Web3Provider({ children }) {
   // -------------------------------------------------------------------------
 
   useEffect(() => {
-    const eth = window.ethereum;
-    if (!eth) return;
-
+    let active = true;
     const handleAccountsChanged = async (accounts) => {
+      if (!active) return;
       if (accounts.length === 0) {
         disconnectWallet();
       } else if (isConnected) {
         setAccount(accounts[0]);
+        setSigner(null);
         if (provider) {
-          const _signer = await provider.getSigner();
-          setSigner(_signer);
+          try {
+            const nextSigner = await provider.getSigner(accounts[0]);
+            if (active) setSigner(nextSigner);
+          } catch (error) {
+            if (active) disconnectWallet();
+            console.error('Wallet account update failed:', error);
+          }
         }
       }
     };
@@ -175,12 +183,18 @@ export function Web3Provider({ children }) {
       window.location.reload();
     };
 
-    eth.on('accountsChanged', handleAccountsChanged);
-    eth.on('chainChanged', handleChainChanged);
+    const unsubscribe = subscribeWalletEvents(
+      () => window.ethereum,
+      { accountsChanged: handleAccountsChanged, chainChanged: handleChainChanged },
+      (error) => {
+        if (active) disconnectWallet();
+        console.error('Wallet events unavailable:', error);
+      },
+    );
 
     return () => {
-      eth.removeListener('accountsChanged', handleAccountsChanged);
-      eth.removeListener('chainChanged', handleChainChanged);
+      active = false;
+      unsubscribe();
     };
   }, [isConnected, provider, disconnectWallet]);
 
