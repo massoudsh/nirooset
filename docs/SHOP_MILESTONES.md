@@ -1,6 +1,6 @@
 # Iranian energy-device shop roadmap
 
-Publication status: synchronized through the repository workflow in `.github/workflows/sync-roadmap.yml`. Its canonical, idempotent input is `docs/github-planning.json`; a push changing either file, or a manual workflow dispatch, creates only missing exact-title milestones/issues and assigns matching issues to their planned milestone. GitHub Actions must be enabled and allow `issues: write`. The GitHub CLI session is not required. Milestone names below are proposed, without invented due dates or issue numbers.
+Publication status: scheduled through the repository workflow in `.github/workflows/sync-roadmap.yml`. Its canonical, idempotent input is `docs/github-planning.json`; a push changing either file, or a manual workflow dispatch, creates only missing exact-title milestones/issues and assigns matching issues to their planned milestone. GitHub Actions must be enabled and allow `issues: write`. The GitHub CLI session is not required. Milestone names below are proposed, without invented due dates or issue numbers.
 
 ## M1 — Trustworthy shop foundation
 
