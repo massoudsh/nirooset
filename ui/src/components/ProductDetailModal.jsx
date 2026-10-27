@@ -1,4 +1,4 @@
-import { X, ShoppingCart, Star } from 'lucide-react'
+import { X, ShoppingCart } from 'lucide-react'
 import { getProduct, formatPrice, CATEGORIES } from '../config/products'
 
 export default function ProductDetailModal({ productId, onClose, onAddToCart }) {
@@ -30,11 +30,7 @@ export default function ProductDetailModal({ productId, onClose, onAddToCart }) 
           <p className="text-energy-green/90 text-xs font-medium uppercase tracking-wide">{product.brand}</p>
           <h2 className="text-xl font-bold text-white mt-1 mb-1">{product.name}</h2>
           <p className="text-sm text-gray-400 mb-2">{categoryLabel} · {product.capacity}</p>
-          <div className="flex items-center gap-2 text-energy-yellow mb-4">
-            <Star className="w-4 h-4 fill-current" />
-            <span className="text-white font-medium">{product.rating}</span>
-            <span className="text-gray-500 text-sm">{product.reviews} reviews</span>
-          </div>
+          <p className="text-sm text-amber-200 mb-4">Demo product. Images, prices and specifications are illustrative; availability and warranty are not verified.</p>
           <ul className="text-sm text-gray-300 space-y-2 mb-6">
             {product.specs.map((s, i) => (
               <li key={i}>• {s}</li>
@@ -48,6 +44,7 @@ export default function ProductDetailModal({ productId, onClose, onAddToCart }) 
               </button>
               <button
                 type="button"
+                disabled={!product.inStock}
                 onClick={() => { onAddToCart(product.id); onClose(); }}
                 className="btn-primary flex items-center gap-2 py-2 px-4"
               >
